@@ -1,0 +1,138 @@
+id: mechanical-design
+title: Mechanical Design — SolidWorks Mastery → CSWP → FEA
+category: mechanical
+schedule: flexible
+accent: "#10b981"
+started: null  # queued behind controls in the MWF slot
+target_completion: null  # rolling — projected by plan.py
+active: false
+resume_after: offer
+daily_hours: 1
+days: [Mon, Wed, Fri]
+cadence:
+  note: "Parked until a signed offer; projected from the offer date."
+goal: >-
+  Turn working CAD ability into job-grade mechanical design — modeling discipline,
+  GD&T to ASME Y14.5, a CSWP credential, and FEA-validated parts that tie into the
+  welding + PCB work.
+weeks:
+  - id: 1
+    title: Part Modeling Mastery & Design Intent
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Rebuild your modeling fundamentals around design intent — robust sketches,
+      feature order, and configurations that survive edits.
+    vocab: [design intent, fully-defined sketch, feature tree, parametric, configuration, equation/global variable, rollback, in-context reference]
+    can_explain:
+      - Why a fully-defined sketch matters and how under-defining causes rebuild failures.
+      - How feature order encodes design intent.
+      - When to use configurations vs separate files.
+    deliverables:
+      - One part rebuilt to be fully parametric with 3 working configurations
+      - A short "design intent" write-up on a part you redesigned
+  - id: 2
+    title: Assemblies, Mates & Motion
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Build assemblies that move and check — mates, sub-assemblies, interference
+      detection, and basic motion.
+    vocab: [mate, coincident, concentric, sub-assembly, mate reference, degrees of freedom, interference detection, exploded view]
+    can_explain:
+      - How over-mating creates conflicts and how to diagnose them.
+      - When to make a sub-assembly rigid vs flexible.
+      - How interference detection catches design errors before fabrication.
+    deliverables:
+      - A multi-part assembly with correct mates + interference check passing
+      - An exploded view + animation of the assembly
+  - id: 3
+    title: GD&T to ASME Y14.5 & Tolerance Stacks
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Specify parts that can actually be made and inspected — datums, feature
+      control frames, and tolerance stack-ups.
+    vocab: [datum, feature control frame, position, flatness, perpendicularity, MMC/LMC, bonus tolerance, tolerance stack-up, ASME Y14.5]
+    can_explain:
+      - The difference between a coordinate tolerance and a position tolerance zone.
+      - What MMC buys you (bonus tolerance) and when to use it.
+      - How to run a worst-case 1D tolerance stack-up.
+    deliverables:
+      - A part fully toleranced with datums + 4+ feature control frames
+      - A worst-case stack-up on a mating pair, with the math shown
+  - id: 4
+    title: Drawings & Manufacturing Detailing
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Produce shop-ready drawings — views, sections, dimensions, BOM, and title
+      blocks a machine shop can quote from.
+    vocab: [orthographic view, section view, detail view, BOM, title block, revision table, surface finish, datum callout]
+    can_explain:
+      - Which views/sections a fabricator actually needs.
+      - How a BOM + balloon scheme drives assembly.
+      - Why surface finish and revision control matter on a real drawing.
+    deliverables:
+      - A complete manufacturing drawing package for one assembly
+      - A drawing that a shop (or you) could quote without questions
+  - id: 5
+    title: Sheet Metal & Weldments
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Model enclosures and frames the way they're built — sheet-metal flat
+      patterns and weldment structures (ties directly to the Welding + PCB tracks).
+    vocab: [bend allowance, k-factor, flat pattern, gauge, weldment profile, structural member, gusset, trim/extend, cut list]
+    can_explain:
+      - What k-factor/bend allowance does to a flat pattern.
+      - How weldment cut lists drive fabrication.
+      - When sheet metal beats machined/welded construction.
+    deliverables:
+      - A sheet-metal enclosure with a correct flat pattern
+      - A weldment frame with an auto cut list (feeds the welding track)
+  - id: 6
+    title: CSWP Exam Prep (Segments 1–3)
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Train to pass the Certified SOLIDWORKS Professional exam — timed part
+      modifications, configurations/drawings, and assembly building.
+    vocab: [CSWP, mass properties, sensor, design table, mate diagnosis, measure tool, coordinate system]
+    can_explain:
+      - How CSWP segment 1 tests parametric edits + mass-property checks under time.
+      - The assembly-building workflow CSWP segment 3 expects.
+      - Where most candidates lose time and how you'll avoid it.
+    deliverables:
+      - Two timed CSWP practice segments passed under the real clock
+      - CSWP exam scheduled (or voucher purchased)
+  - id: 7
+    title: FEA Fundamentals (Static Structural)
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Validate a design with finite-element analysis — loads, constraints, mesh,
+      and reading results without fooling yourself.
+    vocab: [FEA, mesh, element, boundary condition, fixture, load case, von Mises stress, factor of safety, convergence, stress singularity]
+    can_explain:
+      - How boundary conditions/fixtures change the answer more than the load.
+      - What a mesh-convergence check is and why a single run lies.
+      - How to spot a stress singularity vs a real stress concentration.
+    deliverables:
+      - A static FEA on a real bracket with a convergence check
+      - A factor-of-safety call backed by the analysis (SolidWorks Simulation or Ansys)
+  - id: 8
+    title: Design Capstone — Toleranced, FEA-Validated Part
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Take one robotics/hardware part end-to-end: model → tolerance → drawing →
+      FEA → (hand off to welding/PCB). The portfolio piece that proves the track.
+    vocab: [design for manufacture, design review, load path, factor of safety, drawing package, handoff]
+    can_explain:
+      - The full path from concept to a part someone could build.
+      - One DFM tradeoff you made and why.
+      - How the FEA changed the design.
+    deliverables:
+      - A complete part package (model + GD&T drawing + FEA report)
+      - A part designed here that the welding or PCB track actually builds

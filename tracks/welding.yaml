@@ -1,0 +1,125 @@
+id: welding
+title: Welding & Fabrication — TIG/Stick + AWS Cert Path
+category: welding
+schedule: flexible
+accent: "#f59e0b"
+started: null  # starts when the first week actually starts
+target_completion: null  # rolling — projected by plan.py
+active: false
+resume_after: offer
+daily_hours: 1
+days: [Sat]
+cadence:
+  note: "Parked until a signed offer; projected from the offer date."
+goal: >-
+  Build real fabrication skill for robotics/hardware projects AND a credible path
+  toward an AWS Certified Welder credential, using the TIG and stick gear on hand.
+weeks:
+  - id: 1
+    title: Safety, Gear & Shop Setup
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Set up a safe TIG/stick station and learn the machine, consumables, and
+      hazards before striking an arc. Dialing in amperage, gas, and tungsten is
+      half the battle.
+    vocab: [duty cycle, DCEN, DCEP, AC balance, tungsten (2% lanthanated), shielding gas, argon flow, electrode (E6010/E7018), arc flash, fume extraction]
+    can_explain:
+      - Why TIG steel runs DCEN but aluminum needs AC, and what AC balance controls.
+      - How to pick tungsten type/size and grind it for the job.
+      - The PPE + ventilation a home weld station actually needs.
+    deliverables:
+      - TIG + stick station set up with proper ground, gas, and PPE
+      - Tungsten ground and machine dialed for thin mild steel
+      - One-page setup/safety checklist pinned at the station
+  - id: 2
+    title: Metallurgy & Joint Design
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Understand what heat does to metal and how to design joints that hold — base
+      metals, the heat-affected zone, distortion, and the five joint types.
+    vocab: [HAZ, distortion, preheat, filler metal, mild steel, stainless 304, aluminum 6061, butt joint, lap joint, tee joint, fillet, groove, weld positions (1F-4F)]
+    can_explain:
+      - What the heat-affected zone is and why it can be the weakest point.
+      - How to fight distortion (tacking, sequence, fixturing).
+      - When you need preheat and why stainless/aluminum behave differently than mild steel.
+    deliverables:
+      - Coupon set showing butt, lap, and tee joints tacked square
+      - Notes on filler/base pairings for steel, stainless, aluminum
+  - id: 3
+    title: Weld Symbols & Print Reading (AWS A2.4)
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Read a weld callout like an engineer — symbols, fillet vs groove, size,
+      length, and where the weld actually goes. This separates a welder from a fabricator.
+    vocab: [weld symbol, reference line, arrow side, other side, fillet symbol, groove symbol, weld-all-around, field weld, leg size, AWS A2.4]
+    can_explain:
+      - How to read arrow-side vs other-side on a weld symbol.
+      - What a fillet leg-size callout means and how it's inspected.
+      - How to interpret weld-all-around and field-weld flags.
+    deliverables:
+      - Annotated print marking up 6+ weld symbols correctly
+      - A simple bracket detailed with proper weld callouts
+  - id: 4
+    title: SMAW (Stick) Fundamentals
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Lay clean stick beads and fillet welds. Stick is the test process for most
+      AWS structural quals and works where TIG can't.
+    vocab: [arc length, travel speed, work angle, travel angle, stringer bead, weave, slag, undercut, porosity, E7018 (low-hydrogen)]
+    can_explain:
+      - The arc-length / amperage / travel-speed triangle and what each error looks like.
+      - Why E7018 must stay dry and how to store it.
+      - How to read a bead for undercut, porosity, and incomplete fusion.
+    deliverables:
+      - Flat + horizontal fillet welds passing a bend/break visual test
+      - A weld-defect photo doc (good vs undercut vs porosity)
+  - id: 5
+    title: GTAW (TIG) Fundamentals
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Run controlled TIG fillets and beads on mild steel, then stretch to stainless.
+      TIG is the precision/clean-cosmetic process for visible robotics parts.
+    vocab: [torch angle, filler dab, walking the cup, tungsten contamination, heat input, oxidation color, back purge, pulse]
+    can_explain:
+      - How to feed filler without dipping the tungsten, and how to recover when you do.
+      - What stainless weld color tells you about heat input / shielding.
+      - When to reach for TIG over stick (cosmetics, thin material, control).
+    deliverables:
+      - Clean TIG fillet welds on 16ga mild steel
+      - One stainless coupon with acceptable color (not sugared)
+  - id: 6
+    title: Fabrication Capstone — Build a Real Part
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Fabricate a usable steel part for a hardware/robotics project — a bracket,
+      base, or frame — from print to finished, inspected weldment.
+    vocab: [fit-up, tack sequence, fixturing, square, weldment, grind/finish, load path]
+    can_explain:
+      - How you sequenced tacks/welds to control distortion on the build.
+      - Where the load path runs and why your joints are sized for it.
+      - What you'd change for a production run of 10.
+    deliverables:
+      - A finished, square, load-bearing weldment installed on a real project
+      - Build photos + a short fab log (print -> fit-up -> weld -> finish)
+  - id: 7
+    title: AWS Certified Welder — Prep & Test Plan
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Map the path to an AWS performance qualification: pick a process + position,
+      practice to the acceptance criteria, and line up an Accredited Test Facility.
+    vocab: [AWS D1.1, WPS, performance qualification, test position (3G/4G), Accredited Test Facility, bend test, visual acceptance criteria, essential variables]
+    can_explain:
+      - What a WPS is and why a qual is tied to position + process + thickness.
+      - The visual + bend-test acceptance criteria you're welding to.
+      - The realistic cost/logistics of testing at an ATF.
+    deliverables:
+      - Chosen process/position + printed acceptance criteria at the booth
+      - Repeatable test-coupon welds meeting visual criteria
+      - Shortlist of local Accredited Test Facilities + cost/date plan

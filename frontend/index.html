@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ascent</title>
+    <!-- Critical inline boot styles: style.css only loads once the JS module
+         runs, so without this the raw HTML flashes white before paint. Matches
+         --color-ink-950. Pure CSS, never JS-gated (a JS/anim-gated reveal once
+         left the app blank). #boot is removed by main.ts after the shell mounts. -->
+    <style>
+      html, body { margin: 0; height: 100%; background: #050509; color: #e7e7ef;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+      #boot { position: fixed; inset: 0; display: grid; place-items: center;
+        align-content: center; gap: 16px; }
+      #boot .spin { width: 34px; height: 34px; border-radius: 50%;
+        border: 2px solid rgba(99, 102, 241, 0.18); border-top-color: #6366f1;
+        animation: boot-spin 0.7s linear infinite; }
+      #boot .mark { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+        color: #5b5b73; }
+      @keyframes boot-spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { #boot .spin { animation: none; } }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="boot"><div class="spin"></div><div class="mark">Ascent</div></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

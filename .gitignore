@@ -1,0 +1,32 @@
+# Personal / runtime data: never commit
+career.db
+career.db-*
+*.db
+*.db-wal
+*.db-shm
+*.bak*
+settings.yaml
+profile.yaml
+data.yaml
+notes.yaml
+financial_snapshot.yaml
+chat_history.jsonl
+.env
+.secrets/
+output/
+demo/
+data/resume_master.json
+data/linda_corpus/
+data/linda_rag/
+
+# Build + tooling
+static/dist/
+frontend/node_modules/
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+flask_session/
+.DS_Store

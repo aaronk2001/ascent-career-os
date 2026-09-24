@@ -1,0 +1,14 @@
+# Optional features. Everything here fails soft when missing.
+
+# Tavily SDK. Linda calls the Tavily REST endpoint via `requests`; the SDK is only
+# needed if you prefer the official client.
+tavily-python>=0.5.0
+
+# Linda RAG memory (agent/rag.py, data/linda_rag/). Heavy: pulls torch (~500 MB).
+chromadb>=0.5.0
+sentence-transformers>=3.0.0
+
+# Google Calendar push (gcal.py). Setup: docs/gcal-setup.md
+google-api-python-client>=2.150.0
+google-auth-oauthlib>=1.2.1
+google-auth>=2.35.0

@@ -1,0 +1,27 @@
+# Personal profile read by agent/profile.py (Linda's system prompt, offer math,
+# interview prep, resume/cover-letter file names). Copy to profile.yaml and edit.
+# profile.yaml is gitignored. Every key is optional.
+name: Jordan Rivera
+market: Denver, CO
+about: |
+  ## Jordan — quick profile
+  - Controls engineer, 3 years in packaging automation. Target: Controls / Robotics Engineer II.
+  - Strengths: PLC (Studio 5000), vision inspection, fleet reliability.
+  - Open to Denver metro or remote.
+
+  ## Targets
+  - Next 3 months: land a controls role at or above the target salary.
+  - Next 12 months: ship two portfolio projects and one certification.
+current_salary: 80000
+target_salary: 100000
+monthly_expenses: 3000
+net_worth: null
+target_net_worth_1yr: null
+achievements:
+  - Cut line changeover time 40% by standardizing PLC recipes
+  - Deployed a vision inspection station that caught 97% of label defects
+star_situation: On a 12-line packaging floor with a 98% uptime target.
+star_result: Changeover time dropped 40% and unplanned downtime fell by a third.
+talking_points:
+  - Connect your line-reliability work to {company}'s production scale
+  - Highlight the PLC and vision tools from the posting you have shipped with

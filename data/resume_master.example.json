@@ -1,0 +1,34 @@
+{
+  "name": "JORDAN RIVERA",
+  "contact": "Denver, CO • jordan@example.com • linkedin.com/in/example",
+  "tagline": "Controls Engineer | PLC • Machine Vision • Industrial Automation",
+  "summary": "Controls engineer with three years of packaging-automation experience across PLC programming, vision inspection, and line reliability.",
+  "experience": [
+    {
+      "company": "Example Packaging Co.",
+      "role": "Controls Engineer",
+      "location": "Denver, CO",
+      "dates": "Jun 2022 – Present",
+      "bullets": [
+        {"lead": "Cut line changeover time 40%", "rest": " by standardizing Studio 5000 recipe handling across 12 lines."},
+        {"lead": "Deployed a vision inspection station", "rest": " that caught 97% of label defects before palletizing."}
+      ]
+    }
+  ],
+  "featured_project": {
+    "header": "Capstone — Example University",
+    "role": "Project Lead",
+    "location": "Denver, CO",
+    "dates": "Jan 2022 – May 2022",
+    "bullets": [
+      {"lead": "Built a 6-DOF pick-and-place cell", "rest": " with ROS 2 motion planning and a custom PCB I/O board."}
+    ]
+  },
+  "skills": [
+    {"label": "Languages:", "content": "Python, C/C++, Structured Text, Ladder Logic"},
+    {"label": "Controls:", "content": "Studio 5000, CODESYS, EtherNet/IP, Modbus TCP"},
+    {"label": "Tools:", "content": "OpenCV, YOLOv8, KiCad, SOLIDWORKS, Git"}
+  ],
+  "education": "B.S., Mechanical Engineering — Example University",
+  "education_date": "May 2022"
+}

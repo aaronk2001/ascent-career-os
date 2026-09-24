@@ -1,0 +1,254 @@
+{
+  "title": "Robotics & Controls",
+  "description": "A hardware-first path from embedded firmware through controls, robotics, PCB design, and industrial safety — aimed at energy & automation roles.",
+  "accent": "#6366f1",
+  "sections": [
+    {
+      "id": "embedded",
+      "title": "Embedded Foundations",
+      "summary": "The firmware layer every robot and controller sits on.",
+      "nodes": [
+        {
+          "id": "emb-c",
+          "title": "Embedded C / C++",
+          "level": "beginner",
+          "skill": "Embedded C",
+          "prereq": [],
+          "description": "Pointers, memory layout, fixed-width types, and bit manipulation on resource-constrained MCUs.",
+          "resources": [
+            { "type": "video", "title": "Modern Embedded Systems Programming (Miro Samek)", "url": "https://www.youtube.com/playlist?list=PLPW8O6W-1chwyTzI3BHwBLbGQoPFxPAPM" },
+            { "type": "doc", "title": "cppreference — C language", "url": "https://en.cppreference.com/w/c/language" }
+          ]
+        },
+        {
+          "id": "emb-mcu",
+          "title": "Microcontrollers & GPIO",
+          "level": "beginner",
+          "skill": "Microcontrollers",
+          "prereq": ["emb-c"],
+          "description": "Clocks, registers, GPIO, timers, interrupts, and ADC on an MCU like the ESP32 or STM32.",
+          "resources": [
+            { "type": "doc", "title": "ESP-IDF Programming Guide", "url": "https://docs.espressif.com/projects/esp-idf/en/latest/" }
+          ]
+        },
+        {
+          "id": "emb-rtos",
+          "title": "RTOS & Real-Time Tasks",
+          "level": "core",
+          "skill": "RTOS",
+          "prereq": ["emb-mcu"],
+          "description": "Tasks, scheduling, queues, semaphores, and deterministic timing under FreeRTOS.",
+          "resources": [
+            { "type": "book", "title": "Mastering the FreeRTOS Kernel", "url": "https://www.freertos.org/Documentation/RTOS_book.html" }
+          ]
+        },
+        {
+          "id": "emb-comms",
+          "title": "Serial Buses — I2C / SPI / UART / CAN",
+          "level": "core",
+          "skill": "Serial Protocols",
+          "prereq": ["emb-mcu"],
+          "description": "Wire-level framing, addressing, and trade-offs of the buses that connect sensors, drives, and controllers.",
+          "related_weeks": ["controls:3"],
+          "resources": [
+            { "type": "doc", "title": "SparkFun — Serial/I2C/SPI tutorials", "url": "https://learn.sparkfun.com/tutorials" },
+            { "type": "doc", "title": "CAN bus — a simple intro", "url": "https://www.csselectronics.com/pages/can-bus-simple-intro-tutorial" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "controls",
+      "title": "Controls & PLC",
+      "summary": "Industrial logic, supervision, and closed-loop control.",
+      "nodes": [
+        {
+          "id": "ctl-ladder",
+          "title": "PLC & Ladder Logic",
+          "level": "beginner",
+          "skill": "PLC Programming",
+          "prereq": [],
+          "description": "Scan cycle, I/O mapping, contacts/coils, timers, and counters on a real PLC.",
+          "related_weeks": ["controls:1", "controls:2"],
+          "related_certs": ["Rockwell Studio 5000"],
+          "resources": [
+            { "type": "course", "title": "PLC Academy — Ladder Logic", "url": "https://www.plcacademy.com/ladder-logic-tutorial/" }
+          ]
+        },
+        {
+          "id": "ctl-iec",
+          "title": "IEC 61131-3 & Structured Text",
+          "level": "core",
+          "skill": "IEC 61131-3",
+          "prereq": ["ctl-ladder"],
+          "description": "The five IEC languages, with Structured Text and Function Blocks for maintainable control code.",
+          "related_weeks": ["controls:2", "controls:4"],
+          "related_certs": ["Rockwell Studio 5000", "Beckhoff TwinCAT 3 Automation Engineer"],
+          "resources": [
+            { "type": "doc", "title": "CODESYS Online Help", "url": "https://help.codesys.com/" }
+          ]
+        },
+        {
+          "id": "ctl-scada",
+          "title": "HMI / SCADA",
+          "level": "core",
+          "skill": "SCADA/HMI",
+          "prereq": ["ctl-ladder"],
+          "description": "Operator screens, tags, alarms, historians, and supervisory data flow.",
+          "related_weeks": ["controls:3", "controls:4"],
+          "related_certs": ["Siemens TIA Portal — TIA-PRO1"],
+          "resources": [
+            { "type": "course", "title": "Inductive University (Ignition)", "url": "https://inductiveuniversity.com/" }
+          ]
+        },
+        {
+          "id": "ctl-pid",
+          "title": "PID & Closed-Loop Control",
+          "level": "advanced",
+          "skill": "Control Theory",
+          "prereq": ["emb-mcu"],
+          "description": "Feedback, the PID terms, tuning methods, and stability for motion and process loops.",
+          "related_certs": ["Simulink Fundamentals"],
+          "resources": [
+            { "type": "doc", "title": "Control Tutorials (Univ. of Michigan)", "url": "https://ctms.engin.umich.edu/CTMS/index.php?aux=Home" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "robotics",
+      "title": "Robotics Systems",
+      "summary": "Turning controlled actuators into coordinated machines.",
+      "nodes": [
+        {
+          "id": "rob-kin",
+          "title": "Kinematics & Motion",
+          "level": "core",
+          "skill": "Kinematics",
+          "prereq": ["ctl-pid"],
+          "description": "Frames, transforms, forward/inverse kinematics, and trajectory planning.",
+          "resources": [
+            { "type": "book", "title": "Modern Robotics (Lynch & Park)", "url": "https://modernrobotics.northwestern.edu/" }
+          ]
+        },
+        {
+          "id": "rob-motion",
+          "title": "Motion Control & Drives",
+          "level": "core",
+          "skill": "Motion Control",
+          "prereq": ["emb-comms"],
+          "description": "Steppers, servos, encoders, and drive tuning for accurate, repeatable motion.",
+          "resources": [
+            { "type": "doc", "title": "TI — Motor Drivers overview", "url": "https://www.ti.com/motor-drivers/overview.html" }
+          ]
+        },
+        {
+          "id": "rob-ros",
+          "title": "ROS 2 & Middleware",
+          "level": "advanced",
+          "skill": "ROS",
+          "prereq": ["emb-rtos"],
+          "description": "Nodes, topics, services, and the DDS layer that ties a robot's subsystems together.",
+          "resources": [
+            { "type": "doc", "title": "ROS 2 Documentation", "url": "https://docs.ros.org/en/jazzy/index.html" }
+          ]
+        },
+        {
+          "id": "rob-vision",
+          "title": "Machine Vision",
+          "level": "advanced",
+          "skill": "Computer Vision",
+          "prereq": ["emb-comms"],
+          "description": "Cameras, calibration, detection, and inspection for defect-finding and guidance.",
+          "resources": [
+            { "type": "doc", "title": "OpenCV Documentation", "url": "https://docs.opencv.org/4.x/" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pcb",
+      "title": "PCB & Electronics",
+      "summary": "Designing the boards the firmware runs on.",
+      "nodes": [
+        {
+          "id": "pcb-schematic",
+          "title": "Schematic Capture",
+          "level": "beginner",
+          "skill": "Schematic Design",
+          "prereq": [],
+          "description": "Symbols, nets, power architecture, and design-rule thinking before any layout.",
+          "resources": [
+            { "type": "doc", "title": "KiCad Documentation", "url": "https://docs.kicad.org/" }
+          ]
+        },
+        {
+          "id": "pcb-layout",
+          "title": "PCB Layout & Routing",
+          "level": "core",
+          "skill": "PCB Layout",
+          "prereq": ["pcb-schematic"],
+          "description": "Stackups, footprints, routing, ground planes, and manufacturable layout.",
+          "resources": [
+            { "type": "video", "title": "Phil's Lab — PCB design", "url": "https://www.youtube.com/@PhilsLab" }
+          ]
+        },
+        {
+          "id": "pcb-power",
+          "title": "Power & Signal Integrity",
+          "level": "advanced",
+          "skill": "Power Electronics",
+          "prereq": ["pcb-layout"],
+          "description": "Regulator topologies, decoupling, return paths, and EMC-aware design.",
+          "resources": [
+            { "type": "doc", "title": "TI — Power Management overview", "url": "https://www.ti.com/power-management/overview.html" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "safety",
+      "title": "Safety & Standards",
+      "summary": "What separates a hobby build from an industrial deployment.",
+      "nodes": [
+        {
+          "id": "saf-machine",
+          "title": "Machine Safety & E-Stop",
+          "level": "core",
+          "skill": "Functional Safety",
+          "prereq": [],
+          "description": "Risk assessment, safety circuits, performance levels (ISO 13849), and safe-state design.",
+          "related_certs": ["Certified Control Systems Technician (CCST) I"],
+          "resources": [
+            { "type": "doc", "title": "Rockwell — Industrial Safety", "url": "https://www.rockwellautomation.com/en-us/capabilities/industrial-safety.html" }
+          ]
+        },
+        {
+          "id": "saf-ot",
+          "title": "OT / ICS Cybersecurity",
+          "level": "advanced",
+          "skill": "OT Security",
+          "prereq": ["ctl-scada"],
+          "description": "Segmentation, defense-in-depth, and the ISA/IEC 62443 framework for control systems.",
+          "related_certs": ["ISA/IEC 62443 Cybersecurity Fundamentals"],
+          "resources": [
+            { "type": "spec", "title": "ISA/IEC 62443 series", "url": "https://www.isa.org/standards-and-publications/isa-standards/isa-iec-62443-series-of-standards" },
+            { "type": "doc", "title": "CISA — Industrial Control Systems", "url": "https://www.cisa.gov/topics/industrial-control-systems" }
+          ]
+        },
+        {
+          "id": "saf-haz",
+          "title": "Hazardous-Area / Ex",
+          "level": "core",
+          "skill": "Hazardous Area",
+          "prereq": [],
+          "description": "Classified areas, intrinsic safety, and Ex equipment for oil, gas, and chemical sites.",
+          "related_certs": ["OSHA HAZWOPER"],
+          "resources": [
+            { "type": "doc", "title": "IECEx — the system", "url": "https://www.iecex.com/" }
+          ]
+        }
+      ]
+    }
+  ]
+}

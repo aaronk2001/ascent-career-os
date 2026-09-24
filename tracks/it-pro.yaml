@@ -1,0 +1,139 @@
+id: it-pro
+title: IT Professional — Pi-Lab Homelab + DevOps
+category: it
+schedule: flexible
+accent: "#06b6d4"
+lab_dir: null
+started: null  # queued behind mechanical-design in the MWF slot
+target_completion: null  # rolling — projected by plan.py
+active: false
+resume_after: offer
+daily_hours: 1
+days: [Tue, Thu]
+cadence:
+  note: "Parked until a signed offer; projected from the offer date."
+goal: >-
+  Turn the Raspberry Pi fleet into a real homelab and pick up the Linux, container,
+  networking, and DevOps skills that harden your own apps' deployments and read as
+  credible IT/DevOps experience.
+weeks:
+  - id: 1
+    title: Linux Fundamentals & the Pi Fleet
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Get fluent on the shell and inventory the 12 nodes — users, permissions,
+      services, and key-based SSH across the cluster.
+    vocab: [shell, sudo, file permissions (rwx), systemd unit, journalctl, SSH key, static IP/DHCP reservation, hostname]
+    can_explain:
+      - How Linux file permissions + ownership actually gate access.
+      - What systemd does and how to read a failing service with journalctl.
+      - Why key-based SSH beats passwords and how to distribute keys.
+    deliverables:
+      - Passwordless SSH to all 12 nodes from one control host
+      - An inventory doc (hostname, IP, role, OS) for the fleet
+  - id: 2
+    title: Fleet Automation with Ansible
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Stop hand-configuring nodes — define the fleet as code with idempotent
+      Ansible playbooks.
+    vocab: [inventory, playbook, task, role, idempotency, handler, fact, vault]
+    can_explain:
+      - Why idempotency is the whole point of config management.
+      - How an inventory + playbook replace SSH-and-type.
+      - When to reach for a role vs a one-off task.
+    deliverables:
+      - An Ansible inventory of the fleet + a playbook that configures a base node
+      - One service rolled out to all nodes via a single playbook run
+  - id: 3
+    title: Docker & Containerization
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Containerize a real service — images, volumes, networks, and Compose — so it
+      runs the same everywhere.
+    vocab: [image, container, Dockerfile, layer, volume, bind mount, docker compose, port mapping, registry]
+    can_explain:
+      - The difference between an image and a container, and what a layer is.
+      - How volumes persist data past a container's life.
+      - What Compose buys you over raw docker run.
+    deliverables:
+      - A Dockerfile + compose file for one of your apps, running on a Pi
+      - Image pushed to a registry (Docker Hub or self-hosted)
+  - id: 4
+    title: Kubernetes (k3s) on the Cluster
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Stand up lightweight Kubernetes (k3s) across the Pis and deploy a service
+      with self-healing and scaling.
+    vocab: [k3s, node, pod, deployment, service, replicaset, kubectl, manifest, ingress]
+    can_explain:
+      - What a Deployment + Service give you over a bare container.
+      - How k8s self-heals a crashed pod.
+      - Why k3s fits a Pi cluster where full k8s doesn't.
+    deliverables:
+      - A k3s cluster across 3+ Pi nodes
+      - One app deployed via manifests, surviving a node reboot
+  - id: 5
+    title: Networking & Reverse Proxy
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Make services reachable safely — DNS, a reverse proxy, and TLS — without
+      exposing the whole lab.
+    vocab: [VLAN, DNS, reverse proxy, Caddy/Traefik, TLS/Let's Encrypt, port forwarding, firewall, subnet]
+    can_explain:
+      - What a reverse proxy does and why you want one in front of services.
+      - How TLS certs are issued/renewed automatically.
+      - The minimum safe way to expose one service to the internet.
+    deliverables:
+      - A reverse proxy (Caddy or Traefik) terminating TLS for 2+ services
+      - Internal DNS so services have names, not IPs
+  - id: 6
+    title: Observability — Prometheus + Grafana
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Formalize the monitoring you already run — exporters, metrics, dashboards,
+      and alerts that tell you before something breaks.
+    vocab: [metric, time series, exporter, node_exporter, PromQL, scrape, dashboard, alert rule, SLO]
+    can_explain:
+      - The pull model Prometheus uses and what an exporter is.
+      - How to write a basic PromQL query for CPU/mem/disk.
+      - What makes a good alert vs alert fatigue.
+    deliverables:
+      - node_exporter on every fleet node, scraped by Prometheus
+      - A Grafana dashboard + at least one working alert rule
+  - id: 7
+    title: CI/CD & Infrastructure as Code
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Automate build-and-deploy — push to git, tests run, image builds, service
+      updates — and capture infra as code.
+    vocab: [CI/CD, pipeline, GitHub Actions, runner, artifact, infrastructure as code, declarative, rollback]
+    can_explain:
+      - The stages of a basic CI/CD pipeline and what gates a deploy.
+      - Why infrastructure as code beats click-ops.
+      - How to roll back a bad deploy.
+    deliverables:
+      - A GitHub Actions pipeline that builds + deploys one app to the cluster
+      - Infra (compose/k8s manifests) committed as code, not hand-edited
+  - id: 8
+    title: Self-Hosting Capstone
+    status: not_started
+    est_hours: 6
+    objective: >-
+      Deploy one of your own apps (Ascent, NEXUS, or PolyMarked) to the cluster,
+      production-style — containerized, proxied, monitored, and CI-deployed.
+    vocab: [self-hosting, production, health check, uptime, backup, secrets management, zero-downtime]
+    can_explain:
+      - The full path from "runs on my laptop" to "runs on the cluster 24/7."
+      - How you handle secrets + backups for a self-hosted app.
+      - What you'd monitor to know it's healthy.
+    deliverables:
+      - One personal app running 24/7 on the Pi cluster, TLS + monitored
+      - A one-page runbook (deploy, restore, where the dashboards are)

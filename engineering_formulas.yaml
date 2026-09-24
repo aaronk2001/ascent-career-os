@@ -1,0 +1,94 @@
+# Engineering reference — electrical, mechanical, mechanisms. term: {domain, formula?, def}.
+# Formulas are plain text (rendered in monospace). · = multiply.
+
+# ── Electrical ────────────────────────────────────────────────────────────────
+"Ohm's law":            { domain: electrical, formula: "V = I · R", def: "Voltage equals current times resistance." }
+"Power (DC)":           { domain: electrical, formula: "P = V·I = I²·R = V²/R", def: "Electrical power dissipated by a resistive load." }
+"Real power":           { domain: electrical, formula: "P = V·I·cosφ", def: "AC power doing actual work (watts); φ is the voltage-current phase angle." }
+"Apparent power":       { domain: electrical, formula: "S = V·I", def: "Volt-amps the source must supply (VA)." }
+"Reactive power":       { domain: electrical, formula: "Q = V·I·sinφ", def: "Power sloshing in/out of reactive elements (VAR)." }
+"Power factor":         { domain: electrical, formula: "PF = cosφ = P/S", def: "Fraction of apparent power that does real work." }
+"Kirchhoff's Voltage Law": { domain: electrical, formula: "Σ V = 0 (loop)", def: "Voltages around any closed loop sum to zero." }
+"Kirchhoff's Current Law": { domain: electrical, formula: "Σ I = 0 (node)", def: "Currents into a node equal currents out." }
+"Series resistance":    { domain: electrical, formula: "R = R1 + R2 + …", def: "Resistors in series add." }
+"Parallel resistance":  { domain: electrical, formula: "1/R = 1/R1 + 1/R2 + …", def: "Reciprocals of parallel resistors add." }
+"Voltage divider":      { domain: electrical, formula: "Vout = Vin · R2/(R1+R2)", def: "Output of two series resistors tapped at their junction." }
+"Capacitor charge":     { domain: electrical, formula: "Q = C·V ; I = C·dV/dt", def: "Charge stored on a capacitor; current is rate of voltage change." }
+"Capacitor energy":     { domain: electrical, formula: "E = ½·C·V²", def: "Energy stored in a capacitor's field." }
+"Capacitive reactance": { domain: electrical, formula: "Xc = 1/(2π·f·C)", def: "A capacitor's frequency-dependent opposition to AC." }
+"Inductor voltage":     { domain: electrical, formula: "V = L·dI/dt", def: "Voltage across an inductor opposes current change." }
+"Inductor energy":      { domain: electrical, formula: "E = ½·L·I²", def: "Energy stored in an inductor's magnetic field." }
+"Inductive reactance":  { domain: electrical, formula: "XL = 2π·f·L", def: "An inductor's frequency-dependent opposition to AC." }
+"Impedance":            { domain: electrical, formula: "Z = √(R² + (XL − Xc)²)", def: "Total AC opposition combining resistance and reactance." }
+"RC time constant":     { domain: electrical, formula: "τ = R·C", def: "Time to reach 63% of final value in an RC circuit." }
+"RL time constant":     { domain: electrical, formula: "τ = L/R", def: "Time to reach 63% of final current in an RL circuit." }
+"Resonant frequency":   { domain: electrical, formula: "f = 1/(2π·√(L·C))", def: "Frequency where inductive and capacitive reactance cancel." }
+"Three-phase power":    { domain: electrical, formula: "P = √3·V_L·I_L·cosφ", def: "Real power of a balanced three-phase load (line quantities)." }
+"Wye line voltage":     { domain: electrical, formula: "V_line = √3·V_phase", def: "In a wye (star) connection, line voltage leads phase voltage by √3." }
+"Transformer ratio":    { domain: electrical, formula: "Vp/Vs = Np/Ns = Is/Ip", def: "Voltage scales with turns ratio; current scales inversely." }
+"Synchronous speed":    { domain: electrical, formula: "Ns = 120·f / P", def: "AC motor field speed in RPM (f = Hz, P = poles)." }
+"Motor slip":           { domain: electrical, formula: "s = (Ns − Nr)/Ns", def: "Fractional lag of an induction rotor behind the field." }
+"Back-EMF":             { domain: electrical, formula: "Eb = V − Ia·Ra", def: "Voltage a spinning motor generates opposing the supply." }
+"PWM duty cycle":       { domain: electrical, formula: "Vavg = D · Vsupply", def: "Average output of a pulse-width-modulated signal (D = on-fraction)." }
+"Decibels":             { domain: electrical, formula: "dB = 20·log₁₀(V2/V1) = 10·log₁₀(P2/P1)", def: "Logarithmic ratio of voltages or powers." }
+"Diode drop":           { domain: electrical, def: "~0.7 V (Si) forward voltage a diode loses when conducting; ~0.3 V for Schottky." }
+"Pull-up / pull-down":  { domain: electrical, def: "A resistor that sets a logic line's default level when nothing drives it." }
+"H-bridge":             { domain: electrical, def: "Four-switch circuit that drives a DC motor in either direction." }
+
+# ── Mechanical ────────────────────────────────────────────────────────────────
+"Newton's second law":  { domain: mechanical, formula: "F = m·a", def: "Net force equals mass times acceleration." }
+"Torque":               { domain: mechanical, formula: "τ = r·F = I·α", def: "Rotational force; equals lever arm × force, or inertia × angular accel." }
+"Work":                 { domain: mechanical, formula: "W = F·d", def: "Energy transferred by a force acting over a distance." }
+"Mechanical power":     { domain: mechanical, formula: "P = F·v = τ·ω", def: "Rate of doing work; linear or rotational." }
+"Kinetic energy":       { domain: mechanical, formula: "KE = ½·m·v² ; ½·I·ω²", def: "Energy of motion, linear or rotational." }
+"Potential energy":     { domain: mechanical, formula: "PE = m·g·h", def: "Stored energy due to height in gravity." }
+"Linear momentum":      { domain: mechanical, formula: "p = m·v", def: "Mass in motion; conserved in collisions." }
+"Angular momentum":     { domain: mechanical, formula: "L = I·ω", def: "Rotational momentum; conserved without external torque." }
+"Stress":               { domain: mechanical, formula: "σ = F/A", def: "Internal force per unit area in a loaded member." }
+"Strain":               { domain: mechanical, formula: "ε = ΔL/L", def: "Fractional deformation under load." }
+"Young's modulus":      { domain: mechanical, formula: "E = σ/ε", def: "Material stiffness — stress over strain in the elastic region." }
+"Hooke's law (spring)": { domain: mechanical, formula: "F = k·x ; E = ½·k·x²", def: "Spring force proportional to deflection; energy stored." }
+"Bending stress":       { domain: mechanical, formula: "σ = M·c/I", def: "Stress in a beam from a bending moment M (c = distance to fiber, I = area moment)." }
+"Area moment of inertia": { domain: mechanical, formula: "I = b·h³/12 (rectangle)", def: "A cross-section's resistance to bending." }
+"Cantilever deflection": { domain: mechanical, formula: "δ = F·L³/(3·E·I)", def: "Tip deflection of a cantilever beam under an end load." }
+"Pressure":             { domain: mechanical, formula: "P = F/A", def: "Force distributed over an area." }
+"Friction force":       { domain: mechanical, formula: "F = μ·N", def: "Resistance to sliding; μ = friction coefficient, N = normal force." }
+"Factor of safety":     { domain: mechanical, formula: "FoS = σ_yield / σ_working", def: "Margin between a material's strength and the applied stress." }
+"Thermal expansion":    { domain: mechanical, formula: "ΔL = α·L·ΔT", def: "Length change with temperature (α = expansion coefficient)." }
+"Angular kinematics":   { domain: mechanical, formula: "ω = ω₀ + α·t ; θ = ω₀·t + ½·α·t²", def: "Rotational equivalents of linear motion equations." }
+"Centripetal acceleration": { domain: mechanical, formula: "a = v²/r = ω²·r", def: "Inward acceleration keeping an object on a circular path." }
+"Gear ratio":           { domain: mechanical, formula: "GR = N_out/N_in = ω_in/ω_out = τ_out/τ_in", def: "Teeth ratio that trades speed for torque." }
+"Mechanical advantage": { domain: mechanical, formula: "MA = load / effort", def: "Force multiplication of a machine." }
+"Lead screw travel":    { domain: mechanical, formula: "linear = revs · lead", def: "Linear distance per screw revolution; lead = pitch × starts." }
+"Lead screw torque":    { domain: mechanical, formula: "T = F·L/(2π·η)", def: "Torque to drive an axial load F through lead L at efficiency η." }
+"Belt/pulley speed":    { domain: mechanical, formula: "ω₁·r₁ = ω₂·r₂", def: "Surface speed is shared, so smaller pulley spins faster." }
+"Hydraulic force":      { domain: mechanical, formula: "F = P·A", def: "Cylinder force from fluid pressure over piston area." }
+"Flow rate":            { domain: mechanical, formula: "Q = A·v", def: "Volumetric flow equals cross-section area times velocity." }
+"Bolt preload":         { domain: mechanical, formula: "F = T/(K·d)", def: "Clamp load from tightening torque (K = nut factor, d = diameter)." }
+"Buckling (Euler)":     { domain: mechanical, formula: "P_cr = π²·E·I/(L_e)²", def: "Critical axial load that buckles a slender column." }
+
+# ── Mechanisms ────────────────────────────────────────────────────────────────
+"Degrees of freedom (Kutzbach)": { domain: mechanisms, formula: "DOF = 3(n−1) − 2·j1 − j2", def: "Mobility of a planar linkage (n = links, j1 = 1-DOF joints, j2 = 2-DOF joints)." }
+"Four-bar linkage":     { domain: mechanisms, def: "Four links and four pin joints — the workhorse linkage for path/motion generation." }
+"Grashof condition":    { domain: mechanisms, formula: "s + l ≤ p + q", def: "If shortest + longest ≤ other two, a four-bar link can fully rotate (crank)." }
+"Crank-slider":         { domain: mechanisms, def: "Converts rotation to linear motion (engine piston, pump)." }
+"Scotch yoke":          { domain: mechanisms, def: "Turns rotation into pure sinusoidal (SHM) linear motion." }
+"Cam and follower":     { domain: mechanisms, def: "A shaped cam profile drives a follower through rise–dwell–fall motion." }
+"Rack and pinion":      { domain: mechanisms, formula: "v = ω·r_pinion", def: "Gear on a toothed bar converts rotary to linear motion." }
+"Geneva mechanism":     { domain: mechanisms, def: "Converts continuous rotation into precise intermittent indexing." }
+"Ratchet and pawl":     { domain: mechanisms, def: "Allows motion/torque in one direction only; blocks reverse." }
+"Planetary gearset":    { domain: mechanisms, def: "Sun, planets, and ring gears giving compact high ratios and coaxial shafts." }
+"Worm gear":            { domain: mechanisms, def: "Screw meshing a wheel — high reduction and often self-locking." }
+"Bevel gear":           { domain: mechanisms, def: "Cone-shaped gears transmitting power between intersecting (usually 90°) shafts." }
+"Differential":         { domain: mechanisms, def: "Gear set letting two outputs turn at different speeds while sharing torque." }
+"Universal joint":      { domain: mechanisms, def: "Cardan coupling transmitting torque between angled shafts (speed varies cyclically)." }
+"Toggle mechanism":     { domain: mechanisms, def: "Linkage giving huge mechanical advantage near its straightened 'lock' position." }
+"Four simple machines": { domain: mechanisms, def: "Lever, wheel-and-axle, pulley, inclined plane (plus wedge and screw) — MA building blocks." }
+"Backlash":             { domain: mechanisms, def: "Lost motion / play between meshing gears or threads before engagement." }
+"Compliance":           { domain: mechanisms, def: "Designed flexibility (e.g. in EOAT) that absorbs misalignment and shock." }
+"Kinematic pair":       { domain: mechanisms, def: "A joint constraining relative motion between two links (revolute, prismatic, etc.)." }
+"Detent":               { domain: mechanisms, def: "A spring-loaded catch that holds a mechanism at defined positions." }
+"End effector (EOAT)":  { domain: mechanisms, def: "End-of-arm tooling — the gripper/tool a robot uses to act on the world." }
+"Bearing":              { domain: mechanisms, def: "Element (ball, roller, journal) constraining motion to rotation/translation with low friction." }
+"Coupling":             { domain: mechanisms, def: "Connects two shafts to transmit torque while tolerating some misalignment." }
+"Linkage dead point":   { domain: mechanisms, def: "A toggle position where the input can't drive the output (zero mechanical advantage)." }

@@ -1,0 +1,14 @@
+{
+  "title": "Embedded / Firmware Engineer",
+  "summary": "Remote-friendly hedge track — firmware, drivers, and board bring-up that works from anywhere.",
+  "bucket": "remote",
+  "required_skills": [
+    { "skill": "Embedded C", "level": 4 },
+    { "skill": "Microcontrollers", "level": 4 },
+    { "skill": "RTOS", "level": 3 },
+    { "skill": "Serial Protocols", "level": 4 },
+    { "skill": "PCB Layout", "level": 2 },
+    { "skill": "Control Theory", "level": 2 }
+  ],
+  "certs": []
+}

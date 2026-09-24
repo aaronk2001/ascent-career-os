@@ -1,0 +1,376 @@
+track: ml-fundamentals
+title: Computer Vision → ML/LLM Foundations
+started: 2026-05-08
+target_completion: 2026-09-04
+spine: "OpenCV University + Ultralytics + SAM 2 (weeks 1–6, active); Karpathy — Neural Networks: Zero to Hero + HF stack (weeks 7–18, parked until CV ships)"
+sandbox_repo: ~/projects/ml-sandbox
+cadence:
+  sessions_per_week: 2
+  days: [Tue, Thu]
+  hours_per_session: 1
+  rest_day: Sun
+  flex_day: Sat
+  note: "Long-game — secondary track. ~17 cal weeks for 6 active CV weeks. LLM weeks 7–18 stay parked."
+references:
+  - label: OpenCV University — Free CV Crash Course
+    role: CV spine (weeks 1–2)
+    url: https://opencv.org/university/free-courses/
+  - label: PyImageSearch — Deep Learning for CV
+    role: CV practitioner reference
+    url: https://pyimagesearch.com/deep-learning-computer-vision-python-book/
+  - label: Ultralytics YOLO docs
+    role: detection + tracking (week 4)
+    url: https://docs.ultralytics.com/
+  - label: Meta SAM 2
+    role: segmentation (week 5)
+    url: https://github.com/facebookresearch/sam2
+  - label: Roboflow Universe
+    role: CV datasets + auto-label
+    url: https://universe.roboflow.com/
+  - label: Karpathy Zero-to-Hero
+    role: LLM spine (parked, weeks 7–12)
+    url: https://karpathy.ai/zero-to-hero.html
+  - label: huggingface/ml-intern
+    role: real-world reference codebase (parked)
+    url: https://github.com/huggingface/ml-intern
+  - label: HF LLM Course
+    role: modern HF stack vocabulary (parked)
+    url: https://huggingface.co/learn/llm-course/chapter1/1
+  - label: Géron — Hands-On ML
+    role: breadth + classical ML reference (parked)
+    url: https://www.oreilly.com/library/view/hands-on-machine-learning/9798341607972/
+  - label: ashishpatel26/500
+    role: project-archetype bank (parked)
+    url: https://github.com/ashishpatel26/500-AI-Machine-learning-Deep-learning-Computer-vision-NLP-Projects-with-code
+weeks:
+  # ── ACTIVE: Computer Vision arc (weeks 1–6) ──
+  - id: 1
+    title: OpenCV Foundations — Image I/O, Color, Transforms
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Stand up the OpenCV toolchain and develop intuition for what a digital image
+      actually is. Build muscle memory for I/O, color spaces, geometric transforms,
+      and the core filters you reach for before any deep learning enters the picture.
+    vocab: [BGR vs RGB, HSV, grayscale, channel, kernel, convolution, Gaussian blur, Canny, threshold, ROI, affine warp, histogram equalization, gamma]
+    primary_resource:
+      label: OpenCV University — Free CV Crash Course
+      url: https://opencv.org/university/free-courses/
+    sandbox_path: notebooks/cv_week01_opencv_foundations.ipynb
+    ml_intern_angle: Skim huggingface/transformers vision-pipeline modules — note where image preprocessing happens vs where inference runs.
+    can_explain:
+      - Why OpenCV defaults to BGR and what breaks if you forget.
+      - When HSV beats RGB for thresholding and color masking.
+      - What a 3x3 Gaussian kernel does mathematically and visually.
+      - Why Canny needs two thresholds and how hysteresis works.
+
+  - id: 2
+    title: Classical CV — Features, Geometry, Tracking
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Cover the pre-deep-learning stack engineers still ship in production —
+      keypoints, homography, contours, calibration, optical flow. These are the
+      tools you reach for when "just train a model" is overkill or impossible.
+    vocab: [SIFT, ORB, FAST, BRIEF, RANSAC, homography, fundamental matrix, contour, moments, camera intrinsics, distortion, optical flow, Lucas-Kanade, Kalman filter]
+    primary_resource:
+      label: OpenCV docs — Feature Detection & Camera Calibration
+      url: https://docs.opencv.org/4.x/d7/d8b/tutorial_py_lucas_kanade.html
+    sandbox_path: notebooks/cv_week02_classical_cv.ipynb
+    ml_intern_angle: Read the eval-harness IO layer — how does the codebase load and version image-like data on disk?
+    can_explain:
+      - Difference between SIFT, ORB, and modern learned features (SuperPoint).
+      - What a homography is and the minimum correspondences to estimate one.
+      - Why camera calibration matters before you do any 3D reasoning.
+      - When Kalman beats raw optical flow for object tracking.
+
+  - id: 3
+    title: CNNs From Scratch — LeNet → ResNet on CIFAR-10
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Build the canonical CNN ladder in PyTorch — LeNet, VGG-style, ResNet —
+      train on CIFAR-10, watch what each architectural change actually buys you.
+      This is where vision-native models start.
+    vocab: [convolution layer, stride, padding, pooling, receptive field, feature map, batch norm, residual block, skip connection, dropout, data augmentation, transfer learning]
+    primary_resource:
+      label: PyTorch — CIFAR-10 tutorial + ResNet paper
+      url: https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
+    sandbox_path: notebooks/cv_week03_cnns_cifar.ipynb
+    ml_intern_angle: Read torchvision.models — how do they version pretrained weights and where do checkpoints live on disk?
+    can_explain:
+      - Why convolutions are translation-equivariant and what that buys you.
+      - How residual connections fix the degradation problem in deep nets.
+      - Why batch norm sometimes hurts CV training (small batches, distribution shift).
+      - Difference between feature extraction and full fine-tuning for transfer learning.
+
+  - id: 4
+    title: Object Detection — YOLO11/YOLOv8 + Custom Dataset
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Train a real detector on your own data. Use Ultralytics YOLO end-to-end —
+      data prep, training, validation, ONNX export. Run inference on a webcam
+      stream and measure latency on this laptop's CPU vs the Pi cluster.
+    vocab: [bounding box, IoU, NMS, mAP, anchor box, YOLO grid, COCO format, Roboflow, ONNX, TensorRT, FP16, edge inference]
+    primary_resource:
+      label: Ultralytics YOLO docs — Train Custom Data
+      url: https://docs.ultralytics.com/modes/train/
+    sandbox_path: notebooks/cv_week04_yolo_custom.ipynb
+    ml_intern_angle: Compare Ultralytics CLI ergonomics to ml-intern's training-runner — which abstractions did each team pick and why?
+    can_explain:
+      - What mAP@0.5 vs mAP@0.5:0.95 measure and which to trust.
+      - How NMS resolves overlapping detections and where it fails.
+      - Why YOLO's grid + anchor scheme is faster than two-stage detectors.
+      - Tradeoffs of ONNX vs native PyTorch for edge deployment.
+
+  - id: 5
+    title: Segmentation — SAM 2 + Mask R-CNN
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Move from boxes to pixels. Run Meta's SAM 2 zero-shot, then fine-tune
+      Mask R-CNN on a custom segmentation set. Build a video segmentation demo
+      using SAM 2's tracking ability — single-click → mask propagated through frames.
+    vocab: [semantic segmentation, instance segmentation, panoptic, mask, IoU per-pixel, prompt encoder, mask decoder, video object segmentation, dice loss, focal loss]
+    primary_resource:
+      label: Meta SAM 2 — Repo + Demo
+      url: https://github.com/facebookresearch/sam2
+    sandbox_path: notebooks/cv_week05_segmentation.ipynb
+    ml_intern_angle: Read SAM 2's video-object-segmentation pipeline — how does state propagate across frames and where does it break?
+    can_explain:
+      - Difference between semantic, instance, and panoptic segmentation.
+      - What SAM 2 added over SAM 1 and why video changes the architecture.
+      - When dice loss beats cross-entropy for segmentation.
+      - Why segmentation labels are 100x more expensive than detection labels.
+
+  - id: 6
+    title: CV Capstone — Real-Time Pipeline + Portfolio Demo
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Ship a real-time CV pipeline — webcam in, detect + track + segment, overlay
+      the results, export a 60-second portfolio video. Deploy the inference loop
+      on the Pi cluster (pi-ai node) and document the latency budget end to end.
+    vocab: [real-time inference, FPS budget, frame buffer, tracker (ByteTrack/BoT-SORT), webcam capture, GStreamer, edge deployment, model quantization, INT8, portfolio polish]
+    primary_resource:
+      label: Ultralytics — Object Tracking Guide
+      url: https://docs.ultralytics.com/modes/track/
+    sandbox_path: notebooks/cv_week06_cv_capstone.md
+    ml_intern_angle: "Final CV pass — what one thing in your pipeline would you redesign if this were a 6-month team project instead of a 6-week solo build?"
+    can_explain:
+      - Pitch the CV capstone to a hiring manager in 60 seconds.
+      - One latency tradeoff you made (model size vs FPS vs accuracy).
+      - Why the Pi cluster is or isn't a good fit for this workload.
+      - What you would automate (data labeling, retraining, eval) given another month.
+
+  # ── PARKED: LLM / Karpathy Zero-to-Hero (weeks 7–18, resume after CV ships) ──
+  - id: 7
+    title: "[parked] Tensors, Autograd, Env Setup"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Stand up the Python ML toolchain and develop physical intuition for tensors and gradients.
+    vocab: [tensor, scalar/vector/matrix, rank, shape, autograd, computation graph, gradient, GPU vs CPU]
+    primary_resource:
+      label: Géron ch.1–2
+      url: https://www.oreilly.com/library/view/hands-on-machine-learning/9798341607972/
+    sandbox_path: notebooks/week01_tensors.ipynb
+    ml_intern_angle: Clone the repo. Read top-level README only. Do not open code yet.
+    can_explain:
+      - What is a tensor and why it generalizes scalars/vectors/matrices.
+      - Why GPUs are faster than CPUs for deep learning.
+      - What an autograd engine actually tracks.
+
+  - id: 8
+    title: "[parked] Micrograd — Backprop From Scratch"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Reimplement Karpathy's micrograd engine; understand backprop end-to-end.
+    vocab: [forward pass, backward pass, chain rule, loss function, parameter, optimizer, learning rate]
+    primary_resource:
+      label: Karpathy — micrograd lecture
+      url: https://www.youtube.com/watch?v=VMj-3S1tku0
+    sandbox_path: notebooks/week02_micrograd.ipynb
+    ml_intern_angle: Identify languages used (Python? TS?) and entry-point file from package.json/pyproject.
+    can_explain:
+      - Walk through a backward pass on a 2-input, 2-layer toy network.
+      - Why gradient descent moves opposite the gradient.
+      - How a learning rate that is too high or too low fails differently.
+
+  - id: 9
+    title: "[parked] Makemore — Bigram Language Model"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Train your first language model — a bigram character predictor on a names dataset.
+    vocab: [token, vocabulary, one-hot encoding, softmax, cross-entropy loss, sampling, temperature]
+    primary_resource:
+      label: Karpathy — makemore part 1
+      url: https://www.youtube.com/watch?v=PaCmpygFfXo
+    sandbox_path: notebooks/week03_makemore_bigram.ipynb
+    ml_intern_angle: Map the full directory tree. Note where models, configs, prompts, and tests live.
+    can_explain:
+      - What a tokenizer does and why character-level differs from BPE.
+      - Why softmax + cross-entropy is the standard classification combo.
+      - What temperature controls in sampling.
+
+  - id: 10
+    title: "[parked] Makemore — MLP"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Promote the bigram to a small MLP; introduce embeddings and hidden layers.
+    vocab: [embedding, hidden layer, activation function, tanh/ReLU, minibatch, epoch, overfitting]
+    primary_resource:
+      label: Karpathy — makemore part 2
+      url: https://www.youtube.com/watch?v=TCH_1BHY58I
+    sandbox_path: notebooks/week04_makemore_mlp.ipynb
+    ml_intern_angle: Read the agent loop entry point. Whose function is "main"? What does it call first?
+    can_explain:
+      - What an embedding is and why discrete tokens need them.
+      - Difference between an epoch and a step.
+      - Three signals that you are overfitting.
+
+  - id: 11
+    title: "[parked] Makemore — WaveNet / Deeper Nets"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Add depth, dilated structure, and proper batch normalization.
+    vocab: [batch norm, layer norm, residual connection, receptive field, parameter count, init scheme]
+    primary_resource:
+      label: Karpathy — makemore part 4
+      url: https://www.youtube.com/watch?v=t3YJ5hKiMQ0
+    sandbox_path: notebooks/week05_makemore_wavenet.ipynb
+    ml_intern_angle: Read training orchestration. How does it decide what to train, when, and on what data?
+    can_explain:
+      - Why initialization matters and what symptoms bad init produces.
+      - What batch norm is doing and when it can hurt you.
+      - Why residual connections help deeper networks train.
+
+  - id: 12
+    title: "[parked] nanoGPT — Build a Transformer"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Implement a character-level GPT with attention from scratch.
+    vocab: [attention, self-attention, multi-head, positional encoding, causal mask, KV cache, context length]
+    primary_resource:
+      label: Karpathy — Let's build GPT
+      url: https://www.youtube.com/watch?v=kCc8FmEb1nY
+    sandbox_path: notebooks/week06_nanogpt.ipynb
+    ml_intern_angle: Read the model-loading code. Which models, which providers, which weights live where.
+    can_explain:
+      - What attention computes and why "self" attention.
+      - What a causal mask is and why decoders need it.
+      - Why context length is the dominant cost.
+
+  - id: 13
+    title: "[parked] HF Transformers — Pretrained Models"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Stop building from scratch. Use the real HF stack to load and run pretrained models.
+    vocab: [pretraining, fine-tuning, pipeline, AutoTokenizer, AutoModel, checkpoint, model card]
+    primary_resource:
+      label: HF Course ch.1–2
+      url: https://huggingface.co/learn/llm-course/chapter1/1
+    sandbox_path: notebooks/week07_hf_transformers_intro.ipynb
+    ml_intern_angle: Read tool-use / function-calling. How does ml-intern decide which tool to call?
+    can_explain:
+      - Difference between pretraining and fine-tuning.
+      - What a tokenizer/model "checkpoint" actually is on disk.
+      - Why model cards exist.
+
+  - id: 14
+    title: "[parked] HF Datasets — Data Pipelines"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Load, transform, and stream datasets the way production ML teams do.
+    vocab: [Dataset, streaming, map, filter, collator, dataloader, shuffle, split]
+    primary_resource:
+      label: HF Course ch.3
+      url: https://huggingface.co/learn/llm-course/chapter3/1
+    sandbox_path: notebooks/week08_hf_datasets_pipeline.ipynb
+    ml_intern_angle: Read the data pipeline. Where does training data come from and how is it curated?
+    can_explain:
+      - Why streaming datasets matter at scale.
+      - What a data collator does and why padding lives there.
+      - Train/val/test split discipline.
+
+  - id: 15
+    title: "[parked] Fine-Tune DistilBERT"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: End-to-end fine-tune a small transformer on a sentiment task. Save and reload.
+    vocab: [Trainer, TrainingArguments, LoRA, PEFT, gradient accumulation, mixed precision, checkpoint resume]
+    primary_resource:
+      label: HF Course ch.4
+      url: https://huggingface.co/learn/llm-course/chapter4/1
+    sandbox_path: notebooks/week09_finetune_distilbert.ipynb
+    ml_intern_angle: Read the eval harness. What does ml-intern measure when it claims a run improved?
+    can_explain:
+      - What full fine-tune vs LoRA actually changes about the optimizer state.
+      - Why mixed precision speeds training without much accuracy cost.
+      - What you save when you save a checkpoint.
+
+  - id: 16
+    title: "[parked] Evals, Metrics, Leakage"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Learn to trust a number. Understand how evals lie and how leakage creeps in.
+    vocab: [accuracy, precision/recall, F1, AUROC, perplexity, leakage, contamination, benchmark, held-out set]
+    primary_resource:
+      label: HF Course ch.5 + Géron ch.18
+      url: https://huggingface.co/learn/llm-course/chapter5/1
+    sandbox_path: notebooks/week10_evals_and_metrics.ipynb
+    ml_intern_angle: Read CI/test setup. Are evals run in CI? Which thresholds gate a merge?
+    can_explain:
+      - When accuracy is the wrong metric.
+      - What perplexity actually is and why a lower number is better.
+      - Three ways data leakage can fake a great score.
+
+  - id: 17
+    title: "[parked] ml-intern Architecture Deep Dive"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Read ml-intern like a senior engineer reads a new repo. Produce an annotated map.
+    vocab: [agent loop, planner, executor, tool, memory, trajectory, rollout, reward signal]
+    primary_resource:
+      label: huggingface/ml-intern
+      url: https://github.com/huggingface/ml-intern
+    sandbox_path: reading/ml_intern_notes.md
+    ml_intern_angle: Write the annotated repo map. Module-by-module — what it does, what it depends on, why it exists.
+    can_explain:
+      - What ml-intern's agent loop is and how a single iteration flows.
+      - Where its model calls happen and how it picks a model.
+      - How it decides a run is done.
+
+  - id: 18
+    title: "[parked] Capstone — Pick a 500-Projects Archetype + Writeup"
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: Pick a project archetype from the 500-projects list, build a small version, write it up.
+    vocab: [baseline, ablation, inference latency, serving, quantization, distillation, reproducibility]
+    primary_resource:
+      label: 500-AI-ML-Projects
+      url: https://github.com/ashishpatel26/500-AI-Machine-learning-Deep-learning-Computer-vision-NLP-Projects-with-code
+    sandbox_path: notebooks/week12_capstone_writeup.md
+    ml_intern_angle: "Final pass — what one thing in ml-intern would you change first if you joined the team?"
+    can_explain:
+      - Pitch your capstone to an ML engineer in 60 seconds.
+      - One concrete tradeoff you made and why.
+      - What you would do next given another two weeks.

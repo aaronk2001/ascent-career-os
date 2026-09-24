@@ -1,0 +1,204 @@
+track: controls-automation
+title: PLC Virtual Lab — OpenPLC Free Track (Studio 5000 deferred to Phase 2)
+started: 2026-05-08
+target_completion: 2026-06-26
+phase: 1
+sequencing_policy: free-first
+sequencing_doc: aaron-portfolio/CONTROLS_TRACK_REORDER.md
+cadence:
+  sessions_per_week: 3
+  days: [Mon, Wed, Fri]
+  hours_per_session: 1
+  rest_day: Sun
+  flex_day: Sat
+  note: "Job-getter — primary track. ~7 cal weeks for 4 curriculum weeks."
+note: >-
+  Studio 5000 is intentionally OUT of Phase 1. All four weeks below run on free
+  open tooling only (OpenPLC + Arduino Opta + Portenta Machine Control + Wireshark).
+  The same logic ports to Allen-Bradley CompactLogix because IEC 61131-3 is the
+  shared standard. Studio 5000 mirror work is parked under phase2_mirror_deliverables
+  and unblocks the moment an offer is signed and the first paycheck lands.
+hardware:
+  - 2x Arduino Opta Lite (Ethernet only)
+  - 1x Portenta Machine Control
+  - assorted relays, sensors, 24V supply
+software_phase1:
+  - OpenPLC Editor + Runtime (free, IEC 61131-3 on Opta)
+  - existing project mirror at ~/projects/Openplc/optatest
+  - Wireshark (free)
+  - pymodbus (free Python lib)
+software_phase2_deferred:
+  - Studio 5000 Logix Designer (7-day trial — install ONLY post-offer)
+  - Logix Echo emulator (post-offer)
+  - Rockwell Certified Specialist exam (~$350 — employer-funded, post-hire)
+portfolio_links:
+  repo: projects/PLC/Automation/virtual-lab
+  portfolio_route: /projects/plc-virtual-lab
+weeks:
+  - id: 1
+    title: Toolchain + Hello World + Scan Cycle (OpenPLC only)
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Stand up OpenPLC Runtime on Opta #1. Get one rung lighting a real relay
+      from a real button. Internalize the PLC scan cycle as a different beast
+      from the Arduino loop.
+    vocab:
+      - scan cycle
+      - I/O image
+      - rung
+      - ladder logic
+      - IEC 61131-3
+      - OpenPLC Runtime
+      - Cyclic task
+      - XIC
+      - OTE
+    primary_resource:
+      label: Scan cycle vs Arduino loop write-up
+      url: docs/01-scan-cycle-vs-loop.md
+    lab_path: openplc/optatest
+    can_explain:
+      - Why a PLC scan cycle eliminates a class of race conditions Arduino loops have.
+      - What an I/O image is and why outputs change atomically at end-of-scan.
+      - Difference between an OpenPLC Cyclic task interval and a generic super-loop period.
+    deliverables:
+      - OpenPLC installed, license activated on Opta #1
+      - Hello World — XIC SwitchTag → OTE LightTag in OpenPLC, real button → real relay click on Opta #1
+      - 1-page write-up — Arduino sketch vs PLC scan cycle
+      - Photo + 10s phone video of the relay click (portfolio asset)
+    phase2_mirror_deliverables:
+      - Studio 5000 trial + Logix Echo running
+      - Hello World A — same rung in Echo, scan period visible in Trends
+
+  - id: 2
+    title: IEC 61131-3 Fundamentals (LD + ST in OpenPLC)
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Build the bedrock IEC 61131-3 patterns — seal-in, timers, counters, analog
+      scaling — in OpenPLC, in both Ladder and Structured Text. Goal: see that
+      the syntax is portable across vendors because it's a standard.
+    vocab:
+      - seal-in
+      - latch
+      - E-stop interlock
+      - TON
+      - TOF
+      - TP
+      - CTU
+      - CTD
+      - Structured Text
+      - 4-20 mA
+      - SCL
+      - POU
+    primary_resource:
+      label: IEC 61131-3 fundamentals — OpenPLC reference build
+      url: docs/02-iec61131-fundamentals.md
+    lab_path: openplc/optatest
+    can_explain:
+      - Why a seal-in rung needs a normally-closed E-stop in series with the seal contact.
+      - Difference between TON, TOF, and TP timers — which fires when, and what each .Q bit means.
+      - How to scale a 4–20 mA analog input to engineering units, and how to write SCL in ST since OpenPLC has no built-in block.
+      - When to reach for Structured Text instead of Ladder.
+    deliverables:
+      - Seal-in start/stop with E-stop interlock — OpenPLC LD
+      - TON / TOF / TP timer patterns — OpenPLC LD
+      - CTU / CTD counter patterns — OpenPLC LD
+      - 4–20 mA analog scaling on PMC AI input — OpenPLC ST
+      - Same logic re-authored in Structured Text for at least one rung
+    phase2_mirror_deliverables:
+      - Mirror seal-in, timers, counters in Studio 5000
+      - Use built-in SCL block in Studio 5000 and document the difference
+
+  - id: 3
+    title: Networking — Modbus TCP Bridge (free tools only)
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Drive a real Opta relay from a PC OpenPLC master over Ethernet using
+      Modbus TCP. Capture the traffic in Wireshark. Document why this design
+      ports to Allen-Bradley CompactLogix without rewrite.
+    vocab:
+      - Modbus TCP
+      - Function Code
+      - FC 1
+      - FC 5
+      - FC 15
+      - slave ID
+      - coil
+      - holding register
+      - MBAP header
+      - EtherNet/IP
+      - Wireshark
+      - port 502
+    primary_resource:
+      label: Modbus TCP bridge build doc
+      url: docs/03-modbus-tcp-bridge.md
+    lab_path: openplc/optatest
+    can_explain:
+      - Difference between FC 5 (Write Single Coil) and FC 15 (Write Multiple Coils).
+      - Why OpenPLC ↔ OpenPLC over Modbus TCP works out of the box.
+      - What a Modbus slave ID is and why it matters less in TCP than RTU.
+      - What changes (and what doesn't) if you replace the PC master with a CompactLogix.
+    deliverables:
+      - Opta #1 configured as Modbus TCP slave (8 DI + 8 coils)
+      - PMC configured as Modbus TCP master polling Opta #1 + Opta #2
+      - PC Modbus TCP master toggling real Opta relay over Ethernet
+      - Wireshark capture verifying FC 5/15 traffic, saved to repo
+      - Doc — port path to CompactLogix (what changes, what doesn't)
+    phase2_mirror_deliverables:
+      - Side-by-side ladder doc Studio 5000 / OpenPLC for the same Modbus topology
+      - If hardware available at new job — verify against real CompactLogix
+
+  - id: 4
+    title: Capstone — Conveyor Sort SFC + Portfolio Polish
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Author a 3-station conveyor sort SFC that runs across PMC + 2 Optas over
+      Modbus TCP. Ship a 30–60s demo video and a portfolio page. Phase 1
+      capstone — the Studio 5000 SFC export becomes a Phase 2 deliverable.
+    vocab:
+      - SFC
+      - INITIAL_STEP
+      - STEP
+      - TRANSITION
+      - action qualifier
+      - simultaneous divergence
+      - selective divergence
+      - Grafcet
+      - distributed control
+      - watchdog scan time
+    primary_resource:
+      label: Capstone — 3-station conveyor sort
+      url: docs/04-capstone-conveyor.md
+    lab_path: openplc/optatest
+    can_explain:
+      - What an SFC step is and how it differs from a state in a state machine.
+      - Difference between simultaneous and selective divergences in SFC.
+      - Why this design ports to Allen-Bradley CompactLogix without changing the logic.
+      - How to argue scan-time determinism on a distributed Modbus TCP topology.
+    deliverables:
+      - 3-station conveyor sort SFC running on PMC + 2 Optas
+      - Architecture diagram + state machine diagram
+      - Demo video (30–60s)
+      - Public portfolio page /projects/plc-virtual-lab live with Lighthouse Perf > 85
+      - README claim — IEC 61131-3 portability, with the OpenPLC code as proof
+    phase2_mirror_deliverables:
+      - Studio 5000 SFC export of the same conveyor sort
+      - openplc_to_studio5000_port.md side-by-side comparison doc
+
+phase2_studio5000_sprint:
+  trigger: offer signed AND first paycheck deposited
+  estimated_effort: 1–2 weekends
+  ordered_tasks:
+    - Install Studio 5000 trial + Logix Echo
+    - Mirror Week 1 Hello World A in Echo, capture scan period in Trends
+    - Mirror Week 2 fundamentals (seal-in, TON/TOF/TP, CTU/CTD, SCL block)
+    - Mirror Week 4 SFC — conveyor sort export
+    - Author studio5000-demo-projects/docs/openplc_to_studio5000_port.md
+    - Defer Rockwell Certified Specialist exam ($350) until employer-funded

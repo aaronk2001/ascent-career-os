@@ -1,0 +1,421 @@
+track: controls-automation
+title: "Controls Sprint — CODESYS + Factory IO → real Opta"
+started: 2026-09-23
+target_completion: null  # rolling — projected by plan.py from remaining weeks
+phase: 1
+active: true
+daily_hours: 3
+days: [Mon, Tue, Wed, Thu, Fri, Sat]
+cadence:
+  sessions_per_week: 6
+  hours_per_session: 3
+  rest_day: Sun
+  note: "Job-getter — primary track. 3h/day, 6 days/wk, ~6 calendar weeks."
+note: >-
+  CODESYS Control Win V3 SoftPLC + Factory IO trial are free IEC 61131-3 tools that map
+  directly to Allen-Bradley CompactLogix and Siemens STEP 7 — both critical vendor platforms.
+  Factory IO provides interview-ready demos and the trial is 30 days (scene work front-loaded
+  into weeks 1-4). This track ships portfolio code, screen recordings, and 3 short clips for
+  the social channel. Weeks 1-4 drive Factory IO scenes; weeks 5-6 integrate sim and real
+  hardware (CODESYS as Modbus TCP client → Opta as server).
+hardware:
+  - 2x Arduino Opta Lite (Ethernet only)
+  - 1x Portenta Machine Control
+  - assorted relays, sensors, 24V supply
+software:
+  - CODESYS Control Win V3 SoftPLC
+  - CODESYS Visualization (HMI)
+  - Factory IO trial edition (30 days)
+  - "Factory IO Modbus TCP/IP Client driver (OPC UA Client fallback)"
+  - OpenPLC Runtime on Opta
+  - Wireshark (free)
+  - pymodbus (free Python lib)
+portfolio_links:
+  repo: projects/PLC/plc-factoryio-codesys
+  portfolio_route: /projects/plc-factoryio
+references:
+  - label: CODESYS online help — Modbus TCP Slave Device configuration
+    url: https://help.codesys.com/
+  - label: Factory IO — Modbus TCP/IP Client driver + CODESYS tutorials
+    url: https://docs.factoryio.com/
+  - label: Factory IO — Built-in Scenes documentation
+    url: https://docs.factoryio.com/latest/docs/getting-started/scenes/
+  - label: OpenPLC — IEC 61131-3 on embedded hardware
+    url: https://openplcproject.com/
+  - label: IEC 61131-3 Cheat Sheet & Quick Reference
+    url: https://en.wikipedia.org/wiki/IEC_61131-3
+weeks:
+  - id: 1
+    scene: "From A to B · From A to B (Set and Reset)"
+    title: Toolchain Setup + First Loop (CODESYS + Factory IO)
+    related_skills: ["PLC Programming", "IEC 61131-3", "Modbus TCP"]
+    related_nodes: ["ctl-ladder", "emb-comms"]
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Install CODESYS Control Win V3 SoftPLC, confirm the trial + Factory IO license status.
+      Create a first CODESYS project with Ethernet and Modbus TCP Slave Device. Configure
+      Factory IO File > Drivers to select Modbus TCP/IP Client, map coils/holding registers,
+      and drive a simple pump/motor in From A to B and From A to B (Set and Reset) scenes.
+      Internalize the PLC scan cycle and I/O mapping workflow.
+    vocab:
+      - scan cycle
+      - task configuration
+      - I/O mapping
+      - GVL (Global Variable List)
+      - coil
+      - discrete input
+      - holding register
+      - Modbus TCP
+      - SoftPLC
+      - application device tree
+      - Modbus TCP Slave Device
+    primary_resource:
+      label: CODESYS Control Win V3 Getting Started + Factory IO Modbus Driver Setup
+      url: https://docs.factoryio.com/
+    lab_path: plc-factoryio-codesys/week01-toolchain
+    can_explain:
+      - Why a PLC scan cycle is deterministic whereas an Arduino loop is not.
+      - What an I/O image is and when it gets updated (beginning vs end of scan).
+      - How to configure a Modbus TCP Slave device in CODESYS and map coils to Factory IO.
+      - The role of task configuration (cyclic task interval) in determinism.
+    deliverables:
+      - "[30m] CODESYS Control Win V3 downloaded and installed; the CODESYS Development System opens to an empty project."
+      - "[20m] SoftPLC started from the tray icon - right-click > Start PLC shows RUNNING (screenshot saved)."
+      - "[25m] Factory IO installed; Help > About shows the edition and trial days remaining (screenshot saved to week01-toolchain/)."
+      - "[20m] Factory IO File > Drivers lists Modbus TCP/IP Client in the driver dropdown (screenshot saved)."
+      - "[40m] New standard project created targeting CODESYS Control Win V3 x64; device tree shows Device > PLC Logic > Application."
+      - "[35m] Ethernet adapter added under Device and bound to the host NIC; a scan returns the adapter IP."
+      - "[40m] Modbus TCP Slave Device added under the Ethernet node with 8 coils and 8 holding registers, listening on port 502."
+      - "[30m] GVL created with 4 BOOL outputs and 4 BOOL inputs, mapped to the Slave Device %QX / %IX channels in I/O Mapping."
+      - "[30m] Cyclic task interval set to 10 ms - Task Configuration shows MainTask at t#10ms."
+      - "[35m] Project downloads to the SoftPLC and runs: status bar reads RUNNING with zero compile errors or warnings."
+      - "[40m] Factory IO From A to B scene open; Modbus TCP/IP Client driver pointed at 127.0.0.1:502 and showing CONNECTED (green)."
+      - "[40m] Every Factory IO I/O point in the scene dragged onto a driver coil or input address - no unmapped tags remain."
+      - "[45m] Conveyor moves from a CODESYS coil write: forcing the GVL output in online mode visibly starts the belt."
+      - "[45m] From A to B runs one full cycle unattended - item spawns, travels, and the at-end sensor stops the belt."
+      - "[40m] From A to B (Set and Reset) running with SET/RESET coils: the belt latches on and stays on until reset is written."
+      - "[30m] 30-60s screen recording of the Set-and-Reset scene completing a full cycle saved as mp4 in week01-toolchain/."
+      - "[40m] README section written: install steps, IP and port, an I/O map table, and each of the 11 vocab terms defined in one line."
+      - "[30m] Interview story written out in full (120-150 words): how the CODESYS Modbus TCP toolchain ports to CompactLogix without a logic rewrite."
+    est_hours: 12
+
+  - id: 2
+    scene: "Filling Tank (Timers) · Queue of Items (Counters) · Level Control"
+    title: IEC 61131-3 Fundamentals (Ladder + Structured Text)
+    related_skills: ["IEC 61131-3", "PLC Programming"]
+    related_nodes: ["ctl-iec"]
+    related_certs: ["Rockwell Studio 5000"]
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Build the bedrock IEC 61131-3 patterns in CODESYS Ladder and Structured Text:
+      seal-in circuits with E-stop interlocks, TON/TOF/TP timers, CTU/CTD counters,
+      R_TRIG/F_TRIG edge detectors, and analog scaling. Use Filling Tank (Timers),
+      Queue of Items (Counters), and Level Control scenes to verify logic against real
+      Factory IO behavior. The goal is portability — same logic works on AB, Siemens, or
+      any IEC 61131-3 platform.
+    vocab:
+      - seal-in
+      - latch
+      - E-stop interlock
+      - normally-closed contact
+      - TON (on-delay timer)
+      - TOF (off-delay timer)
+      - TP (pulse timer)
+      - CTU (count-up)
+      - CTD (count-down)
+      - R_TRIG (rising edge)
+      - F_TRIG (falling edge)
+      - Structured Text (ST)
+      - 4–20 mA analog input
+      - scaling (linear transform)
+      - POU (Program Organization Unit)
+    primary_resource:
+      label: CODESYS IEC 61131-3 Standard & Tutorials
+      url: https://help.codesys.com/
+    lab_path: plc-factoryio-codesys/week02-fundamentals
+    can_explain:
+      - Why a seal-in rung needs a normally-closed E-stop in series with the seal contact.
+      - The difference between TON, TOF, and TP timers — what each fires when and what .Q output means.
+      - When to use R_TRIG vs F_TRIG and how to debounce a noisy input.
+      - How to scale a 4–20 mA input to engineering units (e.g., tank level 0–100%).
+      - When to reach for Structured Text instead of Ladder — readability, math, logic density.
+    deliverables:
+      - "[35m] Seal-in start/stop rung built in Ladder - Start sets Motor, Stop breaks it, Motor seals itself through its own contact."
+      - "[30m] Normally-closed E-stop contact added in series with the seal; forcing EStop drops Motor within one scan."
+      - "[35m] Seal-in verified against Factory IO: belt latches on Start, drops on E-stop, and does NOT restart when E-stop is released."
+      - "[40m] TON delays a conveyor start by 3 s - .Q goes TRUE exactly 3 s after .IN, confirmed in online mode."
+      - "[35m] TOF holds an output 5 s past its input falling edge, confirmed on the trace."
+      - "[30m] TP fires a fixed 1 s pulse regardless of how long .IN is held, confirmed on the trace."
+      - "[45m] Filling Tank (Timers) scene runs one full fill/drain cycle driven by TON/TOF logic only."
+      - "[40m] CTU counts parts past a sensor in Queue of Items - .CV increments once per part, not once per scan."
+      - "[35m] CTD plus a reset wired so the queue counter returns to its preset from an HMI reset button."
+      - "[40m] Queue of Items (Counters) runs one full cycle and the counter value matches the parts visible on the belt."
+      - "[35m] R_TRIG makes the counter edge-triggered - holding the sensor TRUE no longer increments it."
+      - "[30m] F_TRIG applied to a stop button and verified to fire on release, not on press."
+      - "[40m] Debounce FB written (R_TRIG + TON) and applied to one noisy Factory IO sensor; false triggers stop."
+      - "[45m] 4-20 mA scaling written in Structured Text: linear transform from raw counts to 0-100% tank level, verified at 3 known points."
+      - "[40m] Level Control scene running - the analog level reads 0-100% and the pump holds setpoint without oscillating."
+      - "[45m] The same seal-in logic re-authored in Structured Text; it compiles clean and behaves identically to the Ladder version."
+      - "[30m] 60s screen recording captured showing timer, counter, and analog scaling behaviour."
+      - "[40m] README section written with the timer .PT values used, the scaling formula, and a table defining the 15 vocab terms."
+      - "[45m] One-page Portability to AB note written: which of these blocks exist verbatim in Studio 5000 and which differ."
+      - "[30m] Interview story written out in full (120-150 words): why learning IEC 61131-3 first beats jumping straight to a vendor platform."
+    phase2_mirror_deliverables:
+      - "[Parked] Mirror seal-in, timers, counters in Studio 5000 Logix Designer."
+      - "[Parked] Compare Studio 5000 built-in SCL block vs CODESYS ST custom scaling."
+    est_hours: 15
+
+  - id: 3
+    scene: "Sorting by Height (Basic/Advanced) · Sorting Station · Separating Station"
+    title: "Sequencing: SFC + CASE State Machines, Interlocks & E-Stop"
+    related_skills: ["IEC 61131-3", "SCADA/HMI"]
+    related_nodes: ["ctl-iec", "ctl-scada"]
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Author state machines using SFC (Sequential Function Chart) and CASE logic to drive
+      multi-step processes. Implement Sorting by Height (Basic/Advanced), Sorting Station,
+      and Separating Station scenes. Introduce mode logic (auto/manual), interlocks to prevent
+      dangerous states (e.g., conveyor can't reverse while part is being sorted), and proper
+      E-stop graceful shutdown. Build the mental model that a PLC is a state machine, and that
+      states are explicit, not implicit in code.
+    vocab:
+      - SFC (Sequential Function Chart)
+      - INITIAL_STEP
+      - STEP
+      - TRANSITION
+      - action qualifier (N, S, R, L)
+      - divergence (selective vs simultaneous)
+      - Grafcet (graphical language)
+      - CASE statement
+      - state variable
+      - mode (auto / manual / maintenance)
+      - interlock
+      - E-stop logic
+      - watchdog (scan-time monitor)
+    primary_resource:
+      label: CODESYS SFC & State Machine Patterns
+      url: https://help.codesys.com/
+    lab_path: plc-factoryio-codesys/week03-sequencing
+    can_explain:
+      - What an SFC step is and how it differs from a state in a traditional state machine.
+      - Difference between selective divergence (one path chosen) and simultaneous divergence (multiple paths fire).
+      - How to wire an E-stop that gracefully shuts down without losing state (vs a hard power-cut).
+      - Why interlocks are safer than relying on sequence alone.
+      - When to use SFC vs CASE logic for readability and maintainability.
+    deliverables:
+      - "[40m] Sorting by Height (Basic) scene open with all I/O mapped to the CODESYS slave; driver shows CONNECTED."
+      - "[45m] Height comparator logic written - tall parts divert, short parts pass - verified over 10 consecutive parts."
+      - "[45m] Sorting by Height (Basic) runs one full cycle with zero mis-sorts."
+      - "[40m] New SFC POU created with an INITIAL_STEP plus 3 named STEPs and named TRANSITIONs; compiles clean."
+      - "[40m] Each SFC step given an N-qualifier action driving one actuator; stepping online highlights the active step."
+      - "[35m] S and R action qualifiers used to latch and unlatch one output across steps; the latch survives a step change."
+      - "[40m] Selective divergence added - two mutually exclusive transitions out of one step, and only one path ever fires."
+      - "[40m] Simultaneous divergence added and rejoined; both branches confirmed active in the same scan."
+      - "[45m] The full sorting process driven end-to-end by the SFC POU with the Ladder version disabled - one clean cycle."
+      - "[45m] The same process re-authored as a CASE state machine over an INT state variable; behaviour matches the SFC."
+      - "[30m] State variable added to a watch list so the current state is readable online at all times."
+      - "[40m] Auto/Manual mode variable added - in Manual the sequence halts and jog buttons drive actuators directly."
+      - "[40m] Minimal CODESYS Visualization page built with Start, Stop, E-stop, and an Auto/Manual selector bound to real variables."
+      - "[45m] E-stop drops all outputs and forces the state machine to a defined SAFE state, verified mid-cycle with no crash."
+      - "[35m] Recovery verified: after an E-stop reset the machine requires an explicit Start and does not auto-resume."
+      - "[40m] Interlock added so the diverter cannot fire while a part is under it, verified by forcing the unsafe case."
+      - "[45m] Sorting by Height (Advanced) runs end-to-end with the multi-sorter coordinated - one full cycle, no fault."
+      - "[45m] Sorting Station runs end-to-end - one full cycle without a fault."
+      - "[45m] Separating Station runs end-to-end - one full cycle without a fault."
+      - "[30m] 60s screen recording captured showing state transitions and the E-stop behaviour."
+      - "[40m] README written with a state diagram (hand-drawn or ASCII) and a table of every interlock and what it prevents."
+      - "[30m] Interview story written out in full (120-150 words): how this SFC design ports to CompactLogix without a rewrite."
+    phase2_mirror_deliverables:
+      - "[Parked] Studio 5000 SFC export of the same multi-step process."
+      - "[Parked] Side-by-side Ladder/SFC/ST comparison for interlock logic."
+    est_hours: 15
+
+  - id: 4
+    scene: "Assembler · Pick & Place (Basic) · Pick & Place XYZ · Buffer Station / Converge Station"
+    title: Structured Code + HMI (Function Blocks, STRUCTs, Visualization)
+    related_skills: ["IEC 61131-3", "SCADA/HMI"]
+    related_nodes: ["ctl-iec", "ctl-scada"]
+    related_certs: ["Rockwell Studio 5000"]
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Refactor earlier weeks' logic into reusable function blocks (FB) — e.g., ConveyorModule,
+      CylinderModule, SensorDebouncer. Define STRUCTs for coherent data (e.g., MotorStatus with
+      running, faulted, amps_draw). Build a CODESYS Visualization HMI with start/stop buttons,
+      mode selector, live alarm display. Run Assembler, Pick & Place (Basic), Pick & Place XYZ,
+      Buffer Station, and Converge Station scenes. The goal is production-style code: reusable,
+      testable, documented.
+    vocab:
+      - function block (FB)
+      - STRUCT
+      - encapsulation
+      - state variable (private vs public)
+      - method
+      - interface / contract
+      - HMI (Human-Machine Interface)
+      - CODESYS Visualization
+      - web HMI
+      - alarm
+      - recipe
+      - parameter set
+    primary_resource:
+      label: CODESYS Function Blocks & Visualization Toolbox
+      url: https://help.codesys.com/
+    lab_path: plc-factoryio-codesys/week04-structured-hmi
+    can_explain:
+      - How a function block encapsulates state and behavior (e.g., ConveyorModule manages its own timers).
+      - What a STRUCT is and why it beats a flat list of variables for code readability.
+      - How CODESYS Visualization differs from a web-based HMI — trade-offs in reach vs control.
+      - "The alarm handling pattern: raise locally, display on HMI, log to file."
+      - Why reusable FBs are a job-interview win (code reuse story).
+    deliverables:
+      - "[45m] ConveyorModule FB declared with VAR_INPUT (Enable, Reverse, SpeedPct) and VAR_OUTPUT (Running, Faulted); compiles clean."
+      - "[40m] ConveyorModule start/stop timers moved inside the FB - no timer instances remain in the calling program."
+      - "[40m] Two ConveyorModule instances driving two different belts from one FB definition, verified in Factory IO."
+      - "[30m] Acceleration ramp added to ConveyorModule so SpeedPct ramps over 1 s, verified on the scene."
+      - "[40m] Fault output driven by a jam timeout inside ConveyorModule, verified by blocking a belt in the sim."
+      - "[45m] CylinderModule FB written with Extend, Retract, a dwell time, and both end-sensor inputs; compiles clean."
+      - "[40m] Sensor debounce folded into CylinderModule so a chattering end-sensor no longer aborts a move."
+      - "[35m] CylinderModule verified on a Factory IO pusher - extend, dwell, retract, with no double-fire."
+      - "[40m] MotorStatus STRUCT defined (Running, Faulted, AmpsDraw, HoursRun) and returned as a single FB output."
+      - "[40m] Alarm STRUCT defined (Id, Text, Severity, Active, Acked, Timestamp) with an array of 16 instances."
+      - "[45m] Alarm raise/clear helper written - raising alarm 3 sets Active and stamps the time; clearing preserves Acked history."
+      - "[35m] Alarm log appended to a file on disk; the file holds at least 5 real entries after a test run."
+      - "[45m] CODESYS Visualization page built with Start, Stop, and a mode selector bound to the real variables."
+      - "[40m] HMI live alarm list added - raising an alarm in logic makes its row appear within one scan."
+      - "[30m] HMI live sensor reads added - at least 4 Factory IO sensors update on screen in real time."
+      - "[45m] Assembler scene running end-to-end using only ConveyorModule and CylinderModule instances."
+      - "[45m] Pick & Place (Basic) runs one full cycle without a fault."
+      - "[45m] Pick & Place XYZ runs one full cycle without a fault."
+      - "[45m] Buffer Station or Converge Station running on the same FB toolkit with no new FB types added."
+      - "[30m] Repo restructured into logic/, fb/ and hmi/ folders and pushed; the tree renders correctly on GitHub."
+      - "[30m] 60s screen recording captured showing a mode switch, an alarm raise, and the system responding."
+      - "[40m] README written documenting each FB interface, its parameters, and a copy-paste instantiation example."
+      - "[30m] Interview story written out in full (120-150 words): how this structured FB approach scales to a 50-axis robot arm."
+    est_hours: 15
+
+  - id: 5
+    scene: "Production Line or Palletizer"
+    title: "Capstone — Production Line or Palletizer (Modes, Alarms, Recipes, Portfolio Video)"
+    related_skills: ["IEC 61131-3", "SCADA/HMI"]
+    related_nodes: ["ctl-iec", "ctl-scada"]
+    related_certs: ["Rockwell Studio 5000"]
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Pick Production Line or Palletizer scene and build end-to-end: auto/manual/maintenance
+      modes, recipe/parameter loading, alarm handling, HMI with status dashboards, and documentation.
+      This is the portfolio centerpiece — a 60–90s polished video showing the system in action,
+      plus 3 short clips (10–15s each) cut for social media (LinkedIn, YouTube Shorts, TikTok).
+      The logic is production-grade: defensive, stateful, and clear about state transitions.
+    vocab:
+      - production mode (auto/manual/maintenance)
+      - recipe (parameter set)
+      - persistence (SD card, file system)
+      - graceful shutdown
+      - data logging
+      - portfolio video
+      - clip editing
+      - scene performance (cycle time, throughput)
+    primary_resource:
+      label: Factory IO — Production Line / Palletizer Scene Documentation
+      url: https://docs.factoryio.com/latest/docs/getting-started/scenes/
+    lab_path: plc-factoryio-codesys/week05-capstone
+    can_explain:
+      - End-to-end flow of a complex scene — how modes, recipes, and alarms interact.
+      - Why a portfolio video matters for interviews (concrete proof of understanding).
+      - One design decision (e.g., centralized vs distributed alarm handling).
+      - How cycle time / throughput relates to PLC performance.
+      - What you'd change if this were a real production line vs a demo.
+    deliverables:
+      - "[30m] Production Line or Palletizer chosen, with the decision and the reason written in one line at the top of the README."
+      - "[45m] Chosen scene open with every I/O point mapped to the CODESYS slave; driver CONNECTED and no unmapped tags."
+      - "[45m] Happy-path sequence runs end-to-end in Auto once, even if the logic is still crude."
+      - "[40m] Sequence refactored onto the week-4 FB toolkit - no bare timers or counters left in the main program."
+      - "[40m] Auto mode complete: a full cycle repeats without operator input for 5 minutes straight."
+      - "[45m] Manual mode complete: every actuator jogs individually from the HMI while the sequence is halted."
+      - "[40m] Maintenance mode complete: outputs locked out and a maintenance banner shown on the HMI."
+      - "[35m] Mode transitions guarded - switching mode mid-cycle parks the machine safely instead of dropping outputs."
+      - "[45m] Recipe STRUCT defined with at least 4 parameters (for example speed, dwell, batch size, tolerance)."
+      - "[45m] Recipes load from a file or HMI input, and switching recipe visibly changes machine behaviour."
+      - "[40m] At least 6 real alarms defined and raised by genuine fault conditions, not by test buttons."
+      - "[35m] Alarm acknowledge implemented - acked alarms grey out but stay in history until cleared."
+      - "[40m] Alarms log to disk with timestamps; the log holds 10+ entries after a fault-injection run."
+      - "[45m] HMI status dashboard built showing current mode, active recipe, cycle count, throughput, and an alarm banner."
+      - "[40m] Cycle time and throughput measured over 10 cycles and written into the README as real numbers."
+      - "[30m] Factory IO trial-end decision made - license Ultimate or wrap scene work - written into the README with the date."
+      - "[45m] Raw capture recorded of the full system running, including a mode switch and an alarm raise plus recovery."
+      - "[45m] Main portfolio video cut to 60-90s with titles and exported as mp4."
+      - "[40m] 3 social clips (10-15s each) cut from the capture: highlight reel, alarm handling, mode transition."
+      - "[40m] README capstone narrative written (500 words) covering architecture, the three modes, and one design decision."
+      - "[30m] CODESYS project committed and pushed; a fresh clone opens without missing-library errors."
+      - "[30m] Interview story rehearsed out loud and timed: pitch the capstone in 2 minutes covering modes, alarms and scalability."
+    est_hours: 15
+
+  - id: 6
+    scene: "— real hardware: Opta #1 (OpenPLC) + PMC over Modbus TCP"
+    title: "Hardware Bridge — Sim to Real (CODESYS Master → Opta + Wireshark Proof)"
+    related_skills: ["PLC Programming", "Serial Protocols", "SCADA/HMI"]
+    related_nodes: ["ctl-ladder", "emb-comms", "ctl-scada"]
+    status: not_started
+    started_at: null
+    completed_at: null
+    objective: >-
+      Bridge simulation and real hardware. Configure CODESYS as a Modbus TCP **master** (not
+      slave) and have it read/write Opta #1 running OpenPLC as a Modbus TCP **server**. Toggle
+      a real relay on the Opta from the PC CODESYS master. Capture Modbus TCP frames in Wireshark
+      to prove end-to-end communication. Repeat with PMC as a second node on the network.
+      Write a narrative ("Same Logic, Sim vs Real") showing how the CODESYS code stays identical,
+      only the I/O target changes (Factory IO vs real hardware). This is the final interview story:
+      the simulation-to-production pipeline.
+    vocab:
+      - Modbus TCP master (client)
+      - Modbus TCP server (slave)
+      - Function Code (FC 1, 3, 5, 15)
+      - node (Opta, PMC, master PC)
+      - coil (digital output)
+      - register (analog)
+      - MBAP (Modbus Application Protocol header)
+      - Wireshark
+      - packet capture
+      - frame dissection
+      - network topology
+    primary_resource:
+      label: CODESYS Modbus TCP Master / Slave Device Configuration + Wireshark Packet Analysis
+      url: https://help.codesys.com/
+    lab_path: plc-factoryio-codesys/week06-hw-bridge
+    can_explain:
+      - How Modbus TCP frames work — Function Code 5 vs 15, what a coil vs register holds.
+      - Why using the same logic for sim and real hardware is a scaling win.
+      - How to read a Wireshark capture and spot Modbus TCP traffic.
+      - The role of node IDs, port 502, and network topology in Modbus TCP.
+      - What changes when you swap Factory IO for real Optas (nothing in logic, everything in I/O config).
+    deliverables:
+      - "[40m] OpenPLC Runtime flashed to Opta #1 and its web UI loads from the PC browser at the Opta IP."
+      - "[35m] Opta #1 given a static IP on the lab subnet and reachable by ping with 0% loss over 20 packets."
+      - "[40m] OpenPLC program loaded exposing 8 DI, 8 coils and 4 holding registers; the Modbus tab lists all 20 addresses."
+      - "[30m] OpenPLC confirmed listening on port 502 - netstat or a Modbus poll tool connects successfully."
+      - "[45m] CODESYS Modbus TCP MASTER (not Slave) added pointing at the Opta #1 IP; the device goes green online."
+      - "[40m] FC 1 channel configured to read coils - Opta input states appear as live CODESYS variables."
+      - "[40m] FC 5 channel configured to write a single coil - writing TRUE from CODESYS audibly energises a real relay."
+      - "[35m] FC 3 channel added reading 4 holding registers; values change in CODESYS when changed on the Opta."
+      - "[40m] FC 15 channel added writing multiple coils in one transaction - all 8 relays set from a single write."
+      - "[35m] Comms-loss behaviour verified: unplugging the Ethernet cable faults the master and drops outputs safely."
+      - "[40m] Wireshark capture running on the lab interface with display filter modbus, and traffic visible."
+      - "[40m] Capture saved as a .pcap file containing at least one FC 5 and one FC 15 transaction."
+      - "[40m] One Modbus frame dissected in Wireshark and annotated: MBAP header fields, unit id, function code, payload."
+      - "[40m] PMC added as a second Modbus TCP node polled by the same master, or hardware-unavailable documented with the reason."
+      - "[45m] Same Logic, Sim vs Real write-up sections 1 and 2 drafted: how Factory IO ran, how real hardware runs."
+      - "[45m] Write-up section 3 drafted: side-by-side code comparison proving the logic is identical and only I/O config differs."
+      - "[35m] Write-up section 4 drafted: Wireshark proof with the annotated frame screenshot embedded."
+      - "[40m] README written with a network diagram, node IPs, port 502 setup, and the OpenPLC licence noted."
+      - "[30m] Interview story written out in full (120-150 words): how this Modbus architecture scales from a 2-node demo to a 10-machine floor."
+    est_hours: 13

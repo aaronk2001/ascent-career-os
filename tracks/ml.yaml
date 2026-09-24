@@ -1,0 +1,620 @@
+# ML / AI Bridge Track v2 — mapped from docs/career/ml-track-v2-source.yaml (Aaron, 2026-09-23).
+# 24-week draft compressed to 12 weeks (10 h/wk kept, scope trimmed). v1 kept as ml.yaml.bak-v1-2026-09-23.
+# Out of scope in v2: QLoRA, OpenTelemetry, canary/blue-green deploys, MVTec benchmark.
+track: ml-bridge
+title: ML / AI Bridge Track
+started: 2026-09-28
+target_completion: null  # rolling — projected by plan.py from remaining weeks
+active: true
+daily_hours: 2
+days: [Mon, Tue, Wed, Thu, Fri]
+spine: "P1 ship CV anchor (wk1-2) → P2 PyTorch (3-4) → P3 time-series (5-6) → P4 MLOps (7-9) → P5 GenAI + CCA-F (10-11) → P6 package & apply (12). Nothing counts until it ships."
+sandbox_repo: ~/projects/ml-sandbox
+cadence:
+  sessions_per_week: 5
+  hours_per_session: 2
+  rest_day: Sun
+  weekly_review: "Saturday, 20 min (inside the Study block): check ship gate, log hours, pick next week's single blocking task"
+  if_behind: "Cut scope, never skip the ship gate."
+  track_a_conflict: "Interview or offer deadline this week -> ML drops to 2 hrs, no guilt."
+
+north_star:
+  now: "Automation / equipment / fleet engineer at a fab, robotics, or autonomy company"
+  month_12_18: "CV Engineer, Robotics Perception, ML Engineer (manufacturing), AI-assisted controls"
+  year_5_plus: "AI Engineering Tech Lead (this TSMC posting)"
+  positioning: >
+    Physical-AI engineer: I build ML systems that run on real machines,
+    in real production environments, and I operate them after launch.
+
+gap_analysis:
+  - requirement: "Computer vision / anomaly detection"
+    have: "Production CV + QA systems at work; yolov8-hailo-pi5 framework; edge-defect-detection ~80%"
+    gap: "No trained model, no benchmark numbers, no anomaly-detection model"
+    proof_artifact: "edge-defect-detection v1.0 with mAP, latency, power numbers"
+  - requirement: "Time-series modeling / predictive analytics"
+    have: "Months of Prometheus metrics from a 12-node fleet"
+    gap: "Never modeled it"
+    proof_artifact: "fleet-anomaly: time-series anomaly detector on real homelab metrics"
+  - requirement: "Python + PyTorch + testing"
+    have: "Production Python; ml-sandbox scaffolded"
+    gap: "Custom training loops, pytest coverage, typed/packaged code"
+    proof_artifact: "Hand-written PyTorch training loop + pytest suite in CI"
+  - requirement: "Docker, Kubernetes, CI/CD"
+    have: "Docker Compose monitoring stack; 2-node k3s cluster; Ansible fleet"
+    gap: "No app deployed to k3s; no CI pipeline; no GitOps"
+    proof_artifact: "GitHub Actions -> container registry -> Argo CD -> k3s"
+  - requirement: "MLOps: versioning, reproducibility, drift, rollback"
+    have: "Nothing formal"
+    gap: "Experiment tracking, model registry, data versioning, drift alerts, rollback drill"
+    proof_artifact: "MLflow registry + DVC + drift dashboard + documented rollback drill"
+  - requirement: "Monitoring (Prometheus, Grafana, ELK, OpenTelemetry)"
+    have: "Prometheus + Grafana + Loki + Alertmanager already running"
+    gap: "App-level ML metrics, tracing"
+    proof_artifact: "Grafana dashboard: inference latency, confidence drift, error budget"
+  - requirement: "GenAI / agentic AI / RAG / guardrails"
+    have: "Linda agent, Market_king, Phantom — Claude-based agents"
+    gap: "Evals, guardrails, human-in-the-loop, RAG done properly"
+    proof_artifact: "maintenance-copilot: RAG + MCP tools + eval set + approval gate"
+  - requirement: "Spec-Driven Development / acceptance criteria"
+    have: "Heavy planning docs"
+    gap: "Specs tied to tests"
+    proof_artifact: "SPEC.md per project with acceptance criteria that map to tests"
+  - requirement: "Claude Certified Architect (preferred)"
+    have: "Daily Claude Code / API / agent use"
+    gap: "Not certified"
+    proof_artifact: "CCA-Foundations badge"
+  - requirement: "Measurable production impact"
+    have: "3x production scale-up, 0 -> 200 robot fleet at work"
+    gap: "Not framed as data/ML impact on resume"
+    proof_artifact: "CV/ML resume variant with quantified bullets (verified numbers only)"
+  - requirement: "Master's degree / 5+ yrs ML / led 7+ engineers"
+    have: "BSE Robotics; led cross-functional team"
+    gap: "Long-term only — not solved by this track"
+    proof_artifact: "See long_term section"
+
+portfolio:
+  - name: edge-defect-detection
+    story: "Edge vision inspection with measured latency/power, full MLOps lifecycle, rollback drill"
+    maps_to: [computer_vision, edge_deployment, mlops, monitoring]
+  - name: fleet-anomaly
+    story: "Predictive maintenance on real sensor data from a 12-node fleet"
+    maps_to: [time_series, anomaly_detection, predictive_analytics]
+  - name: maintenance-copilot
+    story: "Agentic troubleshooting assistant with RAG, MCP tools, evals, and human approval"
+    maps_to: [genai, agentic_ai, guardrails, llmops]
+
+credentials:
+  priority:
+    - name: "Claude Certified Architect – Foundations"
+      when: "Week 11"  # draft said Week 21; moved by the 24->12 compression
+      notes: "Proctored, 60 questions / 120 min. Verify current access rules and price before booking."
+  optional:
+    - name: "Kaggle — enter 1 time-series or vision competition"
+      when: "After P4, only if time allows"
+    - name: "CKAD (Kubernetes)"
+      when: "Only if targeting MLOps-heavy roles"
+    - name: "DeepLearning.AI specialization"
+      when: "Supplement, not a substitute for projects"
+
+targets:
+  bridge_titles_now:
+    - "Equipment Engineer / Automation Engineer (fab)"
+    - "Fleet / Field Engineer (equipment maker)"
+    - "Robotics Test Engineer"
+    - "Manufacturing Engineer with vision systems"
+  hybrid_titles_12_18mo:
+    - "Computer Vision Engineer"
+    - "Robotics Perception Engineer"
+    - "ML Engineer, Manufacturing / Smart Factory"
+    - "Machine Vision / Inspection Engineer"
+    - "MLOps Engineer (edge)"
+  phoenix_area_employers:
+    semiconductor: [TSMC Arizona, Intel Chandler, Amkor, ASML, Applied Materials, KLA, Microchip, onsemi]
+    autonomy_robotics: [Waymo, Waabi, Amazon Robotics / RME]
+    industrial: [Honeywell, system integrators adding vision/ML]
+  inside_move_strategy: >
+    Land a bridge role at a company that has a smart-manufacturing / AI team.
+    By month 9, identify one internal vision or anomaly-detection POC.
+    Internal transfer beats cold application.
+
+long_term:
+  masters:
+    note: "Most senior AI roles require it. Do it part-time, ideally with employer tuition assistance."
+    options_to_research: ["ASU online MS programs", "Georgia Tech OMSCS (ML specialization)", "UT Austin online MSAI"]
+  leadership:
+    note: "Posting wants 7-10 engineers led. Start by leading one ML POC with 2-3 people at the next job; mentor juniors."
+  experience_clock:
+    note: "5+ years production ML starts counting the first day ML is part of your job title or duties."
+
+references:
+  - label: Ultralytics YOLO docs
+    role: P1 training + export (YOLOv8n)
+    url: https://docs.ultralytics.com/
+  - label: Hailo Developer Zone
+    role: P1 Dataflow Compiler (HEF) + HailoRT on Pi 5
+    url: https://hailo.ai/developer-zone/
+  - label: PyTorch tutorials
+    role: P2 training loop + transfer learning
+    url: https://pytorch.org/tutorials/
+  - label: anomalib
+    role: P2 unsupervised anomaly detection (PatchCore)
+    url: https://github.com/open-edge-platform/anomalib
+  - label: ONNX Runtime quantization
+    role: P2 INT8 export
+    url: https://onnxruntime.ai/docs/performance/model-optimizations/quantization.html
+  - label: Prometheus HTTP API
+    role: P3 metric export (query_range)
+    url: https://prometheus.io/docs/prometheus/latest/querying/api/
+  - label: scikit-learn IsolationForest
+    role: P3 anomaly baseline
+    url: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
+  - label: MLflow
+    role: P2-P4 experiment tracking + model registry
+    url: https://mlflow.org/docs/latest/
+  - label: DVC
+    role: P4 data versioning
+    url: https://dvc.org/doc
+  - label: Argo CD
+    role: P4 GitOps deploy + rollback
+    url: https://argo-cd.readthedocs.io/
+  - label: Evidently
+    role: P4 drift (PSI/KS)
+    url: https://docs.evidentlyai.com/
+  - label: Anthropic Academy (Skilljar)
+    role: P5 Claude API / MCP / Claude Code courses + CCA-F prep
+    url: https://anthropic.skilljar.com/
+  - label: Model Context Protocol docs
+    role: P5 MCP server
+    url: https://modelcontextprotocol.io/
+  - label: MVTec AD
+    role: "Reference only — out of scope in v2. Non-commercial license (CC BY-NC-SA 4.0): portfolio/research use only."
+    url: https://www.mvtec.com/company/research/datasets/mvtec-ad
+
+weeks:
+  # ── P1 · Ship the CV anchor (weeks 1–2) ──
+  - id: 1
+    phase: P1
+    title: "P1 · Ship the CV anchor — dataset"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      Highest-ROI gap: the edge-defect-detection framework is ~80% done, so finish it before
+      learning anything new. This week produces the dataset everything else depends on —
+      one defect type you can photograph repeatedly, 300+ labeled images, and a datasheet.
+    vocab: [defect class, class balance, bounding box, label format (YOLO txt), train/val/test split, data leakage, datasheet for datasets, DVC]
+    sandbox_path: Pis/edge-defect-detection/pipeline
+    can_explain:
+      - Why the test split must never be used to make labeling or training decisions.
+      - What class imbalance does to precision and recall, and one way to handle it.
+    deliverables:
+      - "[30m] Defect type chosen (pen-stroke card defects, 3D-print defects, or PCB solder) and written as one line in README."
+      - "[40m] Capture rig fixed: camera position, lighting and background photographed and noted so shots are repeatable."
+      - "[45m] pipeline/1_collect_images.py runs end-to-end and saves the first 50 images with timestamps."
+      - "[45m] 100 images collected — at least 40 defective."
+      - "[45m] 200 images collected — defective share still at least 35%."
+      - "[45m] 300+ images collected; count per class printed by a one-line script."
+      - "[40m] Label Studio or Roboflow project created following 2_annotate_instructions.md; label schema matches the defect type."
+      - "[45m] First 100 images labeled."
+      - "[45m] Images 101-200 labeled."
+      - "[45m] Images 201-300+ labeled and exported in YOLO format."
+      - "[40m] 10% of labels spot-checked; fixes applied and the error rate noted."
+      - "[35m] Train/val/test split (70/20/10) generated with a fixed seed; no near-duplicate frames across splits."
+      - "[40m] datasheet.md written: source, capture setup, class counts, split sizes, known biases."
+      - "[30m] Public edge-defect-detection GitHub repo created (git subtree split from the umbrella repo or a fresh init) and the first push done."
+      - "[40m] SHIP GATE: Dataset + labels committed (DVC or release asset) and datasheet.md pushed to the public repo."
+
+  - id: 2
+    phase: P1
+    title: "P1 · Ship the CV anchor — train YOLOv8n, Hailo, benchmark, v1.0"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      Same phase why: finish the ~80%-done framework before learning anything new. The repo's
+      pipeline pivoted to Florence-2 zero-shot, so add a trained YOLOv8n path next to it (new
+      files only — the Florence-2 files stay untouched): train on the week-1 dataset (laptop 4 GB GPU
+      or Colab), compare it with Florence-2 zero-shot on the same held-out test set, compile it to a
+      HEF with the Hailo Dataflow Compiler + Model Zoo (WSL2 or Docker, x86), and measure CPU vs Hailo
+      on pi-ai — accuracy, latency and watts, all measured. Close with a demo video and a v1.0 tag.
+    vocab: [YOLOv8n, epoch, mAP50, mAP50-95, zero-shot vs fine-tuned, ONNX, Hailo Dataflow Compiler, Hailo Model Zoo, HEF, hw-arch (hailo8 / hailo8l), calibration set, latency p50/p95]
+    primary_resource:
+      label: Ultralytics YOLO docs
+      url: https://docs.ultralytics.com/
+    sandbox_path: Pis/edge-defect-detection/pipeline
+    can_explain:
+      - "mAP50 >= 0.85 on held-out test set (or documented reason why not)"
+      - "Latency and power numbers measured, not estimated"
+      - When a fine-tuned closed-set detector beats a zero-shot model like Florence-2, and what each costs.
+    deliverables:
+      - "[30m] Accelerator identified with `hailortcli fw-control identify` on pi-ai; hailo8 or hailo8l recorded in README as the --hw-arch for every compile."
+      - "[40m] New pipeline/3b_train_yolov8n.py (Ultralytics) added next to the Florence-2 files; a 5-epoch smoke train runs on the laptop GPU or Colab and the batch size that fits 4 GB VRAM is noted."
+      - "[45m] Full YOLOv8n training run finished (100 epochs or early stop); hyperparameters and run folder logged in runs/README.md."
+      - "[35m] Test-split mAP50 and mAP50-95 recorded from a val run on the test split; confusion matrix saved."
+      - "[40m] If mAP50 < 0.85: one targeted fix tried (label fixes, imgsz, augmentation, epochs) and the result or the documented reason written down."
+      - "[40m] Florence-2 zero-shot vs trained YOLOv8n on the same held-out test set: precision, recall and latency per image in one README table."
+      - "[30m] Best YOLOv8n weights exported to ONNX at a fixed input size; the ONNX model runs one test image on CPU."
+      - "[45m] Hailo Dataflow Compiler + Model Zoo installed in WSL2 Ubuntu or the Hailo Docker image; `hailo --version` and `hailomz --help` both run."
+      - "[45m] Model Zoo yolov8n config copied and edited for the custom classes (class count, NMS config); 64+ training images staged as the calibration set."
+      - "[45m] `hailomz compile` with the recorded --hw-arch produces a HEF — or the blocking error and its fix are logged and the compile rerun."
+      - "[45m] HEF runs on pi-ai through 5_deploy_and_benchmark.py (or HailoRT directly); one test image shows correct boxes."
+      - "[40m] Hailo benchmark on pi-ai over the test set: FPS, latency p50/p95 and USB-meter watts (idle vs inference) saved to CSV."
+      - "[40m] Same test set on the Pi 5 CPU (ONNX Runtime): FPS, latency p50/p95 and watts logged next to the Hailo numbers."
+      - "[35m] Benchmark table (mAP50, mAP50-95, FPS, latency p50/p95, watts; CPU vs Hailo, plus the Florence-2 row) added to README."
+      - "[40m] 60-second demo video of live detections on pi-ai recorded and uploaded (unlisted video or release asset)."
+      - "[30m] SHIP GATE: Public repo tagged v1.0 with the benchmark table (mAP50, mAP50-95, FPS, latency p50/p95, watts) in README and the demo video linked."
+
+  # ── P2 · PyTorch for real (weeks 3–4) ──
+  - id: 3
+    phase: P2
+    title: "P2 · PyTorch for real — training loop, transfer learning, MLflow"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      Ultralytics hides the training loop, and interviews will ask about it. First close P1's failure analysis and create ml-sandbox as a
+      public repo, then compress ml-sandbox
+      weeks 1-2 (tensors, autograd, micrograd), then write a from-scratch PyTorch training loop on the
+      P1 data, fine-tune ResNet18/EfficientNet as a classifier, and track every run in MLflow.
+    vocab: [tensor, autograd, computational graph, Dataset / DataLoader, loss function, optimizer, learning rate, overfitting, transfer learning, frozen backbone, MLflow run]
+    primary_resource:
+      label: PyTorch tutorials
+      url: https://pytorch.org/tutorials/
+    sandbox_path: ~/projects/ml-sandbox
+    can_explain:
+      - What loss.backward() computes and how the optimizer step uses it.
+      - Why a frozen pretrained backbone beats a small CNN trained from scratch on 300 images.
+      - Why overfitting a 32-image batch is a useful sanity check before a full run.
+    deliverables:
+      - "[40m] P1 carry-over: FAILURES.md in edge-defect-detection — 10 worst YOLOv8n test predictions saved as images with a one-line cause each, pushed."
+      - "[30m] ~/projects/ml-sandbox created as a public GitHub repo (README, .gitignore, venv with torch) and first push done."
+      - "[40m] Tensors + autograd notebook: gradients of a 2-layer MLP computed by hand match loss.backward() to 1e-6."
+      - "[45m] micrograd-style scalar Value class (add, mul, tanh, backward) passes a gradient check against PyTorch."
+      - "[30m] vocab.md updated with this week's terms, one plain-English line each."
+      - "[40m] Dataset class wraps the P1 images as good/defect classification crops; len() and one sample shape printed."
+      - "[30m] Train/val DataLoaders with transforms; one batch shown in a grid with its labels."
+      - "[45m] train.py written from scratch (model, loss, optimizer, train loop, eval loop); a tiny CNN overfits 32 images to ~100% train accuracy."
+      - "[40m] Full tiny-CNN run; train/val loss curves plotted; val precision and recall recorded."
+      - "[45m] MLflow tracking running (laptop or pi-dev); train.py logs params, metrics and the model artifact."
+      - "[45m] ResNet18 (ImageNet weights) fine-tuned with a frozen backbone; run logged to MLflow."
+      - "[40m] Unfrozen, lower-learning-rate run logged; best run picked in the MLflow compare view."
+      - "[35m] EfficientNet-B0 or MobileNetV3 run logged, sized to fit 4 GB VRAM."
+      - "[40m] Learning-rate sweep (3 values) on the best classifier logged to MLflow; chosen rate noted."
+      - "[40m] Comparison table in README: YOLOv8n (P1) vs tiny CNN vs best classifier — precision, recall, latency per image — with the MLflow compare-runs screenshot."
+      - "[30m] SHIP GATE: train.py + notebook pushed to ml-sandbox, vocab.md updated, and MLflow screenshot + comparison table (YOLO vs classifier) in README."
+
+  - id: 4
+    phase: P2
+    title: "P2 · PyTorch for real — anomaly detection, ONNX/INT8, pytest"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      Same phase why: know the training loop, not just the library. Train an unsupervised anomaly
+      detector only on "good" images (anomalib PatchCore vs a conv autoencoder), export the best
+      classifier to ONNX and quantize it to INT8 to measure accuracy lost vs speed gained, and lock
+      it all down with pytest — data loading, shapes, and a "model beats baseline" regression test.
+    vocab: [unsupervised anomaly detection, PatchCore, autoencoder, reconstruction error, AUROC, ONNX Runtime, INT8 quantization, calibration, regression test, test fixture]
+    primary_resource:
+      label: anomalib
+      url: https://github.com/open-edge-platform/anomalib
+    sandbox_path: ~/projects/ml-sandbox
+    can_explain:
+      - "Can explain on a whiteboard: backprop, overfitting, train/val/test split, precision vs recall, AUROC"
+    deliverables:
+      - "[40m] anomalib installed in its own venv; the PatchCore example runs on a 10-image toy folder."
+      - "[35m] Folder dataset built: train = good images only; test = good + defective."
+      - "[45m] PatchCore trained on your good images; image-level AUROC on your test split recorded."
+      - "[45m] Conv autoencoder (reusing the week-3 loop) trained on good images; reconstruction-error AUROC recorded."
+      - "[40m] Anomaly threshold set on held-out good images (e.g. 99th percentile score); precision and recall at that threshold recorded."
+      - "[35m] Anomaly heatmaps for 6 test images saved, with a one-line note on where each method fails."
+      - "[30m] anomaly/ module committed with an AUROC table (PatchCore vs autoencoder) in its README."
+      - "[35m] Best classifier exported to ONNX; ONNX Runtime output matches PyTorch within tolerance on 20 images."
+      - "[45m] INT8 static quantization with ONNX Runtime using a 100-image calibration set; model sizes recorded."
+      - "[40m] FP32 vs INT8 accuracy and latency measured on laptop CPU and Pi 5 CPU; quantization results table committed."
+      - "[35m] pytest data tests: split sizes, no file in two splits, labels in range."
+      - "[35m] pytest shape tests: model input/output and ONNX export."
+      - "[40m] pytest 'model beats baseline' regression test on a small fixed eval set (beats majority class by a set margin)."
+      - "[40m] Whiteboard run: backprop, overfitting, splits, precision vs recall, AUROC explained aloud in 10 minutes; gaps written in WHITEBOARD.md."
+      - "[30m] SHIP GATE: Tests green and pushed to ml-sandbox with the test run recorded in README; quantization results table and anomaly/ AUROC numbers committed."
+
+  # ── P3 · Time-series + predictive maintenance (weeks 5–6) ──
+  - id: 5
+    phase: P3
+    title: "P3 · Time-series + predictive maintenance — export, EDA, baselines"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      Fabs run on sensor data, and you already have months of real metrics from a 12-node fleet.
+      Export Prometheus history to Parquet, run an EDA pass (seasonality, outliers, gaps), inject
+      labeled faults on spare Pis, and score two baselines — rolling z-score, then Isolation Forest —
+      on detection rate and false alarms per day.
+    vocab: [time series, seasonality, stationarity, rolling window, z-score, Isolation Forest, feature window, labeled incident, detection rate, false alarms per day]
+    primary_resource:
+      label: Prometheus HTTP API
+      url: https://prometheus.io/docs/prometheus/latest/querying/api/
+    sandbox_path: fleet-anomaly
+    can_explain:
+      - Why a time series must be split by time, never shuffled, before tuning a threshold.
+      - How Isolation Forest scores a point as anomalous and what contamination controls.
+    deliverables:
+      - "[30m] fleet-anomaly repo created (public) with a README stating the goal and the data source (12-node homelab Prometheus)."
+      - "[40m] Prometheus retention and available series checked; chosen metrics (CPU temp, disk, memory, load, Hailo power) listed in README."
+      - "[45m] export_prometheus.py pulls 30+ days (or all retained days if retention < 30) via the query_range API at 1-minute step, chunked, into Parquet."
+      - "[30m] Export run for all nodes; row count, date range and gap count printed."
+      - "[45m] EDA notebook: per-node plots with daily/weekly seasonality visible and data gaps marked."
+      - "[40m] EDA notebook: outlier survey and metric correlations; 3 observations written as markdown."
+      - "[35m] Fault plan: 4 fault types (fill a disk, CPU stress/throttle, memory hog, stop a service) with the expected metric signature of each."
+      - "[45m] First faults injected on non-critical Pis; start/end timestamps logged to incidents.csv."
+      - "[35m] Faults repeated until incidents.csv has 10+ labeled incidents."
+      - "[35m] Time-based train/test split documented; thresholds tuned only on the train window."
+      - "[40m] Rolling z-score detector implemented with a threshold sweep."
+      - "[40m] score.py: detection rate and false alarms/day against incidents.csv."
+      - "[45m] Isolation Forest on windowed features (mean, std, slope per metric) scored with score.py."
+      - "[40m] README documents the export: Parquet schema, command, and how to rerun it for a new date range."
+      - "[30m] SHIP GATE: fleet-anomaly repo pushed with the data export script, EDA notebook, incidents.csv and z-score vs Isolation Forest scores."
+
+  - id: 6
+    phase: P3
+    title: "P3 · Time-series + predictive maintenance — detector as a service"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      Same phase why: turn fleet metrics into predictive maintenance. Finish the method comparison
+      (a small LSTM/forecast model only if the baselines leave a clear gap), then run the best
+      detector as a service that writes anomaly scores back to Prometheus, alert on it through
+      Alertmanager, and prove it on a Grafana panel with an injected fault. Start the 7-day run early.
+    vocab: [anomaly score, detection delay, prometheus_client, scrape target, recording rule, Alertmanager route, for-duration, alert fatigue, error budget]
+    sandbox_path: fleet-anomaly
+    can_explain:
+      - "Detector runs continuously for 7 days with documented false-alarm rate"
+      - Why a 'for: 5m' clause on the alert rule trades detection delay for fewer false alarms.
+    deliverables:
+      - "[40m] Comparison table: detection rate, false alarms/day and detection delay per method (z-score, Isolation Forest)."
+      - "[40m] Optional small LSTM/forecast-residual detector scored — or a one-line 'why skipped' note if the baselines are good enough."
+      - "[30m] Best detector chosen and justified in one README paragraph."
+      - "[45m] detector service reads the last N minutes from Prometheus and scores every node on a loop."
+      - "[40m] Service exposes anomaly_score{node,metric} on /metrics; Prometheus scrape config added and the series is visible."
+      - "[35m] Detector unit tests pass: a synthetic spike scores high and a flat series scores low."
+      - "[30m] Detector config (thresholds, window, node list) moved to a YAML file and documented."
+      - "[40m] Service containerised and running on the monitoring Pi with a restart policy; 7-day run start time logged."
+      - "[35m] Alertmanager rule fires when anomaly_score stays above threshold for 5m; rule file committed."
+      - "[40m] Grafana panel overlays anomaly score on the raw metric per node; dashboard JSON committed."
+      - "[40m] Fresh fault injected; the alert fires and a Grafana screenshot of the detection is saved."
+      - "[30m] Daily false-alarm log started: each alert marked true incident or false alarm."
+      - "[35m] Architecture sketch in README: Prometheus -> detector -> Prometheus -> Alertmanager/Grafana."
+      - "[40m] Known misses and threshold-tuning notes written in README."
+      - "[30m] 7-day false-alarm rate computed and added to README (finish on day 1 of next week if the run ends then)."
+      - "[30m] SHIP GATE: Grafana panel showing a detected injected fault; screenshot and the method comparison table in the fleet-anomaly README."
+
+  # ── P4 · MLOps — take it past the prototype (weeks 7–9) ──
+  - id: 7
+    phase: P4
+    title: "P4 · MLOps — service, container, CI, DVC + registry"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      This is the posting's core ask: reproducibility, CI/CD, deploy, monitor, drift, rollback. Wrap
+      the defect model in a FastAPI service, build a multi-arch image (arm64 + amd64) to GHCR, add a
+      GitHub Actions pipeline (ruff, mypy, pytest, build on tag), and version data with DVC on pi-nas
+      and models in the MLflow registry.
+    vocab: [FastAPI, /health vs /metrics, Dockerfile layer, multi-arch image, buildx, GHCR, CI pipeline, ruff, mypy, DVC remote, model registry, model alias]
+    primary_resource:
+      label: DVC
+      url: https://dvc.org/doc
+    sandbox_path: Pis/edge-defect-detection
+    can_explain:
+      - Why the image is built multi-arch and what breaks if a Pi pulls an amd64-only image.
+      - What DVC stores in git versus on the remote, and how a fresh clone gets the data back.
+    deliverables:
+      - "[45m] FastAPI app with /predict (image -> boxes), /health and /metrics runs locally."
+      - "[35m] /metrics exposes request count, a latency histogram and a prediction-confidence histogram."
+      - "[30m] pytest for the API with TestClient: /health is 200 and /predict matches the response schema."
+      - "[45m] Dockerfile (slim base, ONNX Runtime CPU) builds and serves /health locally."
+      - "[45m] docker buildx multi-arch (arm64 + amd64) image pushed to GHCR."
+      - "[30m] Image pulled and run on a pi-cluster node; /predict answers from another machine."
+      - "[45m] GitHub Actions runs ruff, mypy and pytest on every push."
+      - "[40m] Workflow builds and pushes the multi-arch image to GHCR on a v* tag."
+      - "[40m] CI caches pip and Docker layers; pipeline run time noted in README."
+      - "[30m] CI green and the badge added to README."
+      - "[40m] DVC initialised, dataset tracked, remote on pi-nas configured; dvc push works."
+      - "[30m] dvc pull in a fresh clone reproduces the dataset."
+      - "[45m] Model registered in the MLflow registry with staging and production aliases (or stages)."
+      - "[30m] Service loads the registry version named in config and reports it at /health."
+      - "[35m] SHIP GATE: Container runs on pi-cluster nodes from a GHCR image; green CI badge in README; model version visible in the MLflow registry."
+
+  - id: 8
+    phase: P4
+    title: "P4 · MLOps — k3s deploy + Argo CD GitOps"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      Same phase why: a model is not in production until it deploys itself reproducibly. Deploy the
+      service to the 2-node k3s cluster (Deployment, Service, ConfigMap, limits, probes), then wire
+      Argo CD so a git tag of a new model version ships automatically — and record it happening.
+    vocab: [Deployment, Service, ConfigMap, resource requests/limits, readiness probe, liveness probe, kustomize, GitOps, Argo CD Application, sync, desired vs live state]
+    primary_resource:
+      label: Argo CD
+      url: https://argo-cd.readthedocs.io/
+    sandbox_path: Pis/edge-defect-detection
+    can_explain:
+      - The difference between a readiness probe and a liveness probe, and what each does on failure.
+      - How Argo CD decides a deploy is needed (desired state in git vs live state in the cluster).
+    deliverables:
+      - "[30m] k3s health checked; nodes and architectures recorded; decision on adding pi-ai as a worker written down."
+      - "[45m] Deployment manifest: GHCR image, requests/limits, readiness and liveness probes on /health."
+      - "[35m] Service and ConfigMap (model version, thresholds) manifests written."
+      - "[40m] kubectl apply -k deploys it; pod is Ready and /predict is reachable from the LAN."
+      - "[40m] Kill-the-pod test: pod comes back and traffic waits for readiness; result noted in README."
+      - "[30m] Prometheus scrapes the pod's /metrics; series visible in Grafana."
+      - "[45m] Argo CD installed on k3s (arm64 images) and its UI reachable."
+      - "[40m] Argo CD Application points at the manifests path; first sync is green."
+      - "[45m] Release flow: a v* tag makes CI bump the image tag in the manifests; flow documented."
+      - "[40m] End-to-end run: git tag -> CI image -> manifest bump -> Argo sync -> new version at /health."
+      - "[40m] Argo CD self-heal tested: a manual kubectl edit is reverted to the git state; result noted in README."
+      - "[30m] Tag-to-live time measured in minutes and logged."
+      - "[35m] Screen recording of tag -> Argo sync -> new version live, uploaded."
+      - "[35m] README deploy section: diagram, commands, and how to roll forward."
+      - "[30m] SHIP GATE: k3s manifests in repo, service reachable on LAN, and the screen recording of tag -> Argo sync -> new version live linked in README."
+
+  - id: 9
+    phase: P4
+    title: "P4 · MLOps — drift, rollback drill, postmortem"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      Same phase why: production means you can see it degrade and undo it fast. Log prediction
+      confidence and input stats, compute PSI/KS daily and put them on a Grafana dashboard with an
+      alert, prove it fires on shifted images, then deploy a deliberately bad model, catch it, roll
+      back through Argo CD against a stopwatch, and publish a blameless postmortem and runbook.
+    vocab: [data drift, concept drift, PSI, KS test, reference window, confidence drift, lineage, rollback, MTTR, blameless postmortem, runbook]
+    primary_resource:
+      label: Evidently
+      url: https://docs.evidentlyai.com/
+    sandbox_path: Pis/edge-defect-detection
+    can_explain:
+      - "Any model in production can be traced to exact code commit, data version, and training run"
+      - "Rollback completes in under 5 minutes, documented"
+    deliverables:
+      - "[40m] Service logs per-request input stats (brightness, contrast, size) and top confidence to a rolling store."
+      - "[45m] Daily drift job computes PSI and KS vs the training reference (Evidently or custom) and exports them as Prometheus metrics."
+      - "[40m] Grafana dashboard: latency p50/p95, throughput, error rate, confidence drift and PSI."
+      - "[30m] Alert rule fires when PSI > 0.2 (or KS p < 0.01) for the day."
+      - "[40m] Shifted images (new lighting or camera angle) fed in; the drift alert fires and a screenshot is saved."
+      - "[30m] Dashboard JSON committed."
+      - "[40m] /health returns git commit, DVC data hash and MLflow run id; checked against the live model."
+      - "[40m] Lineage table in README: live model version -> git commit -> DVC data hash -> MLflow run."
+      - "[35m] Deliberately bad model (e.g. 1 epoch or shuffled labels) built, registered and tagged."
+      - "[40m] Drill: bad model deployed via Argo CD; time to detection from dashboard/alert logged."
+      - "[35m] Rollback via Argo CD (git revert or app rollback) timed with a stopwatch against the < 5 minute target."
+      - "[30m] Drill repeated once to confirm the rollback time."
+      - "[45m] POSTMORTEM.md: blameless timeline, detection, impact, root cause, action items."
+      - "[40m] RUNBOOK.md: symptoms, dashboards to check, rollback commands, verification steps."
+      - "[30m] SHIP GATE: POSTMORTEM.md + RUNBOOK.md published, drift dashboard JSON committed, and rollback time measured in README."
+
+  # ── P5 · GenAI / agentic + CCA-Foundations (weeks 10–11) ──
+  - id: 10
+    phase: P5
+    title: "P5 · GenAI / agentic + CCA-F — Academy, RAG, retrieval eval"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      The target posting lists generative and agentic AI, RAG, guardrails, harness engineering and
+      the Claude cert. Work through the Anthropic Academy Claude API and MCP courses in 45-minute
+      blocks, verify the CCA-F facts on the official page, then start maintenance-copilot: RAG
+      over your own runbooks, postmortems and public manuals, with a 30-question retrieval eval.
+    vocab: [RAG, chunking, chunk overlap, embedding, vector store, hit rate@k, MRR, hybrid search (BM25), reranking, grounding, citation]
+    primary_resource:
+      label: Anthropic Academy (Skilljar)
+      url: https://anthropic.skilljar.com/
+    sandbox_path: maintenance-copilot
+    can_explain:
+      - Why retrieval is evaluated separately from answer quality, and what hit rate@5 measures.
+      - How chunk size trades retrieval precision against context completeness.
+    deliverables:
+      - "[45m] Anthropic Academy Claude API course: first 45-minute block of modules done; last module finished logged in Certs."
+      - "[45m] Claude API course: second 45-minute block done; progress logged in Certs."
+      - "[45m] Claude API course: tool-use modules done; progress logged in Certs (remaining modules optional)."
+      - "[45m] Anthropic Academy MCP course: first half of modules done; progress logged in Certs."
+      - "[40m] MCP course: second half done; completion logged in Certs."
+      - "[30m] Verify CCA-F format, price, validity and individual eligibility on the official Anthropic page; record in Certs how-to."
+      - "[30m] maintenance-copilot repo created; corpus folder holds only your own docs (P1-P4 runbooks, postmortems, READMEs) and public manuals — no employer-confidential docs."
+      - "[40m] eval/questions.yaml: 30 hand-written questions, each with the expected source doc and section."
+      - "[40m] Chunker (by heading, ~500 tokens with overlap) runs; chunk count and size stats printed."
+      - "[45m] Embeddings built with a local model (Ollama nomic-embed-text or sentence-transformers) into a local vector store."
+      - "[40m] Retrieval eval prints hit rate@5 and MRR on the 30 questions."
+      - "[40m] One retrieval improvement (chunk size, hybrid BM25 or reranking) scored against the baseline."
+      - "[45m] Answer step: Claude API call over retrieved chunks returns answers that cite chunk ids."
+      - "[40m] 5 retrieval misses written up in README with the cause of each."
+      - "[40m] 10 answers spot-graded for faithfulness; results table in README."
+      - "[30m] SHIP GATE: Course completions logged, CCA-F exam access confirmed or alternative noted, and maintenance-copilot pushed with the eval set + retrieval scores."
+
+  - id: 11
+    phase: P5
+    title: "P5 · GenAI / agentic + CCA-F — MCP tools, guardrails, evals, exam"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      Same phase why: agentic AI with guardrails and evals, plus the Claude cert. Give
+      maintenance-copilot an MCP server (query Prometheus, query defect-detector history, open a
+      ticket), an agent loop with structured JSON output and validated tool calls, allow-listed tools
+      with human approval before any write and a full audit log, and an eval suite that runs in CI.
+      Fit in the Claude Code course. Finish with a CCA-F practice exam and a booked date (or the noted alternative).
+    vocab: [MCP server, tool schema, tool-call validation, structured output, agent loop, allow-list, human-in-the-loop, approval gate, audit log, eval harness, regression eval]
+    primary_resource:
+      label: Model Context Protocol docs
+      url: https://modelcontextprotocol.io/
+    sandbox_path: maintenance-copilot
+    can_explain:
+      - Why write actions need a human approval gate while read-only tools can run unattended.
+      - How an eval suite in CI catches a prompt or model change that silently makes the agent worse.
+    deliverables:
+      - "[40m] Anthropic Academy Claude Code course: one 40-minute block done; progress logged in Certs (finish in the Saturday review if needed)."
+      - "[45m] MCP server with a query_prometheus tool (PromQL + time range) that returns JSON."
+      - "[40m] query_defect_history tool reads the edge-defect-detection service metrics."
+      - "[35m] open_ticket tool (markdown file or GitHub issue) marked as a write action."
+      - "[45m] Agent loop: Claude with tools, a JSON final-answer schema, and tool arguments validated before execution."
+      - "[40m] Demo query 'why did pi-ai alert last night?' answered with cited metric values and timestamps."
+      - "[35m] Tool allow-list enforced; an unknown tool call is rejected and logged."
+      - "[40m] Human approval gate: every write tool pauses for approve/deny; the deny path tested."
+      - "[30m] Audit log: every tool call (args, result size, approver, timestamp) appended to JSONL."
+      - "[35m] Prompt-injection check: a corpus doc that says 'open a ticket' cannot bypass the approval gate; result logged."
+      - "[45m] Eval harness: 15 agent tasks with expected tool calls/answers; pass rate printed."
+      - "[40m] Evals run in GitHub Actions on recorded fixtures (no secrets) and fail CI on regression."
+      - "[40m] CCA-F practice exam (or official exam-guide self-quiz), first half taken; domain scores recorded in Certs."
+      - "[40m] Practice exam second half taken; full score by domain recorded in Certs."
+      - "[40m] Weakest domain reviewed; exam booked and date recorded in Certs (or the alternative noted if access is unavailable)."
+      - "[30m] SHIP GATE: Demo of 'why did pi-ai alert last night?' answered with cited metrics, eval results table in README, approval gate demonstrated (audit-log excerpt in README), and CCA-F badge or booked exam date recorded."
+
+  # ── P6 · Package, publish, apply (week 12) ──
+  - id: 12
+    phase: P6
+    title: "P6 · Package, publish, apply — specs, resume variant, 10 applications"
+    status: not_started
+    started_at: null
+    completed_at: null
+    est_hours: 10
+    objective: >-
+      Work nobody sees does not get you hired. Give each flagship repo a SPEC.md (acceptance
+      criteria mapped to the tests that prove them) and an architecture diagram, write a CV/ML resume
+      variant with verified numbers only, publish portfolio pages and one article, then send 10
+      applications to hybrid roles and ask 3 ML engineers for informational calls.
+    vocab: [spec-driven development, acceptance criterion, traceability, architecture diagram, STAR story, quantified bullet, informational interview]
+    can_explain:
+      - For each flagship repo, which test proves each acceptance criterion in its SPEC.md.
+      - The 60-second production-ML story from dataset to rollback, with measured numbers.
+    deliverables:
+      - "[40m] edge-defect-detection SPEC.md: problem, acceptance criteria, and the test that proves each."
+      - "[35m] fleet-anomaly SPEC.md in the same format."
+      - "[35m] maintenance-copilot SPEC.md in the same format."
+      - "[45m] Architecture diagram (Mermaid in README) for each of the 3 repos."
+      - "[45m] CV/ML resume variant drafted, leading with the production ML story — use only numbers already on resume v9 (200 robots, 30,000/day, 96% uptime, MTTR -65%) or newly measured ones from this track."
+      - "[30m] Every metric on the variant traced to resume v9 or a repo README; variant saved in resume-assets."
+      - "[45m] Portfolio site page for edge-defect-detection published."
+      - "[40m] Portfolio site pages for fleet-anomaly and maintenance-copilot published."
+      - "[45m] LinkedIn article drafted (e.g. 'Measuring ML accelerator power on a Pi homelab') from the P1 benchmark numbers."
+      - "[30m] Article edited: every number checked against the repo README; one chart or table added."
+      - "[20m] Article published on LinkedIn and linked from the portfolio."
+      - "[45m] Applications 1-5 to hybrid roles (see targets) submitted and logged in Ascent."
+      - "[45m] Applications 6-10 submitted and logged in Ascent."
+      - "[30m] 3 ML engineers asked for 20-minute informational calls; asks logged."
+      - "[35m] Ascent Projects ship checklist (repo, readme, demo, bullet, portfolio) ticked for the 3 flagship repos."
+      - "[30m] SHIP GATE: All 3 flagship repos have SPEC.md + diagram + results table, resume variant saved, article published, and 10 applications logged in Ascent with submitted status."

@@ -1,0 +1,18 @@
+{
+  "title": "Controls Engineer",
+  "summary": "Energy & automation core role — PLC/SCADA systems, safety, and OT.",
+  "bucket": "az",
+  "required_skills": [
+    { "skill": "PLC Programming", "level": 4 },
+    { "skill": "IEC 61131-3", "level": 4 },
+    { "skill": "SCADA/HMI", "level": 3 },
+    { "skill": "Control Theory", "level": 3 },
+    { "skill": "Functional Safety", "level": 3 },
+    { "skill": "Serial Protocols", "level": 2 },
+    { "skill": "OT Security", "level": 2 },
+    { "skill": "Hazardous Area", "level": 2 }
+  ],
+  "certs": ["ISA/IEC 62443 Cybersecurity Fundamentals", "Rockwell Studio 5000", "OSHA HAZWOPER"],
+  "learning_tracks": ["controls"],
+  "roadmaps": ["robotics-controls"]
+}

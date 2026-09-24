@@ -1,0 +1,584 @@
+{
+  "checked_on": "2026-09-23",
+  "verdicts": {
+    "cert_aebf76f4": {
+      "verdict": "KEEP-NOW",
+      "reason": "Free; Ignition SCADA/HMI is the SCADA skill entry controls postings ask for, and the credential is earned self-paced online."
+    },
+    "cert_b14713be": {
+      "verdict": "KEEP-NOW",
+      "reason": "Free, ~3 h of official cobot e-learning; directly supports robotics/cobot integrator roles and is the prerequisite for UR's paid Core Training."
+    },
+    "cert_f940807b": {
+      "verdict": "KEEP-NOW",
+      "reason": "Arc-flash / electrical-safety training is expected for anyone working on energized panels; official NFPA course is 6 h online."
+    },
+    "cert_8cc7eb23": {
+      "verdict": "LATER",
+      "reason": "Real credential but ~50+ h of study; does not gate entry controls offers before Nov 15. Revisit after the job sprint."
+    },
+    "cert_2483738e": {
+      "verdict": "LATER",
+      "reason": "Entry technician credential, but study load is large and exam logistics unverified; after an offer."
+    },
+    "cert_5d7637d4": {
+      "verdict": "LATER",
+      "reason": "30 h course; OSHA 10 (General Industry) covers the entry-level need faster and cheaper. Finish 30 later if an employer wants it."
+    },
+    "cert_55981d62": {
+      "verdict": "LATER",
+      "reason": "Studio 5000 is the #1 gap, but Rockwell's Logix Designer courses are paid (Learning+ via distributors, price not published). Ask employer to fund; use the free CCW path meanwhile."
+    },
+    "cert_13db4a31": {
+      "verdict": "LATER",
+      "reason": "Paid instructor-led Siemens course; Rockwell matters more in NA. Employer-funded after hire."
+    },
+    "cert_71c43b5e": {
+      "verdict": "LATER",
+      "reason": "Engineer-level credential that assumes field experience; 1-2 years after hire."
+    },
+    "cert_a27de739": {
+      "verdict": "LATER",
+      "reason": "Niche platform; pursue only if an employer runs Beckhoff."
+    },
+    "cert_62a85390": {
+      "verdict": "LATER",
+      "reason": "Robotic welding specialist path; only if the role is welding automation."
+    },
+    "cert_7d2de7f6": {
+      "verdict": "LATER",
+      "reason": "DCS training is employer-funded; relevant only for a process/refining role."
+    },
+    "cert_19df8422": {
+      "verdict": "LATER",
+      "reason": "DCS training is employer-funded; relevant only for a process role."
+    },
+    "cert_775012c1": {
+      "verdict": "CUT",
+      "reason": "Vision cert is not an entry controls hiring gate; resume already shows vision work."
+    },
+    "cert_e9f0cbce": {
+      "verdict": "CUT",
+      "reason": "ML/DL coursework is covered by the ML literacy track; not a controls hiring gate."
+    },
+    "cert_078622f7": {
+      "verdict": "CUT",
+      "reason": "CAD is secondary for controls roles; resume already shows SOLIDWORKS use."
+    },
+    "cert_3316b2f4": {
+      "verdict": "CUT",
+      "reason": "IT networking cert; not gating for entry controls."
+    },
+    "cert_f28c1002": {
+      "verdict": "CUT",
+      "reason": "Maintenance/reliability management; post-hire."
+    },
+    "cert_764e8db2": {
+      "verdict": "CUT",
+      "reason": "Additive manufacturing; not on entry controls postings."
+    },
+    "cert_315addb7": {
+      "verdict": "CUT",
+      "reason": "PCB design cert; not a controls hiring gate."
+    },
+    "cert_b7245316": {
+      "verdict": "CUT",
+      "reason": "Soldering/assembly technician cert; not controls."
+    },
+    "cert_595296ed": {
+      "verdict": "CUT",
+      "reason": "Assembly inspection cert; not controls."
+    },
+    "cert_c2eb91f5": {
+      "verdict": "CUT",
+      "reason": "Broad manufacturing technician cert; post-hire."
+    },
+    "cert_a23ca524": {
+      "verdict": "CUT",
+      "reason": "Project management; not an entry technical gate."
+    },
+    "cert_b5965af7": {
+      "verdict": "CUT",
+      "reason": "Quality/process improvement; post-hire."
+    },
+    "cert_2098e806": {
+      "verdict": "CUT",
+      "reason": "Project management; requires PM experience; post-hire."
+    },
+    "cert_02f4274b": {
+      "verdict": "CUT",
+      "reason": "GD&T is ME-focused; not gating for controls."
+    },
+    "cert_8b3c05fd": {
+      "verdict": "CUT",
+      "reason": "Machinery-safety specialist cert; expensive, post-hire."
+    },
+    "cert_2e324c91": {
+      "verdict": "CUT",
+      "reason": "Predictive maintenance specialty; post-hire."
+    },
+    "cert_d521a525": {
+      "verdict": "CUT",
+      "reason": "Quality engineering; not controls."
+    },
+    "cert_a2aee9e4": {
+      "verdict": "CUT",
+      "reason": "Reliability engineering; post-hire."
+    },
+    "cert_e2ce0a79": {
+      "verdict": "CUT",
+      "reason": "Manufacturing engineer cert; experience-based, post-hire."
+    },
+    "cert_058dc8ce": {
+      "verdict": "CUT",
+      "reason": "Functional-safety specialist cert; expensive, post-hire."
+    },
+    "cert_77dc9e73": {
+      "verdict": "CUT",
+      "reason": "ROS 2 is useful long-term but not gating for entry controls in this 7-week window."
+    },
+    "cert_beee9b9b": {
+      "verdict": "CUT",
+      "reason": "Embedded AI; not controls."
+    },
+    "cert_497e9956": {
+      "verdict": "CUT",
+      "reason": "Cloud/ML; not manufacturing automation."
+    },
+    "cert_de9b58bc": {
+      "verdict": "CUT",
+      "reason": "Self-driving nanodegree; not manufacturing automation."
+    },
+    "cert_eb63af8e": {
+      "verdict": "CUT",
+      "reason": "Advanced vision cert; post-hire if a vision role."
+    },
+    "cert_d39ec279": {
+      "verdict": "CUT",
+      "reason": "PCB bare-board inspection; not controls."
+    },
+    "cert_8066a216": {
+      "verdict": "CUT",
+      "reason": "Wire-harness assembly cert; not controls."
+    },
+    "cert_14206216": {
+      "verdict": "CUT",
+      "reason": "Thermography specialty; post-hire."
+    },
+    "cert_9567af8d": {
+      "verdict": "CUT",
+      "reason": "IT networking; not core automation."
+    },
+    "cert_fe9a44a7": {
+      "verdict": "CUT",
+      "reason": "Process safety (SIS) specialty; post-hire."
+    },
+    "cert_d3f4f960": {
+      "verdict": "CUT",
+      "reason": "Fieldbus specialist cert; post-hire if needed."
+    },
+    "cert_90c819a4": {
+      "verdict": "CUT",
+      "reason": "Vendor robot training is employer-funded; after an offer."
+    },
+    "cert_6bcb8e22": {
+      "verdict": "CUT",
+      "reason": "CAD cert; deprioritized vs controls."
+    },
+    "cert_5aea4559": {
+      "verdict": "CUT",
+      "reason": "PCB tool cert; not controls."
+    },
+    "cert_d409e8bf": {
+      "verdict": "CUT",
+      "reason": "Agile/Scrum; not a controls gate."
+    },
+    "cert_e86b4199": {
+      "verdict": "CUT",
+      "reason": "Requires CCST I first; post-hire."
+    },
+    "cert_1216ca47": {
+      "verdict": "CUT",
+      "reason": "Vendor robot training is employer-funded; after an offer."
+    },
+    "cert_c0dad764": {
+      "verdict": "CUT",
+      "reason": "Follows TIA-PRO1; post-hire."
+    },
+    "cert_c7d3c959": {
+      "verdict": "CUT",
+      "reason": "Kubernetes; not manufacturing automation."
+    },
+    "cert_dc86569f": {
+      "verdict": "CUT",
+      "reason": "FEA/CFD simulation; ME tool, not controls."
+    },
+    "cert_1c4dc107": {
+      "verdict": "CUT",
+      "reason": "Cloud ML; not controls."
+    },
+    "cert_ba3e9882": {
+      "verdict": "CUT",
+      "reason": "Cloud AI; not controls."
+    },
+    "cert_19447aa1": {
+      "verdict": "CUT",
+      "reason": "ML platform cert; not controls."
+    },
+    "cert_d00a4d52": {
+      "verdict": "CUT",
+      "reason": "ML cert; not controls."
+    },
+    "cert_39917da1": {
+      "verdict": "CUT",
+      "reason": "OT cybersecurity is valuable later; post-hire."
+    },
+    "cert_0d0b0bd2": {
+      "verdict": "CUT",
+      "reason": "Hazardous-area specialty; only if a hazardous-area role."
+    },
+    "cert_b8f22bc9": {
+      "verdict": "CUT",
+      "reason": "Long-form I&C technician program; not in this window."
+    },
+    "cert_4a7583ee": {
+      "verdict": "CUT",
+      "reason": "Hazardous-waste operations; not general controls."
+    },
+    "cert_b0d45606": {
+      "verdict": "CUT",
+      "reason": "Quality/process improvement; not a controls hiring gate; post-hire."
+    },
+    "cert_95321d00": {
+      "verdict": "DONE",
+      "reason": "Completed."
+    },
+    "cert_0af0b504": {
+      "verdict": "DONE",
+      "reason": "Completed."
+    },
+    "cert_25de1ba8": {
+      "verdict": "DONE",
+      "reason": "Completed."
+    },
+    "cert_3012fe19": {
+      "verdict": "DONE",
+      "reason": "Completed."
+    }
+  },
+  "keepers": {
+    "cert_aebf76f4": {
+      "cost_usd": 0,
+      "how_to": {
+        "url": "https://inductiveuniversity.com/courses/",
+        "prereqs": null,
+        "format": "Self-paced online video courses; a challenge at the end of every topic. 100% required to pass a challenge, unlimited attempts. Credential is awarded when all challenges for an Ignition version are passed and is tied to that version. Must be signed in to attempt challenges. No scheduled/proctored exam.",
+        "cost_note": "Inductive University is 100% free. The Ignition download is free; trial mode times out every 2 hours and can be restarted unlimited times.",
+        "checked_on": "2026-09-23",
+        "study_hours": null,
+        "resources": [
+          {
+            "label": "Inductive University credential courses (8.3 / 8.1)",
+            "url": "https://inductiveuniversity.com/courses/"
+          },
+          {
+            "label": "Ignition free download (trial mode)",
+            "url": "https://inductiveautomation.com/downloads/"
+          },
+          {
+            "label": "IU FAQ",
+            "url": "https://inductiveuniversity.com/about/"
+          }
+        ],
+        "booking": "Nothing to book: create a free IU account and pass the challenges at your own pace.",
+        "results_time": "Credential awarded when all challenges for the version are passed.",
+        "sources": [
+          "https://inductiveuniversity.com/about/",
+          "https://inductiveuniversity.com/courses/",
+          "https://inductiveautomation.com/downloads/"
+        ]
+      },
+      "steps": [
+        {
+          "text": "Create free IU account; install Ignition 8.3 (free trial mode)",
+          "hours": 1
+        },
+        {
+          "text": "Getting Started + Gateway Setup courses and their challenges",
+          "hours": 2
+        },
+        {
+          "text": "Launching Ignition + Tags courses and challenges",
+          "hours": 2
+        },
+        {
+          "text": "Visualization courses and challenges",
+          "hours": 2
+        },
+        {
+          "text": "Build a practice screen bound to tags on your own gateway",
+          "hours": 2
+        },
+        {
+          "text": "Historical Data + Alarming courses and challenges",
+          "hours": 2
+        },
+        {
+          "text": "Platform, Data Handling, Logic Charts courses and challenges",
+          "hours": 2
+        },
+        {
+          "text": "Enterprise courses + any remaining challenges; confirm credential shows on profile",
+          "hours": 1.5
+        }
+      ]
+    },
+    "cert_b14713be": {
+      "cost_usd": 0,
+      "how_to": {
+        "url": "https://academy.universal-robots.com/free-e-learning/",
+        "prereqs": "None stated for Core Track. Pro Track: UR strongly recommends completing the Core Track first.",
+        "format": "Free online simulation modules (e-Series / PolyScope 5); sign-in or account required. Core Track 8 modules, 84 min (step-by-step pick-and-place setup). Pro Track 3 modules, 41 min. Application Track 3 modules, 53 min.",
+        "cost_note": "e-Learning is free. The free pages do not state that a certificate is issued. UR's certificate comes from paid Core Training (in-class or simulator-based: 'the same certificate as in-class core training'); price not stated on the official page.",
+        "checked_on": "2026-09-23",
+        "study_hours": 3,
+        "resources": [
+          {
+            "label": "e-Series Core Track",
+            "url": "https://academy.universal-robots.com/free-e-learning/e-series-e-learning/e-series-core-track/"
+          },
+          {
+            "label": "e-Series Pro Track",
+            "url": "https://academy.universal-robots.com/free-e-learning/e-series-e-learning/e-series-pro-track/"
+          },
+          {
+            "label": "e-Series Application Track",
+            "url": "https://academy.universal-robots.com/free-e-learning/e-series-e-learning/e-series-application-track/"
+          },
+          {
+            "label": "Simulator-based Core Training (paid, next step)",
+            "url": "https://www.universal-robots.com/learn-and-connect/simulator-based-training/"
+          }
+        ],
+        "booking": "Self-paced; create a UR Academy account. Paid simulator-based training is found via academy.universal-robots.com.",
+        "results_time": null,
+        "sources": [
+          "https://academy.universal-robots.com/free-e-learning/",
+          "https://academy.universal-robots.com/free-e-learning/e-series-e-learning/e-series-core-track/",
+          "https://academy.universal-robots.com/free-e-learning/e-series-e-learning/e-series-pro-track/",
+          "https://academy.universal-robots.com/free-e-learning/e-series-e-learning/e-series-application-track/",
+          "https://www.universal-robots.com/learn-and-connect/simulator-based-training/"
+        ]
+      },
+      "steps": [
+        {
+          "text": "Create UR Academy account; open e-Series Core Track",
+          "hours": 0.25
+        },
+        {
+          "text": "Core Track modules 1-4 (robot at a glance, task prep, tool setup, program)",
+          "hours": 0.75
+        },
+        {
+          "text": "Core Track modules 5-8 (external devices, conveyors, safety, optimizing)",
+          "hours": 0.75
+        },
+        {
+          "text": "Pro Track modules 9-11 (program flow, feature coordinates, force control)",
+          "hours": 0.75
+        },
+        {
+          "text": "Application Track modules 12-14 (palletizing, screwdriving, machine tending)",
+          "hours": 1
+        },
+        {
+          "text": "Screenshot completion; add a resume/LinkedIn line",
+          "hours": 0.25
+        }
+      ]
+    },
+    "cert_f940807b": {
+      "cost_usd": 286,
+      "how_to": {
+        "url": "https://www.nfpa.org/product/nfpa-70e-online-course/p0070eol/nfpa-70e-standard-for-electrical-safety-in-the-workplace-online-training-series-2024/ols70e24",
+        "prereqs": null,
+        "format": "NFPA 70E online training series (2024 edition SKU OLS70E24; 2027 and 2021 editions also selectable). Six-hour series, 0.6 CEU. Course assessment; after a passing score and the course evaluation, download/print a Certificate of Completion. 365-day access.",
+        "cost_note": "USD $286.00; NFPA members USD $257.40. Tuition due before starting; online training is non-refundable.",
+        "checked_on": "2026-09-23",
+        "study_hours": 6,
+        "resources": [
+          {
+            "label": "NFPA 70E Online Training Series",
+            "url": "https://www.nfpa.org/product/nfpa-70e-online-course/p0070eol/nfpa-70e-standard-for-electrical-safety-in-the-workplace-online-training-series-2024/ols70e24"
+          }
+        ],
+        "booking": "Buy on nfpa.org; self-paced online.",
+        "results_time": "Certificate downloadable after passing the assessment and completing the course evaluation.",
+        "sources": [
+          "https://www.nfpa.org/product/nfpa-70e-online-course/p0070eol/nfpa-70e-standard-for-electrical-safety-in-the-workplace-online-training-series-2024/ols70e24"
+        ]
+      },
+      "steps": [
+        {
+          "text": "Electrical safety essentials module",
+          "hours": 1
+        },
+        {
+          "text": "Establishing an electrically safe work condition module",
+          "hours": 1
+        },
+        {
+          "text": "Energized work and risk assessment module",
+          "hours": 1
+        },
+        {
+          "text": "Mitigating risks during energized work module",
+          "hours": 1
+        },
+        {
+          "text": "PPE requirements module",
+          "hours": 1
+        },
+        {
+          "text": "Safety-related maintenance and special equipment module",
+          "hours": 1
+        },
+        {
+          "text": "Course assessment + evaluation; download certificate",
+          "hours": 0.5
+        }
+      ]
+    }
+  },
+  "new": [
+    {
+      "title": "Rockwell Connected Components Workbench (free Micro800 / ladder)",
+      "provider": "Rockwell Automation",
+      "track": "phase1",
+      "verdict": "KEEP-NOW",
+      "reason": "Free official Rockwell programming software (Micro800) with a demo simulator: the no-cost ladder-logic path toward the Allen-Bradley gap. Studio 5000 itself has no free training for individuals and stays tracked as LATER (cert_55981d62).",
+      "cost_usd": 0,
+      "how_to": {
+        "url": "https://www.rockwellautomation.com/en-us/capabilities/industrial-automation-control/design-and-configuration-software.html",
+        "prereqs": null,
+        "format": "Standard Edition: configuration and programming software for a Rockwell Automation Micro Control System (Micro800), includes a demo version of Micro800 Simulator. Self-study software, not a credential.",
+        "cost_note": "Standard Edition is a free download. No certificate or badge is stated on the official pages.",
+        "checked_on": "2026-09-23",
+        "study_hours": null,
+        "resources": [
+          {
+            "label": "CCW Standard Edition download (PCDC)",
+            "url": "https://compatibility.rockwellautomation.com/Pages/MultiProductFindDownloads.aspx?crumb=112&mode=3&refSoft=1&versions=57681"
+          },
+          {
+            "label": "CCW tutorial videos",
+            "url": "https://www.rockwellautomation.com/en-us/capabilities/industrial-automation-control/design-and-configuration-software/ccw-software-training-videos.html"
+          },
+          {
+            "label": "CCW guide for Studio 5000 Logix Designer users (9328-QR001)",
+            "url": "http://literature.rockwellautomation.com/idc/groups/literature/documents/qr/9328-qr001_-en-e.pdf"
+          }
+        ],
+        "booking": "Nothing to book: download Standard Edition from the Product Compatibility & Download Center (PCDC).",
+        "results_time": null,
+        "sources": [
+          "https://www.rockwellautomation.com/en-us/capabilities/industrial-automation-control/design-and-configuration-software.html",
+          "https://www.rockwellautomation.com/en-us/capabilities/industrial-automation-control/design-and-configuration-software/ccw-software-training-videos.html"
+        ]
+      },
+      "steps": [
+        {
+          "text": "Create Rockwell account; download CCW Standard Edition from PCDC",
+          "hours": 1
+        },
+        {
+          "text": "Watch CCW tutorials: Create and Test a PLC Project; Micro800 Simulator overview + how to use",
+          "hours": 1
+        },
+        {
+          "text": "Build a ladder start/stop seal-in + timer program; test in Micro800 Simulator (demo)",
+          "hours": 2
+        },
+        {
+          "text": "Read 9328-QR001 guide: map CCW terms/workflow to Studio 5000",
+          "hours": 1
+        },
+        {
+          "text": "Rebuild the logic in structured text; write a short portfolio note",
+          "hours": 1.5
+        }
+      ]
+    },
+    {
+      "title": "OSHA 10 (General Industry)",
+      "provider": "OSHA-authorized trainer",
+      "track": "phase1",
+      "verdict": "KEEP-NOW",
+      "reason": "~$59 and 10 contact hours; plant-floor safety awareness that entry controls/tech postings ask for, finishable in 2 days (vs OSHA 30, moved to LATER).",
+      "cost_usd": 59,
+      "how_to": {
+        "url": "https://www.osha.gov/training/outreach/training-providers",
+        "prereqs": null,
+        "format": "Online self-paced course from an OSHA-authorized online provider (General Industry 10-hour: 360Training/OSHAcampus, AdvanceOnline, CareerSafe, ClickSafety, HSI, PureEHS, University of South Florida). OSHA limits training to 7.5 contact hours/day. ClickSafety: complete within 180 days of start; final exam 40 questions, 70% minimum, 3 attempts. An OSHA card is not a certification or license.",
+        "cost_note": "OSHA sets no price; trainer fees vary. ClickSafety OSHA 10-Hour: $59.00 (listed as a sale price).",
+        "checked_on": "2026-09-23",
+        "study_hours": 10,
+        "resources": [
+          {
+            "label": "OSHA-authorized online providers",
+            "url": "https://www.osha.gov/training/outreach/training-providers"
+          },
+          {
+            "label": "ClickSafety OSHA 10",
+            "url": "https://www.clicksafety.com/courses/osha/osha-10/"
+          },
+          {
+            "label": "OSHA Outreach FAQ",
+            "url": "https://www.osha.gov/training/outreach/faq"
+          }
+        ],
+        "booking": "Enroll directly with an authorized provider; self-paced. Verify the provider is on OSHA's list before paying.",
+        "results_time": "Not same-day for the card: OSHA requires trainers to issue the card within 90 days of completion. ClickSafety: printable certificate right after the final exam + course evaluation; plastic DOL card shipped within two weeks.",
+        "sources": [
+          "https://www.osha.gov/training/outreach/training-providers",
+          "https://www.osha.gov/training/outreach/faq",
+          "https://www.clicksafety.com/courses/osha/osha-10/"
+        ]
+      },
+      "steps": [
+        {
+          "text": "Pick an OSHA-listed provider; enroll in 10-Hour General Industry",
+          "hours": 0.25
+        },
+        {
+          "text": "Course session 1",
+          "hours": 1.5
+        },
+        {
+          "text": "Course session 2",
+          "hours": 1.5
+        },
+        {
+          "text": "Course session 3",
+          "hours": 1.5
+        },
+        {
+          "text": "Course session 4",
+          "hours": 1.5
+        },
+        {
+          "text": "Course session 5",
+          "hours": 1.5
+        },
+        {
+          "text": "Course session 6 (finish remaining modules)",
+          "hours": 1.5
+        },
+        {
+          "text": "Final exam (40 q, 70%) + course evaluation; print certificate",
+          "hours": 1
+        }
+      ]
+    }
+  ]
+}
