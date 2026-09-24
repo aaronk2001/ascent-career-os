@@ -3,6 +3,14 @@
 # Out of scope in v2: QLoRA, OpenTelemetry, canary/blue-green deploys, MVTec benchmark.
 track: ml-bridge
 title: ML / AI Bridge Track
+# UI metadata (registry._meta): Today block label/colour, dashboard ring caption
+category: ml
+schedule: scheduled
+accent: "#8b5cf6"
+caption: ML · CV
+day_label: ML block
+day_color: "#8b5cf6"
+default_est_hours: 5
 started: 2026-09-28
 target_completion: null  # rolling — projected by plan.py from remaining weeks
 active: true

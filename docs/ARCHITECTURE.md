@@ -16,7 +16,7 @@ sequenceDiagram
   A->>A: WebView2 runtime present?
   A->>A: backend on :5001 (:5002 demo) serving the same DB? → reuse it
   A->>F: start Flask (threaded, 127.0.0.1) on that port or a free one
-  A->>P: parse track YAML, glossary, news cache
+  A->>P: parse track YAML, glossary (and the news cache when the news module is on)
   A->>W: open window when /  answers 200
   W->>F: GET / → static/dist/index.html, then /api/*
 ```
@@ -31,9 +31,9 @@ sequenceDiagram
 
 | Module | Responsibility |
 |---|---|
-| `tracker.py` | All HTTP routes (112). Thin: validates input and delegates to domain modules. A `before_request` localhost guard rejects non-loopback `Host` headers (DNS rebinding) and cross-site `Origin`s. Serves `static/dist` with immutable caching for hashed assets. |
+| `tracker.py` | All HTTP routes (108). Thin: validates input and delegates to domain modules. A `before_request` localhost guard rejects non-loopback `Host` headers (DNS rebinding) and cross-site `Origin`s. Serves `static/dist` with immutable caching for hashed assets. |
 | `db.py` | Schema, idempotent `_migrate`, seeding, and CRUD helpers for every table. `DB_PATH` honors `ASCENT_DB`. |
-| `registry.py` | Track registry. Each `tracks/<id>.yaml` is one curriculum. Parsed files are cached by mtime and merged with per-week status and details from the DB. |
+| `registry.py` | Track registry. Each `tracks/<id>.yaml` is one curriculum. Parsed files are cached by mtime and merged with per-week status and details from the DB. Every label, colour and parked flag the UI shows comes from the file's top-level keys (see below). |
 | `plan.py` | Hour-budget scheduler. It walks each track's remaining weeks day by day, spending `daily_hours` on the listed weekdays. Parked tracks start from the offer date. Nothing is stored. |
 | `anchors.py` | Single source of the headline dates: sprint start, offer, stretch, runway, bridge gate, next exam, projected program end, primary-goal milestone. |
 | `dayplan.py` | Generates a day's goal list from a `schedule.yaml` template (`weekday`, `saturday`, `bridge_weekday`, `pre_sprint`, …; `schedule.example.yaml` until you save your own). Each category has a filler that pulls live content. Categories owned by a disabled module are skipped. |
@@ -44,15 +44,15 @@ sequenceDiagram
 | `timeline_board.py` | Collapses every dated item into one Gantt payload with lanes, health and triage. |
 | `health.py` | Weigh-ins, workout log, routine streaks, and Mifflin-St Jeor energy targets (optional `health` module). |
 | `reminders.py` | Reminder engine shared by the in-app bell and the toast notifier. |
-| `gcal.py`, `news.py`, `jobruns.py`, `glossary.py` | Optional Google Calendar push, RSS signal feed, daily job-pull reader, merged engineering glossary. |
+| `gcal.py`, `news.py`, `jobruns.py`, `glossary.py` | Optional Google Calendar push, Google News RSS feed (only when the `news` module is on), daily job-pull reader, merged engineering glossary. |
 
 ### Linda (`agent/`)
 
 - `agent.py` picks the backend from `LINDA_BACKEND`: `ollama`, `claude`, or `auto`. `auto` uses Ollama when it is reachable and otherwise Claude if `ANTHROPIC_API_KEY` is set.
-- `_ollama_backend.py` and `_claude_backend.py` run the same tool loop (`_loop_common.py`) over the tool registry in `tools.py`: career state, applications, certs, weekly tasks, timeline, Tavily research, job-market research, offer analysis and RAG memory.
+- `_ollama_backend.py` and `_claude_backend.py` run the same tool loop (`_loop_common.py`) over the tool registry in `tools.py`: career state, applications, certs, weekly tasks, timeline, Tavily research, job-market research, offer analysis, Exa job-posting search (`job_search.py`; returns a "not configured" error without `EXA_API_KEY`) and RAG memory.
 - `prompts.py` builds the system prompt from live pipeline stats and the user's `profile.yaml` (`profile.py`).
 - `config.py` manages settings with the precedence *env > settings.yaml > defaults*, including the optional-module flags (`modules()`). `chat_with_fallback` downgrades to a small model automatically when Ollama refuses a model for lack of memory.
-- `resume_tailor.py` tailors a resume or cover letter against a job description using only facts from `data/resume_master.json`, and renders `.docx` through `agent/renderers/`.
+- `resume_tailor.py` tailors a resume or cover letter against a job description using only facts from `data/resume_master.json`, and renders `.docx` through `agent/renderers/`. Its report lists every number in the output that is not a whole number token in the master (`_keyword_report`).
 
 ## Data model (`career.db`)
 
@@ -87,7 +87,7 @@ schedule.yaml template ──► dayplan.generate(day)
    │                           │  template_name(): pre_sprint / weekday / saturday / sunday / bridge_weekday
    │                           ▼
    │                     for each entry → _fill(cat):
-   │                        controls / ml   → registry: next unticked deliverable of the current week
+   │                        <track id>      → registry: next unticked deliverable of that track's current week
    │                        apps / outreach → settings.daily_apps, overdue follow-ups
    │                        cert            → certs.next_study_cert(): soonest exam with an open step
    │                        portfolio       → earliest-due open profile link
@@ -100,19 +100,31 @@ Generation is idempotent per date. Regenerating keeps completed blocks and repla
 
 ## Optional modules
 
-`settings.yaml` → `modules: {side, clips, health}` (all off by default, toggled in Settings). One flag gates everything a module owns:
+`settings.yaml` → `modules: {side, clips, health, news}` (all off by default, toggled in Settings). One flag gates everything a module owns:
 
 | Module | Nav | Today categories | Dashboard |
 |---|---|---|---|
 | `side` | Side Hustle | `bridge` (and the `bridge_weekday` template editor) | revenue tile |
 | `clips` | — | `clips` | posts tile |
 | `health` | Health | `gym` | — |
+| `news` | — | — | "Signal" headline widget; `news.py` fetches Google News RSS only while this is on |
 
 The backend filters `dayplan.active_cats()` (generation, `/api/day`, `/api/day/week`); the frontend loads `/api/modules` once before mounting the shell so the nav never flashes hidden items.
 
 ## Learning-track registry
 
-A track file declares `title`, `started`, `active`, `daily_hours`, `days` and `weeks[]`. Each week carries an `objective`, `deliverables` (each prefixed with a `[NNm]` estimate), `can_explain`, `vocab`, a `primary_resource` and `est_hours`. Adding a curriculum means adding a YAML file. The Learning view, Today fillers, Timeline lanes and `plan.py` projections pick it up with no code change.
+A track file declares `title`, `started`, `active`, `daily_hours`, `days` and `weeks[]`. Each week carries an `objective`, `deliverables` (each prefixed with a `[NNm]` estimate), `can_explain`, `vocab`, a `primary_resource` and `est_hours`. Optional top-level keys control how it shows up:
+
+| Key | Default | Used by |
+|---|---|---|
+| `active` | `true` | `false` parks the track: projected from the offer date, faded on the Timeline, no dashboard ring, no Today category |
+| `short` | `ML` for ids of 3 letters or fewer, else `Controls` | Timeline chips (`ML W3: …`), Today titles, dashboard widgets |
+| `caption` | `short` | Dashboard hero ring caption |
+| `day_label`, `day_color` | `<short> track`, `accent` | The Today category for blocks whose `cat` is the track id |
+| `accent`, `category`, `schedule` | `#6366f1`, `general`, `flexible` | Learning view |
+| `default_est_hours` | 6 | Hours for weeks without `est_hours` in `plan.py` |
+
+Adding a curriculum means adding a YAML file: the Learning view, Timeline bars, `plan.py` projections, dashboard rings and the Today category pick it up with no code change. To get Today goals for it, add a block with `cat: <track id>` to a template in `schedule.yaml` (or in Settings → Day templates). `tests/test_core_logic.py` drops a new `robotics.yaml` into a temp folder and checks all of these.
 
 ## Frontend
 
@@ -123,4 +135,4 @@ A track file declares `title`, `started`, `active`, `daily_hours`, `days` and `w
 
 ## Tests
 
-`tests/` covers the day planner (including module gating), cert pace and budget, projects and the Draft path confinement, the demo seed, health math, the ML-track migration (dry run vs apply, idempotency), cache invalidation, the profile, env-override and offer baselines, the localhost guard, and a route smoke test that requests every GET route on a fresh and on a demo database. `tests/conftest.py` points every data path at a temp folder before any app module is imported, and each test also gets its own DB by monkeypatching `db.DB_PATH`. Nothing touches the network or a model.
+`tests/` covers the day planner (including module gating), cert pace and budget, projects and the Draft path confinement, the demo seed, health math, the ML-track migration (dry run vs apply, idempotency), cache invalidation, the profile, env-override and offer baselines, the localhost guard, Linda's tool-loop caps, the resume tailor's number check, weekly targets and follow-ups, the Timeline board's data shape, registry-driven tracks, API-key isolation for Exa and Tavily, and a route smoke test that requests every GET route on a fresh and on a demo database. `tests/conftest.py` points every data path at a temp folder before any app module is imported, and each test also gets its own DB by monkeypatching `db.DB_PATH`. Nothing touches the network or a model.

@@ -80,7 +80,7 @@ export default function timeline(): View {
             <div class="flex rounded-lg overflow-hidden border border-line ${ui.mode === "month" ? "hidden" : ""}">${zoomSeg}</div>
             <div class="flex rounded-lg overflow-hidden border border-line">
               <button data-mode="gantt" class="px-2.5 py-1 text-xs transition-colors ${ui.mode === "gantt" ? "accent-bg text-white" : "text-fg-muted hover:text-fg"}">Gantt</button>
-              <button data-mode="month" class="px-2.5 py-1 text-xs transition-colors ${ui.mode === "month" ? "accent-bg text-white" : "text-fg-muted hover:text-fg"}">Month</button>
+              <button data-mode="month" class="px-2.5 py-1 text-xs transition-colors ${ui.mode === "month" ? "accent-bg text-white" : "text-fg-muted hover:text-fg"}">Calendar</button>
             </div>
             <a href="/api/calendar.ics" download class="flex items-center gap-1.5 rounded-lg glass px-3 py-1.5 text-xs text-fg-muted hover:text-fg transition-colors">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Export</a>

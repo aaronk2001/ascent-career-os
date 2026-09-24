@@ -36,7 +36,7 @@ export function renderTriage(host: HTMLElement, board: Board, h: TriageHandlers)
       <summary class="flex items-center gap-2 cursor-default list-none select-none">
         <span class="h-2 w-2 rounded-full bg-warn"></span>
         <span class="text-sm font-medium">Needs attention</span>
-        <span class="text-[11px] text-fg-faint nums">${triage.length} overdue</span>
+        <span class="text-[11px] text-fg-faint nums">${triage.length} overdue ${triage.length === 1 ? "goal" : "goals"}</span>
       </summary>
       <div class="mt-2">${rows}</div>
     </details>`;

@@ -59,14 +59,14 @@ APPS = [  # company, role, status, bucket, location, salary, applied (days ago),
     ("Front Range Automation", "Controls Engineer", "technical", "local", "Denver, CO", "$80k–$95k", 15, 8.9),
     ("Cobalt Motion Systems", "Motion Control Engineer", "phone_screen", "remote", "Remote — US", "$90k–$110k", 11, 7.8),
     ("Mesa Ridge Semiconductor", "Equipment Automation Engineer", "applied", "local", "Colorado Springs, CO", "$88k–$104k", 6, 8.1),
-    ("Redline Controls", "PLC Programmer", "offer", "local", "Golden, CO", "$82k", 26, 7.4),
-    ("Kestrel Aerospace", "Test Automation Engineer", "applied", "local", "Englewood, CO", "$78k–$92k", 4, 7.2),
+    ("Redline Controls", "PLC Programmer", "onsite", "local", "Golden, CO", "$82k", 26, 7.4),
+    ("Kestrel Aerospace", "Test Automation Engineer", "applied", "local", "Englewood, CO", "$78k–$92k", 2, 7.2),
     ("Bluefin Packaging", "Automation Technician II", "rejected", "local", "Aurora, CO", "$62k–$70k", 30, 5.9),
-    ("Summit Fleet Robotics", "Field Robotics Engineer", "applied", "remote", "Remote — US", "$95k–$115k", 3, 8.3),
+    ("Summit Fleet Robotics", "Field Robotics Engineer", "applied", "remote", "Remote — US", "$95k–$115k", 1, 8.3),
     ("Ironwood Integrators", "Controls Engineer I", "discovered", "local", "Lakewood, CO", None, None, 7.9),
     ("Lumen Vision Labs", "Machine Vision Engineer", "discovered", "remote", "Remote — US", "$100k–$120k", None, 7.6),
     ("Canyon Energy Systems", "SCADA Engineer", "phone_screen", "local", "Fort Collins, CO", "$84k–$99k", 9, 7.0),
-    ("Atlas Warehouse Automation", "Robotics Integration Engineer", "applied", "remote", "Remote — US", "$92k–$108k", 1, 8.0),
+    ("Atlas Warehouse Automation", "Robotics Integration Engineer", "applied", "remote", "Remote — US", "$92k–$108k", 0, 8.0),
 ]
 
 PROJECTS = [  # slug, name, category, stack, status, role, one-liner, ship-done keys

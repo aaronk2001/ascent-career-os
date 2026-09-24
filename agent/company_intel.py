@@ -1,23 +1,15 @@
 """
 Company intelligence agent — researches companies for interview prep.
 """
-import os
+from datetime import date
 
+from .job_search import NotConfigured, exa_search
 from .profile import load_profile
 
-try:
-    from exa_py import Exa
-    HAS_EXA = True
-except ImportError:
-    HAS_EXA = False
 
-
-def research_company(company: str, exa_api_key: str = None) -> dict:
-    """Research a company for interview/application prep."""
-
-    if not exa_api_key:
-        exa_api_key = os.getenv("EXA_API_KEY")
-
+def research_company(company: str) -> dict:
+    """Research a company for interview/application prep. Recent news needs
+    EXA_API_KEY; without it `recent_news` stays empty and `news_note` says why."""
     results = {
         "company": company,
         "summary": f"Research for {company}",
@@ -32,19 +24,13 @@ def research_company(company: str, exa_api_key: str = None) -> dict:
         "red_flags": [],
     }
 
-    if HAS_EXA and exa_api_key:
-        try:
-            exa = Exa(exa_api_key)
-            news = exa.search_and_contents(
-                f"{company} robotics automation news 2025 2026",
-                num_results=3,
-                text={"max_characters": 300},
-            )
-            results["recent_news"] = [
-                {"title": r.title, "url": r.url, "snippet": (r.text or "")[:200]}
-                for r in news.results
-            ]
-        except Exception as e:
-            results["error"] = str(e)
+    year = date.today().year
+    try:
+        news = exa_search(f"{company} robotics automation news {year - 1} {year}", num_results=3, max_chars=300)
+        results["recent_news"] = [{"title": r["title"], "url": r["url"], "snippet": r["text"][:200]} for r in news]
+    except NotConfigured as e:
+        results["news_note"] = str(e)
+    except Exception as e:
+        results["error"] = str(e)
 
     return results

@@ -89,6 +89,7 @@ def execute_tool(name: str, inp: dict, scratchpad: Scratchpad):
     except Exception as exc:
         log.error("Tool %r raised: %s", name, exc)
         result = {"success": False, "error": str(exc)}
+        scratchpad.record(name, inp, result)  # failures count toward the per-tool cap
         events.append({"type": "tool_error", "tool": name, "error": str(exc)})
         return result, events
 

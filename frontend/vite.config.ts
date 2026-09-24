@@ -37,7 +37,8 @@ export default defineConfig(({ command }) => ({
     port: 5173,
     strictPort: true,
     proxy: {
-      "/api": "http://127.0.0.1:5001",
+      // app.py --dev passes the backend's actual port (the demo runs on 5002)
+      "/api": `http://127.0.0.1:${process.env.ASCENT_API_PORT ?? "5001"}`,
     },
   },
   build: {

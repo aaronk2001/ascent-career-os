@@ -1,5 +1,13 @@
 track: controls-automation
 title: "Controls Sprint — CODESYS + Factory IO → real Opta"
+# UI metadata (registry._meta): Today block label/colour, dashboard ring caption
+category: controls
+schedule: scheduled
+accent: "#3b82f6"
+caption: CODESYS sprint
+day_label: Controls lab
+day_color: "#22d3ee"
+default_est_hours: 12
 started: 2026-09-23
 target_completion: null  # rolling — projected by plan.py from remaining weeks
 phase: 1
@@ -46,7 +54,7 @@ references:
     url: https://en.wikipedia.org/wiki/IEC_61131-3
 weeks:
   - id: 1
-    scene: "From A to B · From A to B (Set and Reset)"
+    scene: "From A to B (plain, then Set and Reset)"
     title: Toolchain Setup + First Loop (CODESYS + Factory IO)
     related_skills: ["PLC Programming", "IEC 61131-3", "Modbus TCP"]
     related_nodes: ["ctl-ladder", "emb-comms"]

@@ -66,7 +66,7 @@ def test_every_get_route_answers(client, tmp_path, data):
 
 
 def test_fresh_install_modules_are_off(client):
-    assert client.get("/api/modules").get_json() == {"side": False, "clips": False, "health": False}
+    assert client.get("/api/modules").get_json() == {"side": False, "clips": False, "health": False, "news": False}
     cats = client.get("/api/day").get_json()["cats"]
     assert not {"clips", "gym", "bridge"} & set(cats)
 

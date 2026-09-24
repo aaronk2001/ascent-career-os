@@ -1,6 +1,7 @@
 id: it-pro
 title: IT Professional — Pi-Lab Homelab + DevOps
 category: it
+short: IT
 schedule: flexible
 accent: "#06b6d4"
 lab_dir: null

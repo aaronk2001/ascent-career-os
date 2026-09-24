@@ -2,6 +2,8 @@
 Live news for Ascent's dashboard Signal strip. Pulls Google News RSS (no API
 key) for a few topic queries, parses with stdlib, caches in-memory. Fail-soft:
 network/parse errors return an empty list + an error note, never raise.
+Off unless the `news` module is on (Settings -> Optional modules), so a default
+install makes no network calls of its own.
 """
 from __future__ import annotations
 
@@ -64,7 +66,14 @@ def _ts(item: dict) -> float:
         return 0.0
 
 
+def enabled() -> bool:
+    from agent.config import modules
+    return modules()["news"]
+
+
 def get_news(topics: list[str]) -> dict:
+    if not enabled():
+        return {"items": [], "errors": {}, "disabled": True}
     out: list[dict] = []
     errors: dict[str, str] = {}
     # Fetch topics concurrently: wall-clock = slowest feed, not the sum. Each

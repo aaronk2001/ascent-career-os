@@ -5,6 +5,7 @@ UI (127.0.0.1:5001) in a native pywebview window.
     python app.py             # your data (career.db, settings.yaml, profile.yaml)
     python app.py --demo      # fictional demo data in demo/ on port 5002 (seeded on first run)
     python app.py --browser   # no native window: serve and open the system browser
+    python app.py --browser --no-open   # serve only (headless checks, remote shells)
     python app.py --dev       # window on the Vite dev server (HMR)
 """
 import atexit
@@ -39,6 +40,7 @@ DEMO = "--demo" in sys.argv
 # Serve + system browser instead of pywebview: for Linux boxes without the GTK/Qt
 # bindings pywebview needs, and for headless checks.
 BROWSER = "--browser" in sys.argv
+NO_OPEN = "--no-open" in sys.argv
 _OVERRIDES = ("ASCENT_DB", "ASCENT_SETTINGS", "ASCENT_PROFILE", "TRACKER_DATA", "ASCENT_SCHEDULE")
 
 
@@ -77,12 +79,14 @@ def _find_bun():
     return str(cand) if cand.exists() else None
 
 
-def _start_vite():
-    """Launch the Vite dev server; returns the Popen so we can kill it on exit."""
+def _start_vite(api_port):
+    """Launch the Vite dev server, proxying /api to this backend's port; returns
+    the Popen so we can kill it on exit."""
     bun = _find_bun()
     if not bun:
         raise SystemExit("Ascent --dev needs bun, which wasn't found on PATH or in ~/.bun.")
-    proc = subprocess.Popen([bun, "run", "dev"], cwd=str(FRONTEND_DIR))
+    proc = subprocess.Popen([bun, "run", "dev"], cwd=str(FRONTEND_DIR),
+                            env={**os.environ, "ASCENT_API_PORT": str(api_port)})
     atexit.register(lambda: proc.terminate())
     return proc
 
@@ -149,7 +153,8 @@ def _prewarm():
         # Warm the news cache (3 RSS fetches) so the dashboard's Signal widget
         # has hot data instead of paying the network round-trip on first mount.
         import news
-        news.get_news(list(news.DEFAULT_TOPICS))
+        if news.enabled():
+            news.get_news(list(news.DEFAULT_TOPICS))
     except Exception:
         pass
 
@@ -219,7 +224,8 @@ if __name__ == "__main__":
         port = want if not _port_busy(want) else _free_port()
         url = f"http://127.0.0.1:{port}"
         print(f"Ascent{' (demo)' if DEMO else ''}: {url}  (Ctrl+C to stop)")
-        threading.Timer(1.5, lambda: webbrowser.open(url)).start()
+        if not NO_OPEN:
+            threading.Timer(1.5, lambda: webbrowser.open(url)).start()
         _start_flask(port)
         raise SystemExit(0)
 
@@ -255,7 +261,7 @@ if __name__ == "__main__":
 
     url = f"http://127.0.0.1:{port}"
     if DEV:
-        _start_vite()
+        _start_vite(port)
         if not _wait_for_port(VITE_PORT, timeout=30):
             print(f"Vite dev server did not start on port {VITE_PORT}.")
             raise SystemExit(1)

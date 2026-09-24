@@ -8,7 +8,7 @@ type Block = {
   title: string | null; detail: string | null; deep_link: string | null;
   status: "planned" | "done" | "skipped"; actual_min: number; pos: number;
 };
-type Cat = { label: string; color: string };
+type Cat = { label: string; color: string; track?: boolean };
 type Day = {
   date: string; template: string; blocks: Block[]; cats: Record<string, Cat>;
   wake: string; hard_stop: string; planned_min: number; actual_min: number; done: number;
@@ -117,7 +117,7 @@ export default function today(): View {
       </div>`;
     };
 
-    const targets = work.filter((b) => ["apps", "controls", "ml", "clips", "portfolio", "outreach"].includes(b.cat));
+    const targets = work.filter((b) => d.cats[b.cat]?.track || ["apps", "clips", "portfolio", "outreach"].includes(b.cat));
     const seen = new Set<string>();
     const targetRows = targets.filter((b) => (seen.has(b.cat) ? false : (seen.add(b.cat), true))).map((b) => {
       const c = d.cats[b.cat] ?? { label: b.cat, color: "var(--accent)" };

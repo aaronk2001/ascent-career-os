@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import date, datetime, time
 from functools import lru_cache
 from importlib.util import find_spec
 from pathlib import Path
 
 import db
-from dayplan import CATS
+from dayplan import all_cats
 
 SECRETS_DIR = Path(__file__).parent / ".secrets"
 CLIENT_SECRET = SECRETS_DIR / "client_secret.json"
@@ -14,10 +14,11 @@ SCOPES = ["https://www.googleapis.com/auth/calendar"]
 CALENDAR_NAME = "Ascent"
 
 
-def _tz_offset():
-    """This machine's current UTC offset as RFC3339 "+HH:MM". Events are written
-    with an explicit offset, so no IANA zone name (or tzdata on Windows) is needed."""
-    z = datetime.now().astimezone().strftime("%z")
+def _tz_offset(iso):
+    """This machine's UTC offset on day `iso` as RFC3339 "+HH:MM" (DST-correct for
+    that date, not today). Events are written with an explicit offset, so no IANA
+    zone name (or tzdata on Windows) is needed."""
+    z = datetime.combine(date.fromisoformat(iso), time(12)).astimezone().strftime("%z")
     return f"{z[:3]}:{z[3:]}"
 
 _COLOR_BY_CAT = {
@@ -113,8 +114,8 @@ def _delete_orphans(service, calendar_id, iso, keep_ids):
     page_token = None
     while True:
         resp = service.events().list(
-            calendarId=calendar_id, timeMin=f"{iso}T00:00:00{_tz_offset()}",
-            timeMax=f"{iso}T23:59:59{_tz_offset()}",
+            calendarId=calendar_id, timeMin=f"{iso}T00:00:00{_tz_offset(iso)}",
+            timeMax=f"{iso}T23:59:59{_tz_offset(iso)}",
             singleEvents=True, pageToken=page_token).execute()
         for ev in resp.get("items", []):
             if ev["id"] in keep_ids or not (ev.get("summary") or "").startswith("["):
@@ -128,12 +129,12 @@ def _delete_orphans(service, calendar_id, iso, keep_ids):
 
 
 def _event_body(b, iso):
-    off = _tz_offset()
+    off = _tz_offset(iso)
     detail = b.get("detail") or ""
     if b.get("deep_link"):
         detail += f"\n{b['deep_link']}"
     return {
-        "summary": f"[{CATS.get(b['cat'], {}).get('label', b['cat'])}] {b['title']}",
+        "summary": f"[{all_cats().get(b['cat'], {}).get('label', b['cat'])}] {b['title']}",
         "description": detail,
         "start": {"dateTime": f"{iso}T{b['start']}:00{off}"},
         "end": {"dateTime": f"{iso}T{b['end']}:00{off}"},

@@ -508,16 +508,23 @@ def soft_delete(app_id):
     with get_conn() as conn:
         conn.execute("UPDATE applications SET status = 'archived' WHERE id = ?", [app_id])
 
+def week_start(today=None):
+    """Monday of the current week: the window weekly targets count against,
+    the same one Today's week budget (/api/day/week) uses."""
+    today = today or date.today()
+    return (today - timedelta(days=today.weekday())).isoformat()
+
+
 def get_stats():
     today = date.today().isoformat()
-    week_ago = (date.today() - timedelta(days=7)).isoformat()
+    monday = week_start()
     apps = get_all()
     by_stage = {}
     for a in apps:
         s = a['status']
         by_stage[s] = by_stage.get(s, 0) + 1
     overdue = [a for a in apps if a.get('follow_up_date') and a['follow_up_date'] < today and a['status'] not in ('offer', 'rejected')]
-    this_week = [a for a in apps if a.get('applied_date') and a['applied_date'] >= week_ago]
+    this_week = [a for a in apps if (a.get('applied_date') or '')[:10] >= monday]
     applied_count = sum(1 for a in apps if a['status'] in ('applied', 'phone_screen', 'technical', 'onsite', 'offer', 'rejected'))
     responded = sum(1 for a in apps if a['status'] in ('phone_screen', 'technical', 'onsite', 'offer', 'rejected'))
     return {
@@ -565,14 +572,14 @@ def get_cadence():
     """Weekly apps vs target, by bucket, plus the overdue-first follow-up queue."""
     from agent.config import load_settings
     s = load_settings()
-    target = int(s.get('weekly_target') or 8)
+    target = int(s['weekly_target'] or 0)
     bucket_targets = {}
-    for k, v in (s.get('bucket_targets') or {'local': 5, 'remote': 3}).items():
+    for k, v in (s['bucket_targets'] or {}).items():
         nk = norm_bucket(k)
         bucket_targets[nk] = bucket_targets.get(nk, 0) + (v or 0)
     apps = get_all()
     today = date.today().isoformat()
-    week_ago = (date.today() - timedelta(days=7)).isoformat()
+    monday = week_start()
 
     def bkt(a):
         return norm_bucket(a.get('bucket'))
@@ -581,7 +588,7 @@ def get_cadence():
     for a in apps:
         b = bkt(a)
         by_bucket[b] = by_bucket.get(b, 0) + 1
-        if a.get('applied_date') and a['applied_date'] >= week_ago:
+        if (a.get('applied_date') or '')[:10] >= monday:
             week_by_bucket[b] = week_by_bucket.get(b, 0) + 1
     week_total = sum(v for v in week_by_bucket.values())
 

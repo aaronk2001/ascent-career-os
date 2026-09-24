@@ -177,7 +177,7 @@ export default function applications(): View {
     const c = cadence;
     const weekPct = c.weekly_target ? (c.week_total / c.weekly_target) * 100 : 0;
     const chips = Object.keys(c.bucket_targets).map((b) => {
-      const have = c.by_bucket[b] ?? 0;
+      const have = c.week_by_bucket[b] ?? 0;
       const target = c.bucket_targets[b] ?? 0;
       const pct = target ? (have / target) * 100 : 0;
       const tone = b === "other" ? "bg-ink-600" : b === "remote" ? "bg-cyan-400" : "bg-violet-400";

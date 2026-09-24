@@ -1,4 +1,4 @@
-"""Hour-by-hour day planner.
+"""Day planner: an ordered list of goals for the day.
 
 A day is generated from a template in schedule.yaml (weekday / saturday /
 sunday / bridge_weekday) and each block's title + detail are filled from live
@@ -34,8 +34,6 @@ _HEADER = (
 
 CATS = {
     "apps": {"label": "Applications", "color": "#3b82f6"},
-    "controls": {"label": "Controls lab", "color": "#22d3ee"},
-    "ml": {"label": "ML block", "color": "#8b5cf6"},
     "outreach": {"label": "Outreach", "color": "#f59e0b"},
     "clips": {"label": "Clips", "color": "#ec4899"},
     "portfolio": {"label": "Portfolio + links", "color": "#10b981"},
@@ -48,6 +46,20 @@ CATS = {
     "project": {"label": "Project ship", "color": "#84cc16"},
     "cert": {"label": "Cert study", "color": "#eab308"},
 }
+# Every active tracks/<id>.yaml adds a category named after the track id (see all_cats), so a
+# template block with `cat: <track id>` is filled from that track's current week.
+
+
+def all_cats():
+    """Fixed categories plus one per active learning track, right after `apps`.
+    A parked track (`active: false`) gets no Today goals until it is switched on."""
+    tracks = {m["id"]: {"label": m["day_label"], "color": m["day_color"], "track": True}
+              for m in registry.metas() if m["active"] and m["id"] not in CATS}
+    out = {"apps": CATS["apps"], **tracks}
+    out.update({k: v for k, v in CATS.items() if k != "apps"})
+    return out
+
+
 # Categories owned by an optional module; every other category is always on.
 MODULE_OF_CAT = {"clips": "clips", "gym": "health", "bridge": "side"}
 
@@ -67,9 +79,9 @@ SOCIAL_COURSE_ROTATION = [  # settings.yaml `social_courses` replaces this list
 
 
 def active_cats(settings=None):
-    """CATS minus the categories whose module is switched off."""
+    """all_cats() minus the categories whose module is switched off."""
     on = modules(settings if settings is not None else load_settings())
-    return {k: v for k, v in CATS.items() if on.get(MODULE_OF_CAT.get(k, ""), True)}
+    return {k: v for k, v in all_cats().items() if on.get(MODULE_OF_CAT.get(k, ""), True)}
 _DEFAULT_SCHEDULE = {"wake": "07:00", "hard_stop": "19:15",
                      "templates": {"weekday": [], "saturday": [], "sunday": [], "bridge_weekday": [],
                                    "pre_sprint": []}}
@@ -351,10 +363,8 @@ def _fill(cat, entry, settings):
         return _fill_social(day, settings)
     if cat == "apps":
         return _fill_apps(settings)
-    if cat == "controls":
-        return _fill_track("controls", "Controls", nth)
-    if cat == "ml":
-        return _fill_track("ml", "ML", nth)
+    if cat not in CATS and registry.exists(cat):
+        return _fill_track(cat, registry.short_name(cat), nth)
     if cat == "outreach":
         return _fill_outreach()
     if cat == "clips":
@@ -371,7 +381,7 @@ def _fill(cat, entry, settings):
                 "then Regenerate tomorrow on Today.", "#/today", "review", None)
     if cat == "bridge":
         return (entry.get("title") or "Bridge shift", "Agency contract / part-time shift.", "#/side", "bridge", None)
-    return (entry.get("title") or CATS.get(cat, {}).get("label", cat), "", "", cat, None)
+    return (entry.get("title") or all_cats().get(cat, {}).get("label", cat), "", "", cat, None)
 
 
 # ── public API ────────────────────────────────────────────────────────────────
@@ -411,7 +421,8 @@ def generate(day=None, template=None, force=False):
 def day_payload(day=None):
     day = day or date.today()
     cats = active_cats()
-    blocks = [b for b in generate(day) if b["cat"] in cats or b["cat"] not in CATS]
+    known = all_cats()
+    blocks = [b for b in generate(day) if b["cat"] in cats or b["cat"] not in known]
     sched = load_schedule()
     planned = sum(minutes_between(b["start"], b["end"]) for b in blocks if b["cat"] != "break")
     actual = sum(b.get("actual_min") or 0 for b in blocks)
@@ -429,9 +440,10 @@ def week_summary(start=None):
     end = start + timedelta(days=6)
     rows = db.day_blocks_range(start.isoformat(), end.isoformat())
     cats = active_cats()
+    known = all_cats()
     days, totals = {}, {}
     for b in rows:
-        if b["cat"] == "break" or (b["cat"] in CATS and b["cat"] not in cats):
+        if b["cat"] == "break" or (b["cat"] in known and b["cat"] not in cats):
             continue
         d = days.setdefault(b["date"], {})
         c = d.setdefault(b["cat"], {"planned": 0, "actual": 0, "done": 0, "blocks": 0})

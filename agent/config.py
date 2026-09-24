@@ -84,7 +84,9 @@ _DEFAULTS = {"ollama_host": DEFAULT_HOST, "model": DEFAULT_MODEL,
 #   side   - Side Hustle page, bridge-income template/anchors
 #   clips  - short-form clip posting blocks on Today
 #   health - Health page (weight, workouts) and gym blocks on Today
-MODULE_DEFAULTS = {"side": False, "clips": False, "health": False}
+#   news   - dashboard headlines fetched from Google News RSS (news.py); the only
+#            network call the app makes on its own
+MODULE_DEFAULTS = {"side": False, "clips": False, "health": False, "news": False}
 
 
 def modules(settings: dict | None = None) -> dict:

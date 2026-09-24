@@ -13,8 +13,6 @@ export type GanttState = {
   onDrag?: (item: Item, newIso: string) => void;
 };
 
-const PARKED_TRACKS = new Set(["welding", "mechanical-design", "it-pro"]);
-
 const PILL_H = 22;
 const V_GAP = 4;
 const ROW_PAD = 8;
@@ -125,11 +123,7 @@ export function drawGantt(host: HTMLElement, board: Board, state: GanttState): (
   host.innerHTML = `
     <div class="grid" style="grid-template-columns:${RAIL_W}px 1fr">
       <div class="border-r border-line bg-ink-900/40">
-        <div style="height:${RULER_H}px" class="border-b border-line grid place-items-center">${
-          state.zoom === "week"
-            ? `<div class="flex items-center gap-1.5 text-[8px] text-fg-faint leading-none" title="Study cadence — Controls MWF, ML Tue/Thu"><span class="h-1 w-2 rounded-sm bg-brand-500"></span>MWF<span class="h-1 w-2 rounded-sm bg-violet-500"></span>T-Th</div>`
-            : ""
-        }</div>
+        <div style="height:${RULER_H}px" class="border-b border-line"></div>
         ${railHtml}
       </div>
       <div id="tl-scroll" class="overflow-x-auto overflow-y-hidden">
@@ -242,7 +236,8 @@ function itemPill(p: Placed, laneTop: number, ph: number, vg: number, solo: bool
   const text = solo ? "text-[12px]" : "text-[11px]";
   // focused view has room to show the date inline
   const dateTag = solo && !isBar ? `<span class="ml-1 shrink-0 text-fg-faint nums text-[10px]">${esc(p.date.slice(5))}</span>` : "";
-  const parked = p.lane === "learning" && (PARKED_TRACKS.has(p.track ?? "") || p.label.includes("[parked]"));
+  // meta.parked = the track YAML says `active: false` (timeline_board._collect_track_weeks)
+  const parked = p.lane === "learning" && (p.meta.parked === true || p.label.includes("[parked]"));
   const parkedClass = parked ? "opacity-45" : "";
   const titleText = parked ? `${p.label} · after offer` : p.label;
   return `<div data-item-id="${esc(p.id)}" data-editable="${p.editable}"
@@ -272,15 +267,13 @@ function buildRuler(startDay: number, endDay: number, pxPerDay: number, zoom: Zo
     d = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1));
   }
   if (zoom === "week") {
-    // day numbers + study-cadence ticks (MWF = controls, T-Th = ML)
+    // day numbers (weekends dimmed); each track's own days show as its bars
     for (let i = startDay; i <= endDay; i++) {
       const dt = new Date(Date.UTC(2026, 0, 1) + i * 86400000);
       const dow = dt.getUTCDay();
       const x = (i - startDay) * pxPerDay;
       const wknd = dow === 0 || dow === 6;
       out.push(`<div class="absolute bottom-0.5 text-[9px] ${wknd ? "text-fg-faint/60" : "text-fg-faint"}" style="left:${x + 3}px">${dt.getUTCDate()}</div>`);
-      const cad = dow === 1 || dow === 3 || dow === 5 ? "var(--color-brand-500)" : dow === 2 || dow === 4 ? "var(--color-violet-500)" : null;
-      if (cad) out.push(`<div class="absolute bottom-0" style="left:${x}px;width:${pxPerDay}px;height:2px;background:color-mix(in oklab,${cad} 60%,transparent)"></div>`);
     }
   }
   return out.join("");

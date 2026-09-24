@@ -462,49 +462,16 @@ def _linda_search_memory(inp: dict) -> dict:
 
 
 def _search_jobs(inp: dict) -> dict:
-    """Search Indeed via the sibling job-search-agent scraper.
-    Falls back with guidance if the scraper isn't available on this box."""
+    """Job postings from Exa, scored against the keyword profile. Needs EXA_API_KEY;
+    without it the tool returns an error that says so (and suggests tavily_search)."""
+    from .job_search import scan_jobs
     try:
-        query = inp.get("query") or "controls engineer"
+        query = (inp.get("query") or "controls engineer").strip()
         location = inp.get("location") or _market()
-        pages = min(int(inp.get("pages", 2)), 4)
-        min_salary = int(inp.get("min_salary", 0))
-
-        scraper_path = Path(__file__).resolve().parent.parent.parent / "job-search-agent" / "src"
-        if str(scraper_path) not in sys.path:
-            sys.path.insert(0, str(scraper_path))
-
-        try:
-            from scrapers.indeed_scraper import search_indeed   # type: ignore
-        except ImportError as e:
-            return _err(ImportError(
-                f"job-search-agent scraper not installed: {e}. "
-                f"Try tavily_search with query: '{query} jobs {location}'"
-            ))
-
-        jobs = search_indeed(query, location=location, pages=pages)
-        if min_salary:
-            jobs = [
-                j for j in jobs
-                if j.get("salary_max", 0) >= min_salary
-                or j.get("salary_min", 0) >= min_salary
-            ]
-        top = jobs[:10]
-        summary = []
-        for j in top:
-            sal = ""
-            if j.get("salary_min") and j.get("salary_max"):
-                sal = f"${j['salary_min']//1000}k–${j['salary_max']//1000}k"
-            elif j.get("salary_min"):
-                sal = f"${j['salary_min']//1000}k+"
-            summary.append({
-                "title": j.get("title") or "",
-                "company": j.get("company") or "",
-                "location": j.get("location") or "",
-                "salary": sal or "Not listed",
-                "url": j.get("url") or "",
-            })
-        return _ok({"count": len(jobs), "top": summary, "query": query, "location": location})
+        out = scan_jobs([f"{query} jobs {location}"], min_score=0)
+        if not out["ok"]:
+            return _err(f"{out['error']} Meanwhile, try tavily_search with query: '{query} jobs {location}'.")
+        return _ok({"count": len(out["jobs"]), "top": out["jobs"], "query": query, "location": location})
     except Exception as e:
         return _err(e)
 
@@ -728,17 +695,15 @@ TOOLS: list[dict] = [
     {
         "name": "search_jobs",
         "description": (
-            "Search Indeed via the local job-search-agent scraper. Returns up to "
-            "10 listings with title, company, location, salary, and URL. "
-            "Falls back with guidance if scraper isn't on the box."
+            "Search job postings with Exa (needs EXA_API_KEY). Returns up to 10 "
+            "postings with company, role, URL and matched keywords. Returns an "
+            "error if Exa is not configured."
         ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "query":      {"type": "string"},
-                "location":   {"type": "string"},
-                "pages":      {"type": "integer", "description": "1–4"},
-                "min_salary": {"type": "integer"},
+                "query":    {"type": "string"},
+                "location": {"type": "string"},
             },
             "required": ["query"],
         },

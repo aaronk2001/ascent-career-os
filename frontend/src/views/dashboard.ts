@@ -29,7 +29,7 @@ const accent2 = () => getComputedStyle(document.documentElement).getPropertyValu
 type Stats = { total: number; by_stage: Record<string, number>; overdue_count: number; this_week_count: number; response_rate: number };
 type Skill = { skill: string; target_hours: number; hours_logged: number };
 type Week = { id: number; title: string; status: string; vocab?: string[] };
-type Track = { weeks?: Week[] };
+type Track = { id?: string; weeks?: Week[] };
 type Reminder = { id: string; kind: string; title: string; due?: string | null };
 type Milestone = { id: string; text: string; due?: string | null; done?: number };
 type GlossTerm = { term: string; def: string; domain?: string; formula?: string | null };
@@ -44,7 +44,7 @@ type Funnel = { stages: string[]; reached: number[]; steps: FunnelStep[] };
 type TrackSum = {
   id: string; title: string; pct: number; done: number; weeks: number; active: boolean;
   daily_hours: number | null; days: string[] | null; resume_after: string | null;
-  accent?: string | null;
+  accent?: string | null; short?: string; caption?: string;
 };
 type Anchors = {
   next_exam: string | null; next_exam_title: string | null; program_end: string | null; full_program_end: string | null;
@@ -65,9 +65,6 @@ type DayResp = {
   date: string; template: string; blocks: DayBlock[];
   planned_min: number; actual_min: number; done: number; wake: string; hard_stop: string;
 };
-
-// Parked tracks resume after the offer lands.
-const PARKED_TRACKS = ["welding", "mechanical-design", "it-pro"];
 
 function daysUntil(iso: string): number {
   // UTC midnights → exact whole-day diff (no DST fractional hour); consistent
@@ -117,9 +114,9 @@ function sprintElapsedPct(endIso: string, startIso: string | null): number {
   if (end <= start) return 100;
   return clamp(((Date.now() - start) / (end - start)) * 100, 0, 100);
 }
-function findNowNext(blocks: DayBlock[]): DayBlock | undefined {
-  const now = new Date().toTimeString().slice(0, 5);
-  return blocks.find((b) => b.end > now);
+// Today is an ordered goal list, not a timetable: "next" is the first open goal.
+function nextGoal(blocks: DayBlock[]): DayBlock | undefined {
+  return blocks.find((b) => b.status === "planned" && b.cat !== "break");
 }
 
 export default function dashboard(): View {
@@ -138,11 +135,9 @@ export default function dashboard(): View {
     async render(root) {
       root.innerHTML = `<div class="p-2 text-fg-muted">Loading…</div>`;
       const mods = modules();
-      const [s, skills, controls, ml, reminders, apps, miles, gloss, cad, funnel, anchors, tracks, side, day] = await Promise.all([
+      const [s, skills, reminders, apps, miles, gloss, cad, funnel, anchors, tracks, side, day] = await Promise.all([
         api<Stats>("/applications/stats"),
         api<Skill[]>("/skills"),
-        api<Track>("/controls"),
-        api<Track>("/ml"),
         api<Reminder[]>("/reminders").catch(() => [] as Reminder[]),
         api<{ company: string; role: string; status: string; applied_date?: string | null; location?: string | null }[]>("/applications").catch(() => []),
         api<Milestone[]>("/goals/milestones").catch(() => [] as Milestone[]),
@@ -163,6 +158,10 @@ export default function dashboard(): View {
           planned_min: 0, actual_min: 0, done: 0, wake: "", hard_stop: "",
         } as DayResp)),
       ]);
+      // Active tracks (YAML `active: true`) drive the rings and vocab; parked ones live on Learning.
+      const activeTracks = tracks.filter((t) => t.active);
+      const trackDetails = await Promise.all(activeTracks.map((t) =>
+        api<Track>(`/tracks/${encodeURIComponent(t.id)}`).catch(() => ({ weeks: [] } as Track))));
       const defs: Record<string, { def: string; formula?: string | null }> =
         Object.fromEntries(gloss.terms.map((t) => [t.term, { def: t.def, formula: t.formula }]));
 
@@ -201,8 +200,6 @@ export default function dashboard(): View {
 
       const skillHours = skills.reduce((a, x) => a + (x.hours_logged || 0), 0);
       const skillTarget = skills.reduce((a, x) => a + (x.target_hours || 0), 0);
-      const cw = currentWeek(controls), mw = currentWeek(ml);
-      const cp = trackProgress(controls), mp = trackProgress(ml);
       const pipeline = (s.by_stage.applied ?? 0) + (s.by_stage.phone_screen ?? 0) + (s.by_stage.technical ?? 0) + (s.by_stage.onsite ?? 0);
 
       // ── Widget registry ──────────────────────────────────────────────────
@@ -300,8 +297,10 @@ export default function dashboard(): View {
                 ${ring(total ? (done / total) * 100 : 0, { size: 78, stroke: 7, color, label: lbl })}
                 <div class="text-xs text-fg-muted">${esc(label)}</div></div>`;
             return `<div class="flex items-center justify-around gap-3 py-1">
-              ${cell("Controls", cp.done, cp.total, "var(--accent)", `${cp.done}/${cp.total}`)}
-              ${cell("ML / AI", mp.done, mp.total, "#8b5cf6", `${mp.done}/${mp.total}`)}
+              ${activeTracks.map((t, i) => {
+                const p = trackProgress(trackDetails[i]);
+                return cell(t.short ?? t.title, p.done, p.total, t.accent || "var(--accent)", `${p.done}/${p.total}`);
+              }).join("")}
               ${cell("Skill hours", skillHours, skillTarget, "#10b981", `${skillHours}h`)}</div>`;
           },
           mount: (el) => mountRings(el),
@@ -352,11 +351,11 @@ export default function dashboard(): View {
         {
           id: "vocab", title: "This week's vocab", span: 4, min: 2, max: 4,
           body: () => {
-            const v = [vocabChips("Controls", cw), vocabChips("ML / AI", mw)].filter(Boolean).join("");
+            const v = activeTracks.map((t, i) => vocabChips(t.short ?? t.title, currentWeek(trackDetails[i]))).filter(Boolean).join("");
             return v ? `<div class="space-y-4">${v}</div>` : `<div class="text-sm text-fg-faint">No active track week.</div>`;
           },
         },
-        {
+        ...(!mods.news ? [] : [{
           id: "news", title: "Signal · live", span: 2, min: 2, max: 4,
           body: () => `<div data-news class="text-sm text-fg-faint">Loading headlines…</div>`,
           mount: (el) => {
@@ -374,21 +373,21 @@ export default function dashboard(): View {
               })
               .catch(() => { box.textContent = "News unavailable."; });
           },
-        },
+        } satisfies Widget]),
       ];
 
       const offers = s.by_stage.offer ?? 0;
       // Job-sprint spine: /api/anchors (offer/runway math) + /api/tracks
-      // (controls/ml sprint progress) + /api/day (now/next block) drive the hero.
+      // (active track progress) + /api/day (now/next block) drive the hero.
       const weekLine = `<span class="nums">${cad.week_total}/${cad.weekly_target}</span> apps this week`;
       const heroLine = offers
         ? `<span class="text-positive font-semibold">${offers} offer${offers > 1 ? "s" : ""} in hand</span> — keep stacking skills.`
         : anchors.offer_date
           ? `<b>${Math.max(0, anchors.offer_days ?? 0)} days</b> to the signed-offer target (${shortDate(anchors.offer_date)})${anchors.runway_end ? ` · <b>${Math.max(0, anchors.runway_days ?? 0)} days</b> of runway` : ""} · ${weekLine}`
           : `<a href="#/settings" class="accent-text hover:underline">Set an offer target and runway in Settings</a> to start the countdowns · ${weekLine}`;
-      const nowBlock = findNowNext(day.blocks);
+      const nowBlock = nextGoal(day.blocks);
       const nowNextLine = nowBlock
-        ? `<a href="#/today" class="hover:underline">Now/Next: <span class="nums">${esc(nowBlock.start)}</span> <span class="truncate">${esc(nowBlock.title)}</span> → Today</a>`
+        ? `<a href="#/today" class="hover:underline">Next goal: <span class="truncate">${esc(nowBlock.title)}</span> → Today</a>`
         : `<a href="#/today" class="hover:underline">Day complete — log actuals →</a>`;
 
       const ringCell = (pct: number, color: string, label: string, caption: string) =>
@@ -396,23 +395,14 @@ export default function dashboard(): View {
           ${ring(pct, { size: 60, stroke: 6, color, label })}
           <div class="text-xs text-fg-faint mt-0.5">${esc(caption)}</div>
         </div>`;
-      const controlsT = tracks.find((t) => t.id === "controls");
-      const mlT = tracks.find((t) => t.id === "ml");
-      const controlsPct = controlsT?.weeks ? (controlsT.done / controlsT.weeks) * 100 : 0;
-      const mlPct = mlT?.weeks ? (mlT.done / mlT.weeks) * 100 : 0;
+      const trackRings = activeTracks.map((t) =>
+        ringCell(t.weeks ? (t.done / t.weeks) * 100 : 0, t.accent || "var(--accent)", `${t.done}/${t.weeks}`, t.caption ?? t.title)).join("");
       const offerPct = anchors.offer_date ? sprintElapsedPct(anchors.offer_date, anchors.sprint_start) : 0;
       // Countdown tile: "—" plus a Settings link while its anchor date is unset.
       const countTile = (n: number | null, caption: string, tone: string) => n == null
         ? `<div class="shrink-0"><div class="text-2xl font-semibold nums text-fg-faint">—</div><a href="#/settings" class="block text-[11px] text-fg-faint mt-0.5 hover:underline">${esc(caption)} · set in Settings</a></div>`
         : `<div class="shrink-0"><div class="text-2xl font-semibold nums ${tone}" data-count="${Math.max(0, n)}">0</div><div class="text-[11px] text-fg-faint mt-0.5">${esc(caption)}</div></div>`;
       const offerLabel = anchors.offer_days != null ? `${anchors.offer_days}` : "–";
-      const parkedRings = PARKED_TRACKS
-        .map((id) => tracks.find((t) => t.id === id))
-        .filter((t): t is TrackSum => !!t)
-        .map((t) => `<div class="flex flex-col items-center gap-1 opacity-45" title="${esc(t.title)} — ${t.done}/${t.weeks} weeks">
-            ${ring(t.weeks ? (t.done / t.weeks) * 100 : 0, { size: 38, stroke: 4, color: t.accent || "var(--accent)" })}
-            <div class="text-[10px] text-fg-faint max-w-[64px] truncate">${esc(t.title.split(/[—:(]/)[0].trim())}</div>
-          </div>`).join("");
 
       const dStretch = anchors.stretch_date ? daysUntil(anchors.stretch_date) : null;
       const runwayTone = anchors.runway_days != null && anchors.runway_days <= 21 ? "text-warn" : "text-fg";
@@ -434,9 +424,7 @@ export default function dashboard(): View {
               <div class="flex items-end gap-3 flex-wrap">
                 ${ringCell(offerPct, "var(--color-goal)", offerLabel, "to offer")}
                 ${ringCell(cad.weekly_target ? Math.min(100, (cad.week_total / cad.weekly_target) * 100) : 0, "var(--accent)", `${cad.week_total}/${cad.weekly_target}`, "apps / week")}
-                ${controlsT ? ringCell(controlsPct, controlsT.accent || "var(--accent)", `${controlsT.done}/${controlsT.weeks}`, "CODESYS sprint") : ""}
-                ${mlT ? ringCell(mlPct, mlT.accent || "#8b5cf6", `${mlT.done}/${mlT.weeks}`, "ML · CV") : ""}
-                ${parkedRings}
+                ${trackRings}
               </div>
               <div class="flex items-center gap-x-6 gap-y-2 flex-nowrap overflow-x-auto">
                 ${countTile(anchors.offer_date ? anchors.offer_days : null, "days to offer", "text-goal")}

@@ -196,7 +196,7 @@ export default function projectsView(): View {
           <div id="p-export-msg" class="text-xs text-fg-muted"></div>
           <div class="flex flex-wrap items-center gap-2 pt-1">
             <input id="p-new-name" placeholder="Project name" class="bg-ink-800 rounded-lg px-3 py-1.5 text-sm w-56" />
-            <input id="p-new-path" placeholder="Folder (optional, under ASCENT_PROJECTS_ROOT)" class="bg-ink-800 rounded-lg px-3 py-1.5 text-sm flex-1 min-w-48 max-w-96" />
+            <input id="p-new-path" placeholder="Folder (optional, relative to your projects folder)" class="bg-ink-800 rounded-lg px-3 py-1.5 text-sm flex-1 min-w-48 max-w-96" />
             <button id="p-add" class="rounded-lg btn-accent px-3 py-1.5 text-sm">+ Add project</button>
           </div>
         </div>

@@ -2,14 +2,14 @@ import { api } from "./api";
 
 // Optional modules (settings.yaml `modules:`). Loaded once before the shell mounts
 // so the nav never flashes items that are switched off.
-export type Modules = { side: boolean; clips: boolean; health: boolean };
+export type Modules = { side: boolean; clips: boolean; health: boolean; news: boolean };
 
-let current: Modules = { side: false, clips: false, health: false };
+const OFF: Modules = { side: false, clips: false, health: false, news: false };
+let current: Modules = OFF;
 
 export async function loadModules(): Promise<void> {
-  // A backend from before module flags existed has no /api/modules: show everything,
-  // as that backend did.
-  current = await api<Modules>("/modules").catch(() => ({ side: true, clips: true, health: true }));
+  // If the list can't be loaded, every optional module stays off.
+  current = { ...OFF, ...(await api<Partial<Modules>>("/modules").catch(() => ({}))) };
 }
 
 export const modules = (): Modules => current;

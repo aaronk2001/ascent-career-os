@@ -124,7 +124,8 @@ def _collect_track_weeks(items, tid, sched):
     if not weeks:
         return
     proj = (sched.get(tid) or {}).get("weeks", {})
-    short = (data.get("category") or tid)[:8].capitalize()
+    short = registry.short_name(tid, data)
+    parked = not data.get("active", True)
     for w in weeks:
         status = w.get("status") or "not_started"
         p = proj.get(w["id"]) or {}
@@ -140,7 +141,7 @@ def _collect_track_weeks(items, tid, sched):
                            start.isoformat(), f"{short} W{w['id']}: {w.get('title', '')}",
                            done=(status == "completed"), end_date=end.isoformat(),
                            editable=False, track=tid,
-                           meta={"status": status, "week_id": w["id"]}))
+                           meta={"status": status, "week_id": w["id"], "parked": parked}))
 
 
 def _rung(*, on, at):
@@ -197,6 +198,7 @@ def _health(items, today):
 
     # learning — with rolling projections there is no "calendar-expected week";
     # health = recency of real activity on the scheduled (active-pair) tracks.
+    active_ids = [m["id"] for m in registry.metas() if m["active"]]
     last_touch = None
     total_done = total_weeks = 0
     for meta in registry.all_tracks():
@@ -213,7 +215,7 @@ def _health(items, today):
     if total_weeks:
         idle = (today - last_touch).days if last_touch else None
         # sprint health = logged vs planned learning minutes so far this week
-        # (day_blocks actuals for the controls/ml categories)
+        # (day_blocks actuals for the active tracks' categories)
         try:
             import dayplan
             ws = dayplan.week_summary(today - timedelta(days=today.weekday()))
@@ -221,7 +223,7 @@ def _health(items, today):
             for d_iso, cats in ws["days"].items():
                 if d_iso > today.isoformat():
                     continue
-                for cat in ("controls", "ml"):
+                for cat in active_ids:
                     c = cats.get(cat)
                     if c:
                         planned += c["planned"]

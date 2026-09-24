@@ -17,6 +17,7 @@ const MODULE_INFO: [keyof Modules, string, string][] = [
   ["side", "Side hustle", "Side Hustle page, bridge-income template and dates"],
   ["clips", "Clips", "Short-form clip posting goals on Today"],
   ["health", "Health", "Health page (weight, workouts) and gym goals on Today"],
+  ["news", "News feed", "Dashboard headlines from Google News RSS (the app's only network call besides AI/search services you configure)"],
 ];
 
 type SettingsResp = {
@@ -77,9 +78,9 @@ export default function settings(): View {
   function draw(root: HTMLElement, d: SettingsResp, ollama: Ollama | null) {
     const mods = modules();
     const opts = modelOptions(d, ollama);
-    const bt = d.settings.bucket_targets || { local: 5, remote: 3 };
+    const bt = d.settings.bucket_targets || { local: 12, remote: 8 };
     const localLabel = d.settings.local_label || "Local";
-    const weekly = d.settings.weekly_target ?? 8;
+    const weekly = d.settings.weekly_target ?? 20;
     const tdate = d.settings.target_date ?? "";
     const bktInput = (id: string, label: string, v: number) =>
       `<label class="flex flex-col gap-1 text-xs text-fg-muted">${esc(label)}
@@ -128,8 +129,8 @@ export default function settings(): View {
           </div>
           <label class="block text-xs uppercase tracking-wide text-fg-faint pt-1">Pipeline targets by bucket</label>
           <div class="flex flex-wrap gap-3">
-            ${bktInput("t-local", localLabel, bt.local ?? bt.az ?? 5)}
-            ${bktInput("t-rem", "Remote", bt.remote ?? 3)}
+            ${bktInput("t-local", localLabel, bt.local ?? bt.az ?? 12)}
+            ${bktInput("t-rem", "Remote", bt.remote ?? 8)}
           </div>
           <button id="t-save" class="rounded-lg btn-accent px-3 py-1.5 text-sm">Save targets</button>
           <span id="t-msg" class="ml-2 text-xs text-positive"></span>

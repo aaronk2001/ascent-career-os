@@ -54,6 +54,14 @@ DENY = [ln.strip().lower() for ln in (DENY_FILE.read_text(encoding="utf-8").spli
 SECRETS = re.compile(r"sk-ant-[A-Za-z0-9_-]{10,}|\bsk-[A-Za-z0-9]{20,}|tvly-[A-Za-z0-9]{10,}|ghp_[A-Za-z0-9]{20,}"
                      r"|AKIA[0-9A-Z]{16}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY")
 BANNED_SUFFIXES = (".db", ".db-wal", ".db-shm", ".docx", ".jsonl", ".env")
+# README links like `tracker.py#L59-L102` must still land on the code they describe:
+# the first linked line has to contain this text, so a shifted range fails the export.
+ANCHORS = {
+    "tracker.py": "localhost guard", "projects.py": "def _source_dir", "plan.py": "def _walk",
+    "db.py": "def _migrate", "dayplan.py": "tracks/<id>.yaml adds a category", "agent/tools.py": "TOOLS",
+    "agent/config.py": "def chat_with_fallback", "app.py": "def _reusable",
+}
+ANCHOR_LINK = re.compile(r"\]\(([\w/.-]+)#L(\d+)(?:-L(\d+))?\)")
 
 
 def sources():
@@ -101,9 +109,30 @@ def scan(target: Path) -> list[str]:
     return hits
 
 
+def check_anchors(target: Path) -> list[str]:
+    readme = target / "README.md"
+    if not readme.exists():
+        return []
+    bad = []
+    for m in ANCHOR_LINK.finditer(readme.read_text(encoding="utf-8")):
+        rel, a, b = m.group(1), int(m.group(2)), int(m.group(3) or m.group(2))
+        f = target / rel
+        lines = f.read_text(encoding="utf-8").splitlines() if f.exists() else []
+        want = ANCHORS.get(rel)
+        if not lines or b > len(lines) or a > b:
+            bad.append(f"README link {m.group(0)[2:-1]}: range outside {rel}")
+        elif want is None:
+            bad.append(f"README link {m.group(0)[2:-1]}: add {rel!r} to ANCHORS in export_repo.py")
+        elif want not in lines[a - 1]:
+            bad.append(f"README link {m.group(0)[2:-1]}: line {a} no longer contains {want!r}")
+    return bad
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
+    if not DENY:
+        sys.exit(f"denylist missing or empty: {DENY_FILE} (refusing to export without a privacy scan)")
     target = Path(sys.argv[1]).resolve()
     if target == ROOT or ROOT in target.parents:
         sys.exit("target must be outside the app folder")
@@ -119,12 +148,12 @@ def main():
     for src in overlay:
         copy(src, target / src.relative_to(OVERLAY))
     mark_executable(target)
-    hits = scan(target)
+    hits = scan(target) + check_anchors(target)
     print(f"exported {len(files)} source files + {len(overlay)} overlay files -> {target}")
     if hits:
-        print("PRIVACY SCAN FAILED:\n  " + "\n  ".join(hits))
+        print("EXPORT CHECKS FAILED:\n  " + "\n  ".join(hits))
         sys.exit(1)
-    print(f"privacy scan: clean ({len(DENY)} denylist terms, secret patterns, banned file types)")
+    print(f"privacy scan: clean ({len(DENY)} denylist terms, secret patterns, banned file types); README line links ok")
 
 
 if __name__ == "__main__":

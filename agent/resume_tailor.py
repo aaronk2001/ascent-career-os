@@ -151,12 +151,14 @@ def _keyword_report(job_description: str, resume_json: dict, corpus: str) -> dic
     matched = [k for k in jd_kw if k in rtext]
     missing = [k for k in jd_kw if k not in rtext]
 
-    # Fabrication oracle: hard facts (numbers, %, x-multipliers, tool tokens)
-    # appearing in the tailored resume must trace back to the master corpus.
+    # Fabrication oracle: every number (with its %, x or + suffix) in the tailored
+    # resume must appear as a whole number token in the master corpus. Whole
+    # tokens, not substrings: "5" must not pass because the corpus says "2025".
+    corpus_nums = {n.rstrip(".,") for n in re.findall(r"\b\d[\d,.]*", corpus)}
     unverified = []
     for tok in re.findall(r"\b\d[\d,.]*\s?(?:%|x|×|\+)?", rtext):
         norm = tok.strip()
-        if norm and norm not in corpus and norm.rstrip("%x×+ ") not in corpus:
+        if norm and norm.rstrip("%x×+ ").rstrip(".,") not in corpus_nums:
             unverified.append(norm)
     seen = set()
     unverified = [u for u in unverified if not (u in seen or seen.add(u))]

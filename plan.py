@@ -14,7 +14,7 @@ from agent.config import load_settings
 
 DOW = {"Mon": 0, "Tue": 1, "Wed": 2, "Thu": 3, "Fri": 4, "Sat": 5, "Sun": 6}
 DEFAULT_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"]
-DEFAULT_EST_HOURS = {"controls": 12, "ml": 5}
+DEFAULT_EST_HOURS = 6  # per week, unless the YAML sets `default_est_hours`
 DEFAULT_DAILY_HOURS = 1
 
 
@@ -81,9 +81,10 @@ def schedule(today=None):
             continue
         weeks = data["weeks"]
         active = data.get("active", True)
-        daily = float(data.get("daily_hours") or DEFAULT_DAILY_HOURS) or DEFAULT_DAILY_HOURS
+        # floor: a zero/negative daily_hours (YAML typo) would make _walk loop forever
+        daily = max(0.25, float(data.get("daily_hours") or DEFAULT_DAILY_HOURS))
         days = _days(data)
-        est_default = DEFAULT_EST_HOURS.get(tid, 6)
+        est_default = float(data.get("default_est_hours") or DEFAULT_EST_HOURS)
         remaining = [w for w in weeks if (w.get("status") or "not_started") != "completed"]
         live = [w for w in remaining if not is_parked_week(w)]
         parked = [w for w in remaining if is_parked_week(w)]

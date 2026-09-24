@@ -32,9 +32,9 @@ from data import DATA_FILE as _DATA_PATH  # noqa: E402
 
 
 def _target_date() -> date:
-    """Working deadline = next cert exam, else projected learning-program end
-    (single source of truth in anchors.py). Keeps the morning brief in sync
-    with the Timeline, Focus and Dashboard countdowns."""
+    """Working deadline from anchors.deadline() (the offer date when set, then the
+    next cert exam, then the projected program end). Keeps the morning brief in
+    sync with the Timeline, Focus and Dashboard countdowns."""
     return anchors.deadline()
 
 def _first_name() -> str:
@@ -404,9 +404,11 @@ def api_skills_delete(sid):
 def api_skills_gap_analysis():
     """Match tracked skill proficiencies against a target role profile."""
     pid = request.args.get("profile")
-    result = roadmaps.gap_analysis(pid) if pid else None
+    if not pid:
+        return jsonify({"ok": False, "error": "?profile=<job profile id> is required"}), 400
+    result = roadmaps.gap_analysis(pid)
     if result is None:
-        return jsonify({"ok": False, "error": "profile required or not found"}), 404
+        return jsonify({"ok": False, "error": f"unknown profile {pid!r}"}), 404
     return jsonify(result)
 
 
@@ -641,7 +643,8 @@ def api_reminders_put(rid):
 def api_jobs_scan():
     try:
         from agent.job_search import scan_jobs
-        return jsonify({"ok": True, "jobs": scan_jobs()})
+        out = scan_jobs()
+        return jsonify(out), (200 if out["ok"] else 503)
     except Exception as exc:
         logging.exception("job scan failed")
         return jsonify({"ok": False, "error": str(exc)}), 500
@@ -1020,7 +1023,7 @@ def api_day_add():
         return jsonify({"ok": False, "error": "date + start required"}), 400
     body.setdefault("cat", "review")
     body.setdefault("end", dayplan.add_min(body["start"], body.get("min") or 60))
-    body.setdefault("title", dayplan.CATS.get(body["cat"], {}).get("label", body["cat"]))
+    body.setdefault("title", dayplan.all_cats().get(body["cat"], {}).get("label", body["cat"]))
     return jsonify(db.day_block_create(body))
 
 
@@ -1029,7 +1032,8 @@ def api_schedule_get():
     import dayplan
     sched = dayplan.load_schedule()
     used = {b.get("cat") for blocks in sched["templates"].values() for b in blocks}
-    cats = {k: v for k, v in dayplan.CATS.items() if k in dayplan.active_cats() or k in used}
+    active = dayplan.active_cats()
+    cats = {k: v for k, v in dayplan.all_cats().items() if k in active or k in used}
     return jsonify({**sched, "cats": cats})
 
 
@@ -1217,28 +1221,6 @@ def api_day_sync_gcal():
         return jsonify(gcal.sync_day(_parse_day(body.get("date"))))
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)})
-
-
-# ── legacy aliases — timeline/dashboard still call /api/controls and /api/ml ────
-
-@app.route("/api/controls", methods=["GET"])
-def api_controls_get():
-    return jsonify(registry.load_track("controls") or {})
-
-
-@app.route("/api/controls/week/<int:week_id>", methods=["PUT"])
-def api_controls_week_put(week_id):
-    return api_track_week_put("controls", week_id)
-
-
-@app.route("/api/ml", methods=["GET"])
-def api_ml_get():
-    return jsonify(registry.load_track("ml") or {})
-
-
-@app.route("/api/ml/week/<int:week_id>", methods=["PUT"])
-def api_ml_week_put(week_id):
-    return api_track_week_put("ml", week_id)
 
 
 # ── main ───────────────────────────────────────────────────────────────────────
