@@ -7,6 +7,7 @@ the Markdown export. Nothing here writes story text: the three story blanks + a
 they still need filling.
 """
 import json
+import os
 from datetime import date
 from pathlib import Path
 
@@ -95,9 +96,15 @@ def set_tier(pid, tier):
     return decorate(row) if row else None
 
 
+# ── roots ───────────────────────────────────────────────────────────────────────
+# Project `path`s are relative to ASCENT_PROJECTS_ROOT (default: your home folder),
+# and Draft with Linda only reads files inside it. PROJECTS.md is written into that
+# root when the variable is set, otherwise next to the database (gitignored).
+_ROOT_ENV = os.environ.get("ASCENT_PROJECTS_ROOT")
+PROJECTS_ROOT = Path(_ROOT_ENV).expanduser() if _ROOT_ENV else Path.home()
+
 # ── Markdown export ─────────────────────────────────────────────────────────────
-# projects/Finance agent/career-planner/projects.py -> projects/PROJECTS.md
-PROJECTS_MD = Path(__file__).resolve().parents[2] / "PROJECTS.md"
+PROJECTS_MD = (PROJECTS_ROOT if _ROOT_ENV else Path(db.DB_PATH).parent) / "PROJECTS.md"
 
 BLANK = "_(blank)_"
 
@@ -154,9 +161,6 @@ def export_markdown():
 
 
 # ── Linda draft ─────────────────────────────────────────────────────────────────
-# projects/Finance agent/career-planner/projects.py -> projects/ (project paths are
-# relative to this root, e.g. Pis/edge-defect-detection).
-PROJECTS_ROOT = Path(__file__).resolve().parents[2]
 DRAFT_SOURCES = ("README.md", "CLAUDE.md", "package.json", "pyproject.toml")
 DRAFT_CAP = 6000
 DRAFT_SYSTEM = (
@@ -172,9 +176,18 @@ class DraftError(Exception):
         self.status, self.message = status, message
 
 
+def _source_dir(path):
+    """The project folder, resolved (symlinks and `..` included) and required to sit
+    inside PROJECTS_ROOT, so a crafted path can't make Linda read arbitrary files."""
+    root = PROJECTS_ROOT.resolve()
+    base = (root / Path(path).expanduser()).resolve()
+    if base != root and root not in base.parents:
+        raise DraftError(403, f"{path} is outside the projects root ({root}); set ASCENT_PROJECTS_ROOT")
+    return base
+
+
 def _source_text(path):
-    base = Path(path)
-    base = base if base.is_absolute() else PROJECTS_ROOT / base
+    base = _source_dir(path)
     chunks = []
     for name in DRAFT_SOURCES:
         f = base / name

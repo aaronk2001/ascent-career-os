@@ -1,8 +1,8 @@
-import { NAV } from "./router";
+import { NAV, navItems } from "./router";
 import { ACCENTS, getPrefs, setPrefs, resetPrefs } from "./prefs";
 
 function fullOrder(): string[] {
-  const all = NAV.map((n) => n.id);
+  const all = navItems().map((n) => n.id);
   const p = getPrefs();
   const order = p.navOrder.filter((id) => all.includes(id));
   for (const id of all) if (!order.includes(id)) order.push(id);

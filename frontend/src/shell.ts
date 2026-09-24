@@ -1,4 +1,4 @@
-import { NAV, currentRoute } from "./router";
+import { NAV, navItems, currentRoute } from "./router";
 import { mountNotifications } from "./notifications";
 import { mountCustomize } from "./customize";
 import { slidePill } from "./motion";
@@ -37,7 +37,7 @@ export function mountShell(app: HTMLElement): HTMLElement {
   function renderNav() {
     for (const a of links) a.remove();
     links = [];
-    const ids = orderedVisible(NAV.map((n) => n.id));
+    const ids = orderedVisible(navItems().map((n) => n.id));
     for (const id of ids) {
       const item = NAV.find((n) => n.id === id)!;
       const a = document.createElement("a");
@@ -67,7 +67,7 @@ export function mountShell(app: HTMLElement): HTMLElement {
   topbar.className = "flex items-center gap-1.5 h-12 px-1 shrink-0";
   const search = document.createElement("button");
   search.className = "flex items-center gap-2 h-9 px-3 rounded-xl glass text-sm text-fg-faint hover:text-fg-muted transition-colors w-72 max-w-[40vw]";
-  search.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span>Search or jump to…</span><span class="ml-auto text-[10px] rounded bg-ink-800 px-1.5 py-0.5">⌘K</span>`;
+  search.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span>Search or jump to…</span><span class="ml-auto text-[10px] rounded bg-ink-800 px-1.5 py-0.5">${/Mac/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</span>`;
   search.addEventListener("click", () => dispatchEvent(new Event("ascent:cmdk")));
   topbar.append(search, Object.assign(document.createElement("div"), { className: "flex-1" }));
   mountCustomize(topbar);

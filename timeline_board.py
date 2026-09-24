@@ -8,7 +8,7 @@ per-lane `health`, and a `triage` list of stale/overdue rows.
 The frontend `/api/timeline/board` handler just calls `board()`.
 Dates are handled as `YYYY-MM-DD` strings throughout — no tz math.
 """
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 import anchors
 import db
@@ -271,5 +271,5 @@ def board():
         "today": today.isoformat(),
         "health": _health(items, today),
         "triage": _triage(items, today),
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
     }

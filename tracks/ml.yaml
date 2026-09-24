@@ -1,5 +1,5 @@
-# ML / AI Bridge Track v2 — mapped from docs/career/ml-track-v2-source.yaml (Aaron, 2026-09-23).
-# 24-week draft compressed to 12 weeks (10 h/wk kept, scope trimmed). v1 kept as ml.yaml.bak-v1-2026-09-23.
+# ML / AI Bridge Track v2.
+# 24-week draft compressed to 12 weeks (10 h/wk kept, scope trimmed).
 # Out of scope in v2: QLoRA, OpenTelemetry, canary/blue-green deploys, MVTec benchmark.
 track: ml-bridge
 title: ML / AI Bridge Track
@@ -52,7 +52,7 @@ gap_analysis:
     gap: "App-level ML metrics, tracing"
     proof_artifact: "Grafana dashboard: inference latency, confidence drift, error budget"
   - requirement: "GenAI / agentic AI / RAG / guardrails"
-    have: "Linda agent, Market_king, Phantom — Claude-based agents"
+    have: "A few LLM agent prototypes (tool-calling, Claude and local models)"
     gap: "Evals, guardrails, human-in-the-loop, RAG done properly"
     proof_artifact: "maintenance-copilot: RAG + MCP tools + eval set + approval gate"
   - requirement: "Spec-Driven Development / acceptance criteria"
@@ -108,10 +108,10 @@ targets:
     - "ML Engineer, Manufacturing / Smart Factory"
     - "Machine Vision / Inspection Engineer"
     - "MLOps Engineer (edge)"
-  phoenix_area_employers:
-    semiconductor: [TSMC Arizona, Intel Chandler, Amkor, ASML, Applied Materials, KLA, Microchip, onsemi]
-    autonomy_robotics: [Waymo, Waabi, Amazon Robotics / RME]
-    industrial: [Honeywell, system integrators adding vision/ML]
+  example_employers:
+    semiconductor: [chip fabs, equipment makers (litho, etch, metrology), OSAT packaging]
+    autonomy_robotics: [autonomous-vehicle companies, warehouse-robotics teams]
+    industrial: [automation OEMs, system integrators adding vision/ML]
   inside_move_strategy: >
     Land a bridge role at a company that has a smart-manufacturing / AI team.
     By month 9, identify one internal vision or anomaly-detection POC.

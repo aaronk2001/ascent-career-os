@@ -1,9 +1,11 @@
-# Today renders these as an ordered goal list, not a timetable.
-# `start` is only the sort key; `min` is the goal's size and still drives
-# week_summary() and the weekly hour budget. Real times are kept so the
-# hour-by-hour view can be restored later without a data migration.
+# Default day templates. Copy to schedule.yaml (or just save from Settings ->
+# Day templates, which writes schedule.yaml for you) and edit.
+# Today renders these as an ordered goal list, not a timetable: `start` is only
+# the sort key, `min` is the goal's size and drives the weekly hour budget.
+# Blocks whose category belongs to a disabled module (gym = health, bridge =
+# side, clips = clips) are skipped until that module is switched on.
 wake: "07:00"
-hard_stop: "22:00"
+hard_stop: "21:00"
 templates:
   weekday:
   - start: "08:30"
@@ -17,38 +19,29 @@ templates:
     cat: break
     title: Lunch
   - start: "13:15"
-    min: 60
-    cat: controls
-  - start: "14:15"
     min: 120
     cat: ml
   - start: "15:15"
     min: 60
     cat: outreach
   - start: "16:15"
-    min: 30
-    cat: clips
-  - start: "16:45"
     min: 60
     cat: portfolio
-  - start: "17:30"
+  - start: "17:15"
     min: 45
     cat: project
-  - start: "17:45"
-    min: 30
-    cat: review
-  - start: "18:30"
+  - start: "18:00"
     min: 60
     cat: gym
+  - start: "19:00"
+    min: 45
+    cat: cert
   - start: "19:45"
-    min: 30
-    cat: social
-  - start: "20:15"
     min: 45
     cat: study
   - start: "20:30"
-    min: 45
-    cat: cert
+    min: 30
+    cat: review
   saturday:
   - start: "09:00"
     min: 180
@@ -58,21 +51,18 @@ templates:
     cat: break
     title: Lunch
   - start: "12:30"
-    min: 120
-    cat: clips
-  - start: "14:30"
     min: 90
     cat: portfolio
-  - start: "15:30"
+  - start: "14:00"
     min: 45
     cat: project
-  - start: "16:00"
+  - start: "14:45"
     min: 45
     cat: study
-  - start: "16:30"
+  - start: "15:30"
     min: 45
     cat: cert
-  - start: "17:00"
+  - start: "16:15"
     min: 60
     cat: gym
   sunday: []
@@ -92,28 +82,15 @@ templates:
     title: Lunch
   - start: "13:00"
     min: 30
-    cat: clips
-  - start: "14:00"
-    min: 30
     cat: review
   - start: "15:00"
     min: 240
     cat: bridge
     title: Bridge shift
-  - start: "19:30"
-    min: 60
-    cat: gym
-  - start: "20:45"
-    min: 45
-    cat: study
   pre_sprint:
   - start: "18:00"
     min: 60
     cat: portfolio
   - start: "19:00"
-    min: 45
-    cat: clips
-    title: 'Clips setup: Phantom creds + first ingest'
-  - start: "19:45"
     min: 15
     cat: review

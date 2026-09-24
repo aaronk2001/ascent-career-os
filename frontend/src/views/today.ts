@@ -143,7 +143,7 @@ export default function today(): View {
     const addForm = adding ? `<div class="card p-3 flex flex-wrap items-end gap-2">
         <label class="flex flex-col gap-1 text-[11px] text-fg-muted">Minutes<input id="td-add-min" type="number" min="5" step="5" value="60" class="w-20 bg-ink-800 rounded-lg px-2 py-1.5 text-sm"/></label>
         <label class="flex flex-col gap-1 text-[11px] text-fg-muted">Category<select id="td-add-cat" class="bg-ink-800 rounded-lg px-2 py-1.5 text-sm">${Object.entries(d.cats).map(([k, c]) => `<option value="${esc(k)}">${esc(c.label)}</option>`).join("")}</select></label>
-        <label class="flex flex-col gap-1 text-[11px] text-fg-muted flex-1 min-w-[180px]">Title<input id="td-add-title" placeholder="e.g. Phone screen — Axon" class="bg-ink-800 rounded-lg px-2 py-1.5 text-sm"/></label>
+        <label class="flex flex-col gap-1 text-[11px] text-fg-muted flex-1 min-w-[180px]">Title<input id="td-add-title" placeholder="e.g. Phone screen — Acme Robotics" class="bg-ink-800 rounded-lg px-2 py-1.5 text-sm"/></label>
         <button id="td-add-save" class="rounded-lg btn-accent px-3 py-1.5 text-sm">Add</button>
         <button id="td-add-cancel" class="rounded-lg border border-line px-3 py-1.5 text-sm text-fg-muted">Cancel</button>
       </div>` : "";

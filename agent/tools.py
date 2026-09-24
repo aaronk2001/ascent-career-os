@@ -25,9 +25,8 @@ from datetime import date as _date, datetime, timezone
 from pathlib import Path
 
 import requests
-import yaml
 
-# Make the career-planner/ root importable from agent/tools.py
+# Make the repo root importable from agent/tools.py
 _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
@@ -81,7 +80,7 @@ def _tavily_search(query: str, num_results: int = 5,
     key = os.environ.get("TAVILY_API_KEY")
     if not key:
         raise ValueError(
-            "TAVILY_API_KEY is not set — add it to career-planner/.env. "
+            "TAVILY_API_KEY is not set — add it to .env in the repo root. "
             "Get a free key at https://tavily.com/"
         )
     r = requests.post(
@@ -377,8 +376,8 @@ def _analyze_offer(inp: dict) -> dict:
         target_p1 = float(prof["target_salary"] or (current * 1.25 if current else offer))
 
         def net_monthly(gross: float) -> float:
-            # Rough 74 % after-tax for AZ, ~$65–115k bracket
-            return round(gross * 0.74 / 12, 0)
+            # rough take-home share of gross; profile.yaml `after_tax_rate`
+            return round(gross * float(prof["after_tax_rate"]) / 12, 0)
 
         current_take = net_monthly(current)
         offer_take = net_monthly(offer)

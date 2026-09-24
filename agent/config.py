@@ -1,6 +1,6 @@
 """
 Shared LLM/app settings — single source of truth for Linda and the resume
-generator. Persisted to career-planner/settings.yaml.
+generator. Persisted to settings.yaml at the repo root (override with ASCENT_SETTINGS).
 
 Precedence for model/host: explicit env override > settings.yaml > default.
 `chat_with_fallback` auto-downgrades to a model that fits when the chosen one
@@ -46,7 +46,8 @@ CURATED_MODELS = [
 _DEFAULTS = {"ollama_host": DEFAULT_HOST, "model": DEFAULT_MODEL,
              "target_date": None,               # plan target shown in briefs
              "weekly_target": 20,               # apps/week goal
-             "bucket_targets": {"az": 12, "remote": 8},
+             "bucket_targets": {"local": 12, "remote": 8},
+             "local_label": "Local",            # display name of the "local" bucket
              # job-sprint anchors (set in Settings): sprint day 1, signed-offer
              # target, stretch first offer, runway end, bridge-income decision gate
              "sprint_start": None,
@@ -67,14 +68,35 @@ _DEFAULTS = {"ollama_host": DEFAULT_HOST, "model": DEFAULT_MODEL,
              "sex": None,                       # male | female
              "daily_delta": 500,
              "goal_date": None,    # target date; drives the required delta
-             "cert_budget": None}  # cap on active-cert cost_usd; None = no cap shown
+             "cert_budget": None,  # cap on active-cert cost_usd; None = no cap shown
+             # optional modules; see MODULE_DEFAULTS / modules()
+             "modules": {},
+             # Today "study" block: weekday (0=Mon) -> topic key, merged over the
+             # defaults in dayplan; study_topics adds/overrides {key: [label, detail]}
+             "study_plan": {},
+             "study_topics": {},
+             "social_courses": [],               # overrides dayplan's default rotation
+             "clips_tool": None,                 # name + URL of an external clip tool (clips module)
+             "clips_url": None}
+
+# Optional modules. Off by default so a fresh install is a focused job-search tool;
+# each can be switched on in Settings (or settings.yaml `modules:`).
+#   side   - Side Hustle page, bridge-income template/anchors
+#   clips  - short-form clip posting blocks on Today
+#   health - Health page (weight, workouts) and gym blocks on Today
+MODULE_DEFAULTS = {"side": False, "clips": False, "health": False}
+
+
+def modules(settings: dict | None = None) -> dict:
+    raw = (settings if settings is not None else load_settings()).get("modules") or {}
+    return {k: bool(raw.get(k, v)) for k, v in MODULE_DEFAULTS.items()}
 
 # Keys persisted as trimmed strings; others (ints, dicts) pass through verbatim.
 # keys the UI is allowed to blank back out
 _NULLABLE_KEYS = {"weight_goal", "weight_start", "height_in", "birth_year", "sex", "goal_date",
                   "cert_budget"}
 _STRING_KEYS = {"ollama_host", "model", "target_date", "sprint_start", "offer_date", "stretch_date",
-                "runway_end", "bridge_gate", "weight_mode", "sex", "goal_date"}
+                "runway_end", "bridge_gate", "weight_mode", "sex", "goal_date", "local_label"}
 
 
 # mtime-keyed parse cache: load_settings() is called several times per request
@@ -109,7 +131,9 @@ def save_settings(patch: dict) -> dict:
             continue
         # None normally means "not supplied" so a partial patch can't wipe a key;
         # the nullable ones are genuinely clearable from the UI.
-        if patch[k] in (None, "") and k in _NULLABLE_KEYS:
+        if k == "modules" and isinstance(patch[k], dict):
+            cur[k] = {**(cur.get(k) or {}), **{m: bool(v) for m, v in patch[k].items() if m in MODULE_DEFAULTS}}
+        elif patch[k] in (None, "") and k in _NULLABLE_KEYS:
             cur[k] = None
         elif patch[k] not in (None, "") or isinstance(patch[k], bool):
             cur[k] = str(patch[k]).strip() if k in _STRING_KEYS else patch[k]

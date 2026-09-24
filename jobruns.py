@@ -1,9 +1,10 @@
 """
-Reads the daily Cowork "engineering job pull" written to
-  ~/projects/career/job_runs/YYYY-MM-DD/
+Reads daily job-pull runs written by an external scheduled job (any script or
+agent that follows this layout) into ASCENT_JOB_RUNS (default: data/job_runs/):
+  <ASCENT_JOB_RUNS>/YYYY-MM-DD/
 Each run has 00_summary.md (ranked table + "why each fits") and per-job folders
-NN_<slug>/ with job.md, resume_data.json, cover_letter_data.json, and the two
-generated .docx files. Pure read-only parsing over the filesystem.
+NN_<slug>/ with job.md and, optionally, generated *_Resume.docx /
+*_CoverLetter.docx files. Pure read-only parsing over the filesystem.
 """
 from __future__ import annotations
 
@@ -11,7 +12,7 @@ import os
 import re
 from pathlib import Path
 
-JOB_RUNS = Path(os.environ.get("ASCENT_JOB_RUNS") or (Path.home() / "projects" / "career" / "job_runs"))
+JOB_RUNS = Path(os.environ.get("ASCENT_JOB_RUNS") or (Path(__file__).parent / "data" / "job_runs"))
 
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _ROW_RE = re.compile(r"^\|\s*(\d+)\s*\|(.+)$")

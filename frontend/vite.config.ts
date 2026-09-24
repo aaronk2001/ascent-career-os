@@ -46,5 +46,7 @@ export default defineConfig(({ command }) => ({
     // Desktop-only target (pywebview = modern Edge/WebView2), so skip legacy
     // transpilation → smaller, faster-parsing chunks.
     target: "esnext",
+    // The lazily loaded Three.js globe chunk is ~570 kB by itself; it never blocks first paint.
+    chunkSizeWarningLimit: 700,
   },
 }));

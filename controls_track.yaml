@@ -4,7 +4,6 @@ started: 2026-05-08
 target_completion: 2026-06-26
 phase: 1
 sequencing_policy: free-first
-sequencing_doc: aaron-portfolio/CONTROLS_TRACK_REORDER.md
 cadence:
   sessions_per_week: 3
   days: [Mon, Wed, Fri]

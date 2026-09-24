@@ -1,0 +1,27 @@
+[project]
+name = "ascent"
+version = "0.1.0"
+description = "Local-first career OS: Flask + SQLite API, TypeScript SPA, local-LLM assistant"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = ["_legacy", "frontend", "static", "demo", ".venv"]
+
+[tool.ruff.lint]
+# pyflakes + pycodestyle errors/warnings + bugbear's likely-bug checks. No formatter
+# rules: the codebase keeps its own layout.
+select = ["F", "E4", "E7", "E9", "W6", "B006", "B008", "B015", "B018"]
+ignore = ["E741", "E702"]  # `l` loop vars and `a; b` one-liners are house style
+
+[tool.ruff.lint.per-file-ignores]
+# tracker.py / tests load .env or patch sys.path before importing app modules.
+"tracker.py" = ["E402"]
+"tests/*" = ["E402"]
+"scripts/*" = ["E402"]
+"agent/resume_tailor.py" = ["E402"]
+"agent/tools.py" = ["E402"]

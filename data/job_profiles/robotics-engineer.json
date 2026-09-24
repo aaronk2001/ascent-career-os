@@ -1,7 +1,7 @@
 {
   "title": "Robotics Engineer",
   "summary": "Robot fleet, motion, and autonomy work — closest to hands-on fleet and cobot experience.",
-  "bucket": "az",
+  "bucket": "local",
   "required_skills": [
     { "skill": "Kinematics", "level": 4 },
     { "skill": "Motion Control", "level": 4 },

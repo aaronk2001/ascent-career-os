@@ -5,7 +5,8 @@ import { esc, badge } from "../ui";
 import { countUp, growBars } from "../motion";
 import { ring, mountRings } from "../visuals";
 import { getPrefs, setPrefs, type WidgetPref } from "../prefs";
-import { appMarkers } from "../geocode";
+import { appHome, appMarkers } from "../geocode";
+import { modules } from "../modules";
 
 // chart.js (~187KB) is dynamic-imported and registered once on first chart
 // mount (mirrors the globe defer below) so the hero + non-chart widgets paint
@@ -105,13 +106,13 @@ function trackProgress(t: Track) {
 }
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
-const SPRINT_START = "2026-09-10";
 function isoUTC(iso: string): number {
   const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
   return Date.UTC(y, m - 1, d);
 }
-function sprintElapsedPct(endIso: string, startIso: string | null = null): number {
-  const start = isoUTC(startIso ?? SPRINT_START);
+function sprintElapsedPct(endIso: string, startIso: string | null): number {
+  if (!startIso) return 0;
+  const start = isoUTC(startIso);
   const end = isoUTC(endIso);
   if (end <= start) return 100;
   return clamp(((Date.now() - start) / (end - start)) * 100, 0, 100);
@@ -136,13 +137,14 @@ export default function dashboard(): View {
     },
     async render(root) {
       root.innerHTML = `<div class="p-2 text-fg-muted">Loading…</div>`;
+      const mods = modules();
       const [s, skills, controls, ml, reminders, apps, miles, gloss, cad, funnel, anchors, tracks, side, day] = await Promise.all([
         api<Stats>("/applications/stats"),
         api<Skill[]>("/skills"),
         api<Track>("/controls"),
         api<Track>("/ml"),
         api<Reminder[]>("/reminders").catch(() => [] as Reminder[]),
-        api<{ company: string; role: string; status: string; applied_date?: string | null }[]>("/applications").catch(() => []),
+        api<{ company: string; role: string; status: string; applied_date?: string | null; location?: string | null }[]>("/applications").catch(() => []),
         api<Milestone[]>("/goals/milestones").catch(() => [] as Milestone[]),
         api<{ terms: GlossTerm[] }>("/glossary").catch(() => ({ terms: [] as GlossTerm[] })),
         api<Cadence>("/applications/cadence").catch(() => ({ weekly_target: 8, bucket_targets: {}, week_total: 0, week_by_bucket: {}, by_bucket: {}, needs_followup: [] as FollowupItem[] })),
@@ -153,7 +155,7 @@ export default function dashboard(): View {
           runway_end: null, bridge_gate: null, bridge_mode: false, runway_days: null, offer_days: null, sprint_start: null,
         } as Anchors)),
         api<TrackSum[]>("/tracks").catch(() => [] as TrackSum[]),
-        api<SideSummary>("/side/summary").catch(() => ({
+        (mods.side || mods.clips ? api<SideSummary>("/side/summary") : Promise.reject(new Error("off"))).catch(() => ({
           latest_followers: {}, posts_mtd: 0, revenue_mtd: 0, posts_total: 0, revenue_total: 0, streak_days: 0, entries: [],
         } as SideSummary)),
         api<DayResp>("/day").catch(() => ({
@@ -217,6 +219,9 @@ export default function dashboard(): View {
               <div class="text-[11px] ${d ? "text-fg-muted" : "text-fg-faint italic"} line-clamp-2">${esc(d?.def || "Definition coming soon")}</div></div>`;
           }).join("")}</div></div>`;
 
+      const emptyApps = `<div class="text-sm text-fg-faint py-6 text-center">No applications yet.
+        <a href="#/applications" class="block mt-1 accent-text hover:underline">Add your first application →</a></div>`;
+
       const registry: Widget[] = [
         {
           id: "stats", title: "Key metrics", span: 4, min: 2, max: 4,
@@ -230,7 +235,7 @@ export default function dashboard(): View {
         },
         {
           id: "pipeline", title: "Pipeline by stage", span: 2, min: 2, max: 4,
-          body: () => `<canvas height="150"></canvas>`,
+          body: () => s.total ? `<canvas height="150"></canvas>` : emptyApps,
           mount: async (el) => {
             const Chart = await ensureChart();
             const canvas = el.querySelector("canvas");
@@ -245,7 +250,7 @@ export default function dashboard(): View {
         },
         {
           id: "donut", title: "Stage mix", span: 1, min: 1, max: 2,
-          body: () => `<canvas height="160"></canvas>`,
+          body: () => s.total ? `<canvas height="160"></canvas>` : emptyApps,
           mount: async (el) => {
             const Chart = await ensureChart();
             const canvas = el.querySelector("canvas");
@@ -261,7 +266,7 @@ export default function dashboard(): View {
         },
         {
           id: "trend", title: "Applications · 6 mo", span: 2, min: 1, max: 4,
-          body: () => `<canvas height="150"></canvas>`,
+          body: () => trend.some(Boolean) ? `<canvas height="150"></canvas>` : emptyApps,
           mount: async (el) => {
             const Chart = await ensureChart();
             const canvas = el.querySelector("canvas");
@@ -357,7 +362,7 @@ export default function dashboard(): View {
           mount: (el) => {
             const box = el.querySelector<HTMLElement>("[data-news]");
             if (!box) return;
-            const dot: Record<string, string> = { robotics: "bg-brand-500", ai: "bg-violet-500", az: "bg-positive" };
+            const dot: Record<string, string> = { robotics: "bg-brand-500", ai: "bg-violet-500", local: "bg-positive" };
             api<{ items: { title: string; link: string; source: string; topic: string }[] }>("/news")
               .then((d) => {
                 box.innerHTML = d.items.slice(0, 7).map((n) =>
@@ -375,9 +380,12 @@ export default function dashboard(): View {
       const offers = s.by_stage.offer ?? 0;
       // Job-sprint spine: /api/anchors (offer/runway math) + /api/tracks
       // (controls/ml sprint progress) + /api/day (now/next block) drive the hero.
+      const weekLine = `<span class="nums">${cad.week_total}/${cad.weekly_target}</span> apps this week`;
       const heroLine = offers
         ? `<span class="text-positive font-semibold">${offers} offer${offers > 1 ? "s" : ""} in hand</span> — keep stacking skills.`
-        : `<b>${Math.max(0, anchors.offer_days ?? 0)} days</b> to the signed-offer target (${shortDate(anchors.offer_date)}) · <b>${Math.max(0, anchors.runway_days ?? 0)} days</b> of runway · <span class="nums">${cad.week_total}/${cad.weekly_target}</span> apps this week`;
+        : anchors.offer_date
+          ? `<b>${Math.max(0, anchors.offer_days ?? 0)} days</b> to the signed-offer target (${shortDate(anchors.offer_date)})${anchors.runway_end ? ` · <b>${Math.max(0, anchors.runway_days ?? 0)} days</b> of runway` : ""} · ${weekLine}`
+          : `<a href="#/settings" class="accent-text hover:underline">Set an offer target and runway in Settings</a> to start the countdowns · ${weekLine}`;
       const nowBlock = findNowNext(day.blocks);
       const nowNextLine = nowBlock
         ? `<a href="#/today" class="hover:underline">Now/Next: <span class="nums">${esc(nowBlock.start)}</span> <span class="truncate">${esc(nowBlock.title)}</span> → Today</a>`
@@ -393,17 +401,22 @@ export default function dashboard(): View {
       const controlsPct = controlsT?.weeks ? (controlsT.done / controlsT.weeks) * 100 : 0;
       const mlPct = mlT?.weeks ? (mlT.done / mlT.weeks) * 100 : 0;
       const offerPct = anchors.offer_date ? sprintElapsedPct(anchors.offer_date, anchors.sprint_start) : 0;
+      // Countdown tile: "—" plus a Settings link while its anchor date is unset.
+      const countTile = (n: number | null, caption: string, tone: string) => n == null
+        ? `<div class="shrink-0"><div class="text-2xl font-semibold nums text-fg-faint">—</div><a href="#/settings" class="block text-[11px] text-fg-faint mt-0.5 hover:underline">${esc(caption)} · set in Settings</a></div>`
+        : `<div class="shrink-0"><div class="text-2xl font-semibold nums ${tone}" data-count="${Math.max(0, n)}">0</div><div class="text-[11px] text-fg-faint mt-0.5">${esc(caption)}</div></div>`;
       const offerLabel = anchors.offer_days != null ? `${anchors.offer_days}` : "–";
       const parkedRings = PARKED_TRACKS
         .map((id) => tracks.find((t) => t.id === id))
         .filter((t): t is TrackSum => !!t)
         .map((t) => `<div class="flex flex-col items-center gap-1 opacity-45" title="${esc(t.title)} — ${t.done}/${t.weeks} weeks">
             ${ring(t.weeks ? (t.done / t.weeks) * 100 : 0, { size: 38, stroke: 4, color: t.accent || "var(--accent)" })}
-            <div class="text-[10px] text-fg-faint">after offer</div>
+            <div class="text-[10px] text-fg-faint max-w-[64px] truncate">${esc(t.title.split(/[—:(]/)[0].trim())}</div>
           </div>`).join("");
 
       const dStretch = anchors.stretch_date ? daysUntil(anchors.stretch_date) : null;
       const runwayTone = anchors.runway_days != null && anchors.runway_days <= 21 ? "text-warn" : "text-fg";
+      const runwayDays = anchors.runway_end ? anchors.runway_days : null;
 
       root.innerHTML = `
         <div class="space-y-4 pb-6">
@@ -426,12 +439,12 @@ export default function dashboard(): View {
                 ${parkedRings}
               </div>
               <div class="flex items-center gap-x-6 gap-y-2 flex-nowrap overflow-x-auto">
-                <div class="shrink-0"><div class="text-2xl font-semibold nums text-goal" data-count="${Math.max(0, anchors.offer_days ?? 0)}">0</div><div class="text-[11px] text-fg-faint mt-0.5">days to offer</div></div>
-                <div class="shrink-0"><div class="text-2xl font-semibold nums ${runwayTone}" data-count="${Math.max(0, anchors.runway_days ?? 0)}">0</div><div class="text-[11px] text-fg-faint mt-0.5">days of runway</div></div>
-                <div class="shrink-0"><div class="text-2xl font-semibold nums text-fg" data-count="${Math.max(0, dStretch ?? 0)}">0</div><div class="text-[11px] text-fg-faint mt-0.5">to stretch (${shortDate(anchors.stretch_date)})</div></div>
+                ${countTile(anchors.offer_date ? anchors.offer_days : null, "days to offer", "text-goal")}
+                ${countTile(runwayDays, "days of runway", runwayTone)}
+                ${countTile(dStretch, anchors.stretch_date ? `to stretch (${shortDate(anchors.stretch_date)})` : "to stretch", "text-fg")}
                 <div class="shrink-0"><div class="text-2xl font-semibold nums ${offers ? "text-positive" : "text-fg"}" data-count="${offers}">0</div><div class="text-[11px] text-fg-faint mt-0.5">offer${offers === 1 ? "" : "s"} in hand</div></div>
-                <div class="shrink-0"><div class="text-2xl font-semibold nums text-fg" data-count="${side.posts_mtd}">0</div><div class="text-[11px] text-fg-faint mt-0.5">posts MTD</div></div>
-                <div class="shrink-0"><div class="text-2xl font-semibold nums text-positive" data-count="${Math.round(side.revenue_mtd)}" data-prefix="$">0</div><div class="text-[11px] text-fg-faint mt-0.5">revenue MTD</div></div>
+                ${mods.clips ? `<div class="shrink-0"><div class="text-2xl font-semibold nums text-fg" data-count="${side.posts_mtd}">0</div><div class="text-[11px] text-fg-faint mt-0.5">posts MTD</div></div>` : ""}
+                ${mods.side ? `<div class="shrink-0"><div class="text-2xl font-semibold nums text-positive" data-count="${Math.round(side.revenue_mtd)}" data-prefix="$">0</div><div class="text-[11px] text-fg-faint mt-0.5">revenue MTD</div></div>` : ""}
               </div>
             </div>
           </section>
@@ -453,7 +466,7 @@ export default function dashboard(): View {
       if (host && getPrefs().globe) {
         const loadGlobe = () => import("../globe").then(({ createGlobe }) => {
           if (!host.isConnected) return;
-          disposeGlobe = createGlobe(host, { markers: apps.length ? appMarkers(apps) : undefined });
+          disposeGlobe = createGlobe(host, { markers: apps.length ? appMarkers(apps) : undefined, home: appHome(apps) });
           requestAnimationFrame(() => host.classList.remove("opacity-0"));
         });
         if ("requestIdleCallback" in window) requestIdleCallback(() => void loadGlobe(), { timeout: 2000 });

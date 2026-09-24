@@ -2,7 +2,7 @@
 Linda RAG memory store — local ChromaDB with sentence-transformers embeddings.
 
 This is the "learning loop" for Linda: a persistent vector store at
-career-planner/data/linda_rag/ that grows as the user works with the assistant.
+data/linda_rag/ (repo root) that grows as the user works with the assistant.
 
 Two write modes:
   - explicit `remember(text, tag)` from a Linda tool call

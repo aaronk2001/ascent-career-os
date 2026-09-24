@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 def run(query: str, context):
     """Generator implementing the Linda agent loop on Ollama."""
     try:
-        import ollama  # type: ignore
+        import ollama  # type: ignore  # noqa: F401 (availability probe)
     except ImportError:
         yield {
             "type": "answer",

@@ -127,7 +127,7 @@ weeks:
     status: not_started
     est_hours: 6
     objective: >-
-      Deploy one of your own apps (Ascent, NEXUS, or PolyMarked) to the cluster,
+      Deploy one of your own apps (Ascent itself works) to the cluster,
       production-style — containerized, proxied, monitored, and CI-deployed.
     vocab: [self-hosting, production, health check, uptime, backup, secrets management, zero-downtime]
     can_explain:

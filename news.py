@@ -1,27 +1,40 @@
 """
 Live news for Ascent's dashboard Signal strip. Pulls Google News RSS (no API
-key) for three topic queries, parses with stdlib, caches in-memory. Fail-soft:
+key) for a few topic queries, parses with stdlib, caches in-memory. Fail-soft:
 network/parse errors return an empty list + an error note, never raise.
 """
 from __future__ import annotations
 
 import time
+import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from email.utils import parsedate_to_datetime
 from xml.etree import ElementTree as ET
 
+_RSS = "https://news.google.com/rss/search?q={}&hl=en-US&gl=US&ceid=US:en"
 FEEDS = {
-    "robotics": "https://news.google.com/rss/search?q=robotics+automation+controls+engineering&hl=en-US&gl=US&ceid=US:en",
-    "ai": "https://news.google.com/rss/search?q=artificial+intelligence+machine+learning&hl=en-US&gl=US&ceid=US:en",
-    "az": "https://news.google.com/rss/search?q=Phoenix+Arizona+engineering+hiring+OR+aerospace+OR+defense&hl=en-US&gl=US&ceid=US:en",
+    "robotics": _RSS.format("robotics+automation+controls+engineering"),
+    "ai": _RSS.format("artificial+intelligence+machine+learning"),
 }
+DEFAULT_TOPICS = ("robotics", "ai", "local")
 TTL = 1800  # 30 min
 _cache: dict[str, tuple[float, list[dict]]] = {}
 
 
+def _feed_url(topic: str) -> str | None:
+    """`local` searches the job market set in profile.yaml (`market`); skipped if unset."""
+    if topic != "local":
+        return FEEDS.get(topic)
+    from agent.profile import load_profile
+    market = load_profile()["market"].strip()
+    if not market:
+        return None
+    return _RSS.format(urllib.parse.quote_plus(f"{market} engineering hiring OR aerospace OR defense"))
+
+
 def _fetch(topic: str) -> list[dict]:
-    url = FEEDS.get(topic)
+    url = _feed_url(topic)
     if not url:
         return []
     cached = _cache.get(topic)

@@ -1,7 +1,7 @@
 {
   "title": "Controls Engineer",
   "summary": "Energy & automation core role — PLC/SCADA systems, safety, and OT.",
-  "bucket": "az",
+  "bucket": "local",
   "required_skills": [
     { "skill": "PLC Programming", "level": 4 },
     { "skill": "IEC 61131-3", "level": 4 },

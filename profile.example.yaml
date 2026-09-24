@@ -25,3 +25,4 @@ star_result: Changeover time dropped 40% and unplanned downtime fell by a third.
 talking_points:
   - Connect your line-reliability work to {company}'s production scale
   - Highlight the PLC and vision tools from the posting you have shipped with
+after_tax_rate: 0.74   # rough take-home share of gross, for offer comparisons

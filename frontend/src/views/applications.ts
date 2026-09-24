@@ -40,6 +40,7 @@ type Cadence = {
   by_bucket: Record<string, number>;
   needs_followup: FollowupItem[];
   no_reply: NoReplyItem[];
+  local_label?: string;
 };
 
 const COLUMNS = [
@@ -47,16 +48,20 @@ const COLUMNS = [
 ] as const;
 const STAGE_RANK: Record<string, number> = Object.fromEntries(COLUMNS.map((c, i) => [c, i]));
 
-const BUCKETS = ["", "az", "remote", "houston", "other"];
+const BUCKETS = ["", "local", "remote", "other"];
 const BUCKET_TONE: Record<string, string> = {
-  az: "text-violet-400 border-violet-400/40 bg-violet-400/10",
+  local: "text-violet-400 border-violet-400/40 bg-violet-400/10",
   remote: "text-cyan-400 border-cyan-400/40 bg-cyan-400/10",
-  houston: "text-fg-faint border-line bg-ink-800/40", // historical — demoted
   other: "text-fg-faint border-line bg-ink-800/40",
 };
-const bucketLabel = (b?: string | null) => (b === "az" ? "AZ" : titleCase(b || "other"));
+// Older rows may hold "az" (the old local-market key) or "houston" (a retired
+// target); db.norm_bucket maps them the same way server-side.
+const BUCKET_ALIAS: Record<string, string> = { az: "local", houston: "other" };
+const normBucket = (b?: string | null) => { const k = (b || "").trim().toLowerCase(); return BUCKET_ALIAS[k] ?? k; };
+let localLabel = "Local"; // settings.yaml local_label, delivered with /applications/cadence
+const bucketLabel = (b?: string | null) => { const k = normBucket(b) || "other"; return k === "local" ? localLabel : titleCase(k); };
 function bucketBadge(b?: string | null): string {
-  const key = (b || "").toLowerCase();
+  const key = normBucket(b);
   if (!key || key === "other") return "";
   const tone = BUCKET_TONE[key] || BUCKET_TONE.other;
   return `<span class="inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] ${tone}">${esc(bucketLabel(key))}</span>`;
@@ -96,6 +101,7 @@ export default function applications(): View {
     ]);
     apps = a;
     cadence = c;
+    if (c?.local_label) localLabel = c.local_label;
   }
   async function syncCadence(root: HTMLElement) {
     cadence = await api<Cadence>("/applications/cadence").catch(() => cadence);
@@ -174,7 +180,7 @@ export default function applications(): View {
       const have = c.by_bucket[b] ?? 0;
       const target = c.bucket_targets[b] ?? 0;
       const pct = target ? (have / target) * 100 : 0;
-      const tone = b === "houston" ? "bg-ink-600" : b === "remote" ? "bg-cyan-400" : "bg-violet-400";
+      const tone = b === "other" ? "bg-ink-600" : b === "remote" ? "bg-cyan-400" : "bg-violet-400";
       return `<div class="flex-1 min-w-[120px]">
         <div class="flex items-center justify-between text-[11px] mb-1">
           <span class="text-fg-muted">${esc(bucketLabel(b))}</span>
@@ -372,7 +378,7 @@ export default function applications(): View {
     const close = () => overlay.remove();
 
     const opt = (s: string) => `<option value="${s}" ${s === app.status ? "selected" : ""}>${esc(titleCase(s))}</option>`;
-    const bOpt = (b: string) => `<option value="${b}" ${b === (app.bucket || "") ? "selected" : ""}>${b ? bucketLabel(b) : "—"}</option>`;
+    const bOpt = (b: string) => `<option value="${b}" ${b === normBucket(app.bucket) ? "selected" : ""}>${b ? bucketLabel(b) : "—"}</option>`;
     const field = (id: string, label: string, value: unknown, type = "text") =>
       `<label class="flex flex-col gap-1 text-xs text-fg-muted">${esc(label)}
         <input id="${id}" type="${type}" value="${esc(value ?? "")}"

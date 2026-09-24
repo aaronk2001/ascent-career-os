@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import lru_cache
 from importlib.util import find_spec
 from pathlib import Path
@@ -11,11 +12,13 @@ TOKEN = SECRETS_DIR / "token.json"
 CALENDAR_ID_CACHE = SECRETS_DIR / "calendar_id.txt"
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 CALENDAR_NAME = "Ascent"
-TZ = "America/Phoenix"
 
-# America/Phoenix has no DST, so the UTC offset is always -07:00 — safe to
-# hardcode for the RFC3339 timeMin/timeMax filters the list API requires.
-_TZ_OFFSET = "-07:00"
+
+def _tz_offset():
+    """This machine's current UTC offset as RFC3339 "+HH:MM". Events are written
+    with an explicit offset, so no IANA zone name (or tzdata on Windows) is needed."""
+    z = datetime.now().astimezone().strftime("%z")
+    return f"{z[:3]}:{z[3:]}"
 
 _COLOR_BY_CAT = {
     "apps": "9", "controls": "7", "ml": "3", "outreach": "5",
@@ -26,8 +29,8 @@ _COLOR_BY_CAT = {
 @lru_cache(maxsize=1)
 def _libs_installed():
     """Are the Google libs importable? `find_spec` only stats the path — actually
-    importing google_auth_oauthlib costs ~24s on this Store-Python install, and
-    /api/gcal/status is one of the four calls the Today view blocks first paint on.
+    importing google_auth_oauthlib took ~24s on a Microsoft Store Python install,
+    far too slow for a status probe.
     """
     try:
         return all(find_spec(m) for m in ("google_auth_oauthlib", "googleapiclient"))
@@ -62,7 +65,7 @@ def _calendar_id(service):
         page_token = resp.get("nextPageToken")
         if not page_token:
             break
-    created = service.calendars().insert(body={"summary": CALENDAR_NAME, "timeZone": TZ}).execute()
+    created = service.calendars().insert(body={"summary": CALENDAR_NAME}).execute()
     CALENDAR_ID_CACHE.write_text(created["id"], encoding="utf-8")
     return created["id"]
 
@@ -110,8 +113,8 @@ def _delete_orphans(service, calendar_id, iso, keep_ids):
     page_token = None
     while True:
         resp = service.events().list(
-            calendarId=calendar_id, timeMin=f"{iso}T00:00:00{_TZ_OFFSET}",
-            timeMax=f"{iso}T23:59:59{_TZ_OFFSET}", timeZone=TZ,
+            calendarId=calendar_id, timeMin=f"{iso}T00:00:00{_tz_offset()}",
+            timeMax=f"{iso}T23:59:59{_tz_offset()}",
             singleEvents=True, pageToken=page_token).execute()
         for ev in resp.get("items", []):
             if ev["id"] in keep_ids or not (ev.get("summary") or "").startswith("["):
@@ -125,14 +128,15 @@ def _delete_orphans(service, calendar_id, iso, keep_ids):
 
 
 def _event_body(b, iso):
+    off = _tz_offset()
     detail = b.get("detail") or ""
     if b.get("deep_link"):
         detail += f"\n{b['deep_link']}"
     return {
         "summary": f"[{CATS.get(b['cat'], {}).get('label', b['cat'])}] {b['title']}",
         "description": detail,
-        "start": {"dateTime": f"{iso}T{b['start']}:00", "timeZone": TZ},
-        "end": {"dateTime": f"{iso}T{b['end']}:00", "timeZone": TZ},
+        "start": {"dateTime": f"{iso}T{b['start']}:00{off}"},
+        "end": {"dateTime": f"{iso}T{b['end']}:00{off}"},
         "colorId": _COLOR_BY_CAT.get(b["cat"]),
     }
 

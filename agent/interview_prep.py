@@ -1,8 +1,6 @@
 """
 Interview preparation agent — generates questions and STAR answers.
 """
-import os
-import json
 
 from .profile import load_profile
 
@@ -44,7 +42,7 @@ def generate_prep(company: str, role: str) -> dict:
             "type": "technical",
             "question": q,
             "answer_guide": "Draw from your PLC, robotics, and CV experience",
-            "tip": f"Mention specific tools: Allen Bradley, UR5e, YOLOv8, Python"
+            "tip": "Mention specific tools: Allen Bradley, UR5e, YOLOv8, Python"
         })
 
     # Company-specific questions

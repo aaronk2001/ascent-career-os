@@ -2,14 +2,19 @@
 
     python scripts/export_repo.py C:/path/to/ascent-career-os
 
-Wipes everything in the target except .git/, copies an explicit allowlist of
-source paths plus the publish/ overlay (README, CI, setup scripts, screenshots),
-then scans the result for personal strings and secret patterns and exits non-zero
-on any hit. Anything not on the allowlist — career.db, settings.yaml, profile.yaml,
-data.yaml, notes, backups, docs/career, output/ — never leaves this folder.
+This repo is generated. Ascent is developed inside a private working folder that
+also holds its author's real data; this script is the one-way pipe out of it.
+It wipes everything in the target except .git/, copies an explicit allowlist of
+source paths plus a `publish/` overlay (README, CI, setup scripts, screenshots;
+it lives only in the private folder), marks the shell scripts executable in the
+target's git index, then scans the result for personal strings (a denylist file
+that is itself never exported) and secret patterns, and exits non-zero on any
+hit. Anything not on the allowlist (the real career.db, settings.yaml,
+profile.yaml, data.yaml, notes, backups, generated resumes) never leaves.
 """
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -20,7 +25,7 @@ FILES = [
     "app.py", "anchors.py", "certs.py", "data.py", "dayplan.py", "db.py", "focus.py", "gcal.py",
     "glossary.py", "health.py", "jobruns.py", "news.py", "notifier.py", "plan.py", "projects.py",
     "registry.py", "reminders.py", "roadmaps.py", "timeline_board.py", "tracker.py", "yamlio.py",
-    "schedule.yaml", "vocab_definitions.yaml", "engineering_formulas.yaml",
+    "schedule.example.yaml", "vocab_definitions.yaml", "engineering_formulas.yaml", "pyproject.toml",
     "controls_track.yaml", "ml_track.yaml", "profile.example.yaml",
     "requirements.txt", "requirements-optional.txt", "requirements-dev.txt",
     "ascent.bat", "ascent.vbs", "ascent-dev.bat", "ascent.ico", "create_shortcut.ps1",
@@ -39,6 +44,7 @@ GLOBS = [  # (dir, pattern) — recursive where the pattern says so
     ("tests", "*.py"), ("frontend/src", "**/*.ts"), ("frontend/src", "**/*.css"),
 ]
 EXCLUDE = {"agent/models.py"}  # unused personal-finance calculator
+EXECUTABLE = ("setup.sh",)  # Windows has no exec bit on disk; set it in the git index
 
 # Personal identifiers that must never appear in the export, one per line, checked
 # case-insensitively. Kept in a local file that is itself never exported.
@@ -67,6 +73,14 @@ def wipe(target: Path):
 def copy(src: Path, dst: Path):
     dst.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src, dst)
+
+
+def mark_executable(target: Path):
+    if not (target / ".git").is_dir():
+        return
+    for name in EXECUTABLE:
+        if (target / name).exists():
+            subprocess.run(["git", "-C", str(target), "update-index", "--add", "--chmod=+x", name], check=True)
 
 
 def scan(target: Path) -> list[str]:
@@ -104,6 +118,7 @@ def main():
     overlay = [p for p in OVERLAY.rglob("*") if p.is_file()] if OVERLAY.is_dir() else []
     for src in overlay:
         copy(src, target / src.relative_to(OVERLAY))
+    mark_executable(target)
     hits = scan(target)
     print(f"exported {len(files)} source files + {len(overlay)} overlay files -> {target}")
     if hits:

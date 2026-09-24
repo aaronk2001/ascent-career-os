@@ -3,7 +3,9 @@ import { feature } from "topojson-client";
 import landTopo from "world-atlas/land-110m.json";
 
 const RADIUS = 1.8;
-const HOME = { name: "Phoenix", lat: 33.45, lon: -112.07 };
+export type GlobeHome = { name: string; lat: number; lon: number };
+// Without a known home city (no located applications yet) arcs start mid-continent.
+const DEFAULT_HOME: GlobeHome = { name: "Home", lat: 39.5, lon: -98.35 };
 
 export type GlobeMarker = { lat: number; lon: number; label: string; color: string };
 
@@ -103,7 +105,8 @@ function buildMarker(pos: THREE.Vector3, color: string, label: string, home: boo
   return { group, pulse: { mesh, ring, seed: pos.x * 5 + pos.y * 3 }, hit: mesh };
 }
 
-export function createGlobe(container: HTMLElement, opts: { markers?: GlobeMarker[] } = {}): () => void {
+export function createGlobe(container: HTMLElement, opts: { markers?: GlobeMarker[]; home?: GlobeHome } = {}): () => void {
+  const HOME = opts.home ?? DEFAULT_HOME;
   const w = container.clientWidth || 600;
   const h = container.clientHeight || 420;
 

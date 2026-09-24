@@ -19,7 +19,7 @@ const PILL_H = 22;
 const V_GAP = 4;
 const ROW_PAD = 8;
 const RULER_H = 34;
-const RAIL_W = 92;
+const RAIL_W = 112;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 type Placed = Item & { x: number; w: number; sub: number };

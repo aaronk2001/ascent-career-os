@@ -1,4 +1,4 @@
-import type { View } from "../../router";
+import { routeParam, type View } from "../../router";
 import { $, $$, esc } from "../../ui";
 import { toast } from "../../notifications";
 import { type Board, type Item, type Lane, LANE_META, loadBoard } from "./data";
@@ -18,7 +18,8 @@ const ZOOMS: ZoomLevel[] = ["quarter", "month", "week"];
 function loadUi(): UiState {
   try {
     const s = JSON.parse(localStorage.getItem(UI_KEY) || "{}") as Partial<UiState>;
-    return { mode: s.mode ?? "gantt", zoom: s.zoom ?? "month", section: s.section ?? "all", hidden: s.hidden ?? [] };
+    const z = routeParam("zoom") as ZoomLevel | null; // #/timeline?zoom=week deep link
+    return { mode: s.mode ?? "gantt", zoom: (z && ZOOMS.includes(z) ? z : s.zoom) ?? "month", section: s.section ?? "all", hidden: s.hidden ?? [] };
   } catch {
     return { mode: "gantt", zoom: "month", section: "all", hidden: [] };
   }

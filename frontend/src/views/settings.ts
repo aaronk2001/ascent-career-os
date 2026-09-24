@@ -1,6 +1,7 @@
 import { api } from "../api";
 import type { View } from "../router";
 import { $, $$, esc } from "../ui";
+import { modules, type Modules } from "../modules";
 
 type Block = { start: string; min: number; cat: string; title?: string };
 type Templates = { weekday: Block[]; saturday: Block[]; sunday: Block[]; bridge_weekday: Block[] };
@@ -10,6 +11,13 @@ type ScheduleResp = {
   templates: Templates;
   cats: Record<string, { label: string; color: string }>;
 };
+
+type Ollama = { reachable: boolean; models: string[]; error?: string | null };
+const MODULE_INFO: [keyof Modules, string, string][] = [
+  ["side", "Side hustle", "Side Hustle page, bridge-income template and dates"],
+  ["clips", "Clips", "Short-form clip posting goals on Today"],
+  ["health", "Health", "Health page (weight, workouts) and gym goals on Today"],
+];
 
 type SettingsResp = {
   settings: {
@@ -26,12 +34,12 @@ type SettingsResp = {
     daily_apps?: number;
     bridge_mode?: boolean;
     cert_budget?: number | null;
+    local_label?: string;
   };
-  ollama: { reachable: boolean; models: string[]; error?: string | null };
   free_ram_gib: number | null;
   fallback_model: string;
   curated: { name: string; tier: string; note: string }[];
-  app: { ascent_port: number; output_dir: string };
+  app: { ascent_port: number | null; output_dir: string };
 };
 
 const TEMPLATE_LABEL: Record<keyof Templates, string> = {
@@ -50,21 +58,27 @@ export default function settings(): View {
       root.innerHTML = `<div class="p-2 text-fg-muted">Loading…</div>`;
       const [d, s] = await Promise.all([api<SettingsResp>("/settings"), api<ScheduleResp>("/schedule")]);
       sched = s;
-      draw(root, d);
+      draw(root, d, null);
+      // Ollama probe is slow when it's down; paint first, fill the model list after.
+      void api<Ollama>("/settings/ollama")
+        .catch((e) => ({ reachable: false, models: [], error: e instanceof Error ? e.message : String(e) }))
+        .then((o) => {
+          const sel = $(root, "#s-model") as HTMLSelectElement | null;
+          const status = $(root, "#ollama-status");
+          if (!sel || !status) return;
+          const picked = sel.value;
+          sel.innerHTML = modelOptions(d, o);
+          sel.value = picked;
+          status.innerHTML = ollamaStatus(o);
+        });
     },
   };
 
-  function draw(root: HTMLElement, d: SettingsResp) {
-    const curatedNotes = new Map(d.curated.map((c) => [c.name, c.note]));
-    const models = [...new Set([...curatedNotes.keys(), ...d.ollama.models, d.settings.model])].filter(Boolean);
-    const opts = models
-      .map((m) => {
-        const note = curatedNotes.get(m);
-        return `<option value="${esc(m)}" ${m === d.settings.model ? "selected" : ""}>${esc(m)}${note ? ` — ${esc(note)}` : ""}</option>`;
-      })
-      .join("");
-    const dot = d.ollama.reachable ? "text-positive" : "text-danger";
-    const bt = d.settings.bucket_targets || { az: 5, remote: 3 };
+  function draw(root: HTMLElement, d: SettingsResp, ollama: Ollama | null) {
+    const mods = modules();
+    const opts = modelOptions(d, ollama);
+    const bt = d.settings.bucket_targets || { local: 5, remote: 3 };
+    const localLabel = d.settings.local_label || "Local";
     const weekly = d.settings.weekly_target ?? 8;
     const tdate = d.settings.target_date ?? "";
     const bktInput = (id: string, label: string, v: number) =>
@@ -89,14 +103,14 @@ export default function settings(): View {
               <input id="js-stretch" type="date" value="${esc(d.settings.stretch_date ?? "")}" class="bg-ink-800 rounded-lg px-3 py-2 text-sm" /></label>
             <label class="flex flex-col gap-1 text-xs text-fg-muted">Runway end
               <input id="js-runway" type="date" value="${esc(d.settings.runway_end ?? "")}" class="bg-ink-800 rounded-lg px-3 py-2 text-sm" /></label>
-            <label class="flex flex-col gap-1 text-xs text-fg-muted">Bridge gate
+            <label class="flex flex-col gap-1 text-xs text-fg-muted" ${mods.side ? "" : "hidden"}>Bridge gate
               <input id="js-bridge" type="date" value="${esc(d.settings.bridge_gate ?? "")}" class="bg-ink-800 rounded-lg px-3 py-2 text-sm" /></label>
             <label class="flex flex-col gap-1 text-xs text-fg-muted">Apps / day
               <input id="js-daily-apps" type="number" min="0" value="${d.settings.daily_apps ?? 0}" class="w-20 bg-ink-800 rounded-lg px-3 py-2 text-sm" /></label>
             <label class="block space-y-1"><span class="text-xs text-fg-muted">Cert budget (USD, blank = none)</span>
               <input id="js-cert-budget" type="number" min="0" value="${d.settings.cert_budget ?? ""}" class="bg-ink-800 rounded-lg px-3 py-2 text-sm w-32" /></label>
           </div>
-          <label class="flex items-center gap-2 text-xs text-fg-muted pt-1">
+          <label class="flex items-center gap-2 text-xs text-fg-muted pt-1" ${mods.side ? "" : "hidden"}>
             <input id="js-bridge-mode" type="checkbox" ${d.settings.bridge_mode ? "checked" : ""} class="h-4 w-4" />
             Bridge mode — weekdays use the 6-hour bridge template
           </label>
@@ -114,11 +128,20 @@ export default function settings(): View {
           </div>
           <label class="block text-xs uppercase tracking-wide text-fg-faint pt-1">Pipeline targets by bucket</label>
           <div class="flex flex-wrap gap-3">
-            ${bktInput("t-az", "Arizona", bt.az ?? 5)}
+            ${bktInput("t-local", localLabel, bt.local ?? bt.az ?? 5)}
             ${bktInput("t-rem", "Remote", bt.remote ?? 3)}
           </div>
           <button id="t-save" class="rounded-lg btn-accent px-3 py-1.5 text-sm">Save targets</button>
           <span id="t-msg" class="ml-2 text-xs text-positive"></span>
+        </div>
+
+        <div class="card p-4 space-y-3">
+          <label class="block text-xs uppercase tracking-wide text-fg-faint">Optional modules</label>
+          ${MODULE_INFO.map(([key, label, hint]) => `<label class="flex items-start gap-2 text-sm">
+            <input data-module="${key}" type="checkbox" ${mods[key] ? "checked" : ""} class="h-4 w-4 mt-0.5" />
+            <span>${esc(label)}<span class="block text-xs text-fg-faint">${esc(hint)}</span></span></label>`).join("")}
+          <button id="m-save" class="rounded-lg btn-accent px-3 py-1.5 text-sm">Save modules</button>
+          <span id="m-msg" class="ml-2 text-xs text-positive"></span>
         </div>
 
         <div class="card p-4 space-y-3">
@@ -138,7 +161,7 @@ export default function settings(): View {
             <label class="flex flex-col gap-1 text-xs text-fg-muted">Hard stop
               <input id="sc-hardstop" type="time" value="${esc(s.hard_stop)}" class="bg-ink-800 rounded-lg px-3 py-2 text-sm" /></label>
           </div>
-          ${TEMPLATE_KEYS.map(
+          ${TEMPLATE_KEYS.filter((k) => k !== "bridge_weekday" || mods.side).map(
             (key) => `<div class="space-y-1.5 pt-2 border-t border-line">
               <div class="text-xs font-medium text-fg-muted">${esc(TEMPLATE_LABEL[key])}</div>
               <div id="tmpl-wrap-${key}">${templateBlockHtml(key, s.templates[key], s.cats)}</div>
@@ -150,10 +173,10 @@ export default function settings(): View {
         </div>
 
         <div class="card p-4 text-sm space-y-1 text-fg-muted">
-          <div>Ollama: <span class="${dot}">${d.ollama.reachable ? "reachable" : "unreachable"}</span>${d.ollama.error ? ` · ${esc(d.ollama.error)}` : ""}</div>
+          <div id="ollama-status">${ollamaStatus(ollama)}</div>
           <div>Free RAM: <span class="nums text-fg">${d.free_ram_gib != null ? `${d.free_ram_gib} GiB` : "n/a"}</span></div>
           <div>Fallback model: <span class="text-fg">${esc(d.fallback_model)}</span></div>
-          <div>Port: <span class="nums text-fg">${d.app.ascent_port}</span></div>
+          <div>Port: <span class="nums text-fg">${d.app.ascent_port ?? "default"}</span></div>
         </div>
       </div>`;
 
@@ -187,7 +210,7 @@ export default function settings(): View {
       const weekly_target = Number(($(root, "#t-weekly") as HTMLInputElement).value) || 0;
       const target_date = ($(root, "#t-date") as HTMLInputElement).value;
       const bucket_targets = {
-        az: Number(($(root, "#t-az") as HTMLInputElement).value) || 0,
+        local: Number(($(root, "#t-local") as HTMLInputElement).value) || 0,
         remote: Number(($(root, "#t-rem") as HTMLInputElement).value) || 0,
       };
       const msg = $(root, "#t-msg");
@@ -217,6 +240,18 @@ export default function settings(): View {
       }
     });
 
+    $(root, "#m-save")?.addEventListener("click", async () => {
+      const mods = Object.fromEntries($$(root, "[data-module]").map((el) =>
+        [el.dataset.module!, (el as HTMLInputElement).checked]));
+      const msg = $(root, "#m-msg");
+      try {
+        await api("/settings", { method: "POST", body: JSON.stringify({ modules: mods }) });
+        location.reload(); // nav + Today categories are built from the module list at startup
+      } catch (e) {
+        if (msg) { msg.textContent = `Save failed: ${e instanceof Error ? e.message : String(e)}`; msg.className = "ml-2 text-xs text-danger"; }
+      }
+    });
+
     TEMPLATE_KEYS.forEach((key) => wireTemplateBlock(root, key));
 
     $(root, "#sc-save")?.addEventListener("click", async () => {
@@ -227,7 +262,8 @@ export default function settings(): View {
         weekday: readTemplateRows(root, "weekday"),
         saturday: readTemplateRows(root, "saturday"),
         sunday: readTemplateRows(root, "sunday"),
-        bridge_weekday: readTemplateRows(root, "bridge_weekday"),
+        // hidden while the side module is off: keep the saved rows instead of wiping them
+        bridge_weekday: modules().side ? readTemplateRows(root, "bridge_weekday") : sched.templates.bridge_weekday,
       };
       const msg = $(root, "#sc-msg");
       try {
@@ -278,6 +314,20 @@ export default function settings(): View {
       };
     });
   }
+}
+
+function modelOptions(d: SettingsResp, ollama: Ollama | null): string {
+  const curatedNotes = new Map(d.curated.map((c) => [c.name, c.note]));
+  const models = [...new Set([...curatedNotes.keys(), ...(ollama?.models ?? []), d.settings.model])].filter(Boolean);
+  return models.map((m) => {
+    const note = curatedNotes.get(m);
+    return `<option value="${esc(m)}" ${m === d.settings.model ? "selected" : ""}>${esc(m)}${note ? ` — ${esc(note)}` : ""}</option>`;
+  }).join("");
+}
+
+function ollamaStatus(o: Ollama | null): string {
+  const dot = !o ? "text-fg-faint" : o.reachable ? "text-positive" : "text-danger";
+  return `Ollama: <span class="${dot}">${!o ? "checking…" : o.reachable ? "reachable" : "unreachable"}</span>${o?.error ? ` · ${esc(o.error)}` : ""}`;
 }
 
 function templateBlockHtml(key: keyof Templates, blocks: Block[], cats: Record<string, { label: string; color: string }>): string {

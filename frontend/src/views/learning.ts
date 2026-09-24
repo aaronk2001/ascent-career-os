@@ -1,5 +1,5 @@
 import { api } from "../api";
-import type { View } from "../router";
+import { routeParam, type View } from "../router";
 import { $, $$, esc } from "../ui";
 import { growBars } from "../motion";
 import { ring, mountRings } from "../visuals";
@@ -28,7 +28,7 @@ const cleanTitle = (t: string) => t.replace(/^\s*\[parked\]\s*/i, "");
 
 export default function learning(): View {
   let tracks: TrackMeta[] = [];
-  let active = "";
+  let active = routeParam("track") ?? ""; // #/tracks?track=ml deep link
   const cache: Record<string, Track> = {};
   const expanded: Record<string, number> = {};
   let quiz: { deck: string[]; i: number; known: number; flipped: boolean } | null = null;

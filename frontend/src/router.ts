@@ -1,4 +1,5 @@
 import { enter, initMagnetics } from "./motion";
+import { modules, type Modules } from "./modules";
 
 export type View = {
   render: (root: HTMLElement) => void | Promise<void>;
@@ -25,6 +26,15 @@ const routes: Record<string, () => Promise<ViewModule>> = {
   linda: () => import("./views/linda"),
   settings: () => import("./views/settings"),
 };
+
+// Nav entries owned by an optional module; hidden while that module is off.
+const NAV_MODULE: Partial<Record<string, keyof Modules>> = { side: "side", health: "health" };
+
+/** NAV minus entries whose module is switched off. */
+export function navItems() {
+  const on = modules();
+  return NAV.filter((n) => { const m = NAV_MODULE[n.id]; return !m || on[m]; });
+}
 
 export const NAV: { id: string; label: string; icon: string }[] = [
   { id: "today", label: "Today", icon: "M3 5h18v16H3zM3 9h18M8 3v4M16 3v4M8 14h3v3H8z" },

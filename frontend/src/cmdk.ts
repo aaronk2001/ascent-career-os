@@ -1,4 +1,5 @@
-import { NAV } from "./router";
+import { navItems } from "./router";
+import { modules } from "./modules";
 import { api } from "./api";
 import { esc } from "./ui";
 import { getPrefs, setPrefs } from "./prefs";
@@ -29,9 +30,9 @@ export function mountCommandPalette() {
   let sel = 0;
 
   const base = (): Cmd[] => [
-    ...NAV.map((n) => ({ label: `Go to ${n.label}`, group: "Navigate", run: () => (location.hash = `#/${n.id}`) })),
+    ...navItems().map((n) => ({ label: `Go to ${n.label}`, group: "Navigate", run: () => (location.hash = `#/${n.id}`) })),
     { label: "Today's plan", group: "Actions", run: () => (location.hash = "#/today") },
-    { label: "Log clips / side revenue", group: "Actions", run: () => (location.hash = "#/side") },
+    ...(modules().side ? [{ label: "Log clips / side revenue", group: "Actions", run: () => (location.hash = "#/side") }] : []),
     { label: "Profile links checklist", group: "Actions", run: () => (location.hash = "#/links") },
     { label: "Add application", group: "Actions", run: () => (location.hash = "#/applications") },
     { label: "Ask Linda", group: "Actions", run: () => (location.hash = "#/linda") },

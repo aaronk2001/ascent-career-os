@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Ascent API — Flask routes over career.db (served by app.py on :5001).
-Run standalone:  python tracker.py   (http://localhost:5000)
+Run standalone:  python tracker.py   (http://127.0.0.1:5000)
 Debug: FLASK_DEBUG=1 python tracker.py
 """
 
@@ -9,9 +9,9 @@ import json
 import logging
 import os
 import re
-import uuid
-from datetime import datetime, timezone, date, timedelta
+from datetime import date
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_file, stream_with_context
@@ -44,6 +44,8 @@ def _first_name() -> str:
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
+db.init_db()
+
 app = Flask(__name__)
 
 # Gzip compression for responses
@@ -52,6 +54,66 @@ try:
     Compress(app)
 except ImportError:
     pass  # optional dependency
+
+
+# ── localhost guard ────────────────────────────────────────────────────────────
+# The API has no auth: it trusts that only this machine can reach it. Binding to
+# 127.0.0.1 keeps other hosts out, but a web page open in any local browser can
+# still aim requests at it: DNS rebinding (attacker.example resolving to 127.0.0.1
+# sends `Host: attacker.example`) and cross-site form/fetch POSTs. So every request
+# must name a loopback host, and any Origin it carries must be a loopback origin
+# on an allowed port: the served port (app.config["ASCENT_PORTS"], set by app.py /
+# tracker.py) plus the Vite dev server.
+LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+VITE_DEV_PORT = 5173
+
+
+def _host_port(netloc: str) -> tuple[str, int | None]:
+    try:
+        u = urlsplit(f"//{netloc}")
+        return (u.hostname or "").lower(), u.port
+    except ValueError:
+        return "", None
+
+
+def _allowed(host: str, port: int | None) -> bool:
+    if host not in LOOPBACK_HOSTS:
+        return False
+    ports = app.config.get("ASCENT_PORTS")
+    return port is None or not ports or port in ports or port == VITE_DEV_PORT
+
+
+@app.before_request
+def _local_only():
+    if not _allowed(*_host_port(request.host)):
+        return jsonify({"ok": False, "error": "forbidden host"}), 403
+    origin = request.headers.get("Origin")
+    if origin:
+        u = urlsplit(origin)
+        try:
+            port = u.port
+        except ValueError:
+            port = -1
+        if u.scheme not in ("http", "https") or not _allowed((u.hostname or "").lower(), port):
+            return jsonify({"ok": False, "error": "forbidden origin"}), 403
+    elif request.method not in ("GET", "HEAD", "OPTIONS") and \
+            request.headers.get("Sec-Fetch-Site") not in (None, "same-origin", "none"):
+        return jsonify({"ok": False, "error": "forbidden cross-site request"}), 403
+
+
+# ── app meta ───────────────────────────────────────────────────────────────────
+
+@app.route("/api/instance", methods=["GET"])
+def api_instance():
+    """Which database this backend serves. app.py compares it before reusing a
+    running instance, so a demo launch never attaches to someone's real data."""
+    return jsonify({"app": "ascent", "db": str(Path(db.DB_PATH).resolve())})
+
+
+@app.route("/api/modules", methods=["GET"])
+def api_modules():
+    from agent.config import modules
+    return jsonify(modules())
 
 # ── agent routes ───────────────────────────────────────────────────────────────
 
@@ -573,7 +635,7 @@ def api_reminders_put(rid):
     return jsonify(rec)
 
 
-# ── ai agents (stub routes) ────────────────────────────────────────────────────
+# ── AI agents (API only: used by Linda and scripts, no UI yet) ─────────────────
 
 @app.route("/api/jobs/scan", methods=["POST"])
 def api_jobs_scan():
@@ -585,7 +647,7 @@ def api_jobs_scan():
         return jsonify({"ok": False, "error": str(exc)}), 500
 
 
-# ── Cowork daily job pull (job_runs/) ────────────────────────────────────────────
+# ── daily job-pull runs (ASCENT_JOB_RUNS folder, parsed by jobruns.py) ───────────
 
 @app.route("/api/jobs/runs", methods=["GET"])
 def api_jobs_runs():
@@ -616,7 +678,7 @@ def api_jobs_file(date, slug, which):
 @app.route("/api/news", methods=["GET"])
 def api_news():
     import news
-    topics = (request.args.get("topics") or "robotics,ai,az").split(",")
+    topics = (request.args.get("topics") or ",".join(news.DEFAULT_TOPICS)).split(",")
     return jsonify(news.get_news([t.strip() for t in topics if t.strip()]))
 
 
@@ -714,29 +776,32 @@ def _free_ram_gib():
         return None
 
 
+@app.route("/api/settings/ollama", methods=["GET"])
+def api_settings_ollama():
+    """Ollama reachability + installed models. Split out of GET /api/settings so a
+    slow or absent Ollama never delays the Settings page."""
+    from agent.config import PROBE_TIMEOUT, load_settings
+    info = {"reachable": False, "models": [], "error": None}
+    try:
+        import ollama
+        data = ollama.Client(host=load_settings()["ollama_host"], timeout=PROBE_TIMEOUT).list()
+        info["reachable"] = True
+        info["models"] = sorted((m.get("model") or m.get("name") or "") for m in data.get("models", []))
+    except Exception as exc:
+        info["error"] = str(exc)
+    return jsonify(info)
+
+
 @app.route("/api/settings", methods=["GET"])
 def api_settings_get():
     from agent.config import CURATED_MODELS, FALLBACK_MODEL, load_settings
-    s = load_settings()
-    ollama_info = {"reachable": False, "models": [], "error": None}
-    try:
-        import ollama
-        from agent.config import PROBE_TIMEOUT
-        data = ollama.Client(host=s["ollama_host"], timeout=PROBE_TIMEOUT).list()
-        ollama_info["reachable"] = True
-        ollama_info["models"] = sorted(
-            (m.get("model") or m.get("name") or "") for m in data.get("models", [])
-        )
-    except Exception as exc:
-        ollama_info["error"] = str(exc)
     return jsonify({
-        "settings": s,
-        "ollama": ollama_info,
+        "settings": load_settings(),
         "free_ram_gib": _free_ram_gib(),
         "fallback_model": FALLBACK_MODEL,
         "curated": CURATED_MODELS,
         "app": {
-            "ascent_port": 5001,
+            "ascent_port": _host_port(request.host)[1],
             "data_yaml": str(_DATA_PATH),
             "output_dir": str(Path(__file__).parent / "output"),
         },
@@ -873,7 +938,6 @@ def api_track_week_put(track, week_id):
 
 
 @app.route("/api/tracks/<track>/week/<int:week_id>/detail", methods=["PUT"])
-@app.route("/api/<track>/week/<int:week_id>/detail", methods=["PUT"])
 def api_track_detail(track, week_id):
     """Persist per-week checked objectives + can_explain + logged hours."""
     if not registry.exists(track):
@@ -963,7 +1027,10 @@ def api_day_add():
 @app.route("/api/schedule", methods=["GET"])
 def api_schedule_get():
     import dayplan
-    return jsonify({**dayplan.load_schedule(), "cats": dayplan.CATS})
+    sched = dayplan.load_schedule()
+    used = {b.get("cat") for blocks in sched["templates"].values() for b in blocks}
+    cats = {k: v for k, v in dayplan.CATS.items() if k in dayplan.active_cats() or k in used}
+    return jsonify({**sched, "cats": cats})
 
 
 @app.route("/api/schedule", methods=["PUT"])
@@ -1072,7 +1139,9 @@ def api_side_delete(sid):
 
 @app.route("/api/side/summary", methods=["GET"])
 def api_side_summary():
-    return jsonify(db.side_summary())
+    from agent.config import load_settings
+    s = load_settings()
+    return jsonify({**db.side_summary(), "clips_tool": s.get("clips_tool"), "clips_url": s.get("clips_url")})
 
 
 # ── personal health (weight, workouts, daily routine) ────────────────────
@@ -1183,7 +1252,7 @@ def index():
     if _DIST_INDEX.exists():
         return send_file(_DIST_INDEX)
     return Response(
-        "Ascent UI build missing — run `bun run build` in career-planner/frontend.",
+        "Ascent UI build missing — run `bun run build` in frontend/.",
         status=503, mimetype="text/plain")
 
 
@@ -1199,5 +1268,7 @@ def _cache_hashed_assets(resp):
 
 if __name__ == "__main__":
     debug = os.environ.get("FLASK_DEBUG", "0") == "1"
-    print("Ascent API - http://localhost:5000")
-    app.run(debug=debug, port=5000)
+    port = int(os.environ.get("ASCENT_PORT") or 5000)
+    app.config["ASCENT_PORTS"] = {port}
+    print(f"Ascent API - http://127.0.0.1:{port}")
+    app.run(host="127.0.0.1", debug=debug, port=port)

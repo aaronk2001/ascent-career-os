@@ -2,7 +2,7 @@ import json
 import os
 import sqlite3
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 DB_PATH = Path(os.environ.get("ASCENT_DB") or Path(__file__).parent / "career.db")
@@ -284,38 +284,28 @@ CREATE TABLE IF NOT EXISTS workouts (
 );
 """
 
-# Seeded once when profile_links is empty. Due dates follow the Sep-2026 sprint.
+# Seeded once when profile_links is empty: a generic checklist with no due dates
+# (set them in Profile Links). Rows are never re-seeded or overwritten.
 _PROFILE_LINK_SEED = [
-    {"key": "linkedin", "label": "LinkedIn / Personal Website", "url": "",
-     "status": "done", "due": "2026-09-10", "checklist": [
-         {"text": "Headline: Controls / Robotics Engineer · PLC · Computer Vision", "done": True},
-         {"text": "Open-to-work set for target locations + remote", "done": True},
-         {"text": "Add Factory IO demo videos to Featured as they ship", "done": False}]},
-    {"key": "github", "label": "GitHub URL", "url": "",
-     "status": "todo", "due": "2026-09-19", "checklist": [
-         {"text": "Create profile README repo (<user>/<user>): who, stack, 3 headline projects", "done": False},
-         {"text": "Create plc-factoryio-codesys repo (sprint W1) with README + first scene", "done": False},
-         {"text": "Pin 6: plc-factoryio-codesys, yolov8-hailo-pi5, virtual-lab (OpenPLC), senior-design ROS2, KiCad PCB, NEXUS", "done": False},
-         {"text": "Clean repo names + one-line descriptions + topics on every pinned repo", "done": False},
-         {"text": "Set profile photo, location, link to portfolio + LinkedIn", "done": False}]},
-    {"key": "portfolio", "label": "Portfolio URL", "url": "",
-     "status": "todo", "due": "2026-09-26", "checklist": [
-         {"text": "Deploy the portfolio site (e.g. Vercel)", "done": False},
-         {"text": "Add 'PLC / Factory IO' project section with embedded demo video", "done": False},
-         {"text": "Add resume PDF download + contact links", "done": False},
-         {"text": "Custom domain (optional) — otherwise use the vercel.app URL", "done": False},
-         {"text": "Paste final URL here and into LinkedIn + GitHub profile", "done": False}]},
-    {"key": "transcripts", "label": "Transcripts (on request only)", "url": "",
-     "status": "done", "due": None, "checklist": [
-         {"text": "Do not publish or link; shipped work carries the application.", "done": True},
-         {"text": "Keep an unofficial transcript PDF locally for the rare form that forces an upload.", "done": False}],
-     "notes": "Field is optional (co-op/internship only) on the forms that ask."},
-    {"key": "other", "label": "Other URL (YouTube channel)", "url": "",
-     "status": "todo", "due": "2026-10-03", "checklist": [
-         {"text": "Create YouTube channel for Factory IO / CODESYS demos + clips", "done": False},
-         {"text": "Upload first Factory IO demo (sprint W1 recording)", "done": False},
-         {"text": "Channel banner + about text + links to GitHub/portfolio", "done": False},
-         {"text": "Paste channel URL here and into LinkedIn + GitHub", "done": False}]},
+    {"key": "linkedin", "label": "LinkedIn", "url": "", "status": "todo", "due": None, "checklist": [
+        {"text": "Headline names the target role and 2-3 core skills", "done": False},
+        {"text": "Open-to-work set for target locations + remote", "done": False},
+        {"text": "Featured section links your best project demo", "done": False}]},
+    {"key": "github", "label": "GitHub", "url": "", "status": "todo", "due": None, "checklist": [
+        {"text": "Profile README: who you are, stack, 3 headline projects", "done": False},
+        {"text": "Pin the 4-6 repos that best match the target role", "done": False},
+        {"text": "Every pinned repo has a one-line description, topics and a README screenshot", "done": False}]},
+    {"key": "portfolio", "label": "Portfolio site", "url": "", "status": "todo", "due": None, "checklist": [
+        {"text": "Deploy the site (any static host works)", "done": False},
+        {"text": "One page per headline project with a demo video or photos", "done": False},
+        {"text": "Resume PDF download + contact links", "done": False},
+        {"text": "Paste the final URL here and into LinkedIn + GitHub", "done": False}]},
+    {"key": "other", "label": "Other (video channel, blog, ...)", "url": "", "status": "todo", "due": None,
+     "checklist": [
+         {"text": "Pick one channel where demos live", "done": False},
+         {"text": "Upload the first project demo", "done": False},
+         {"text": "Paste the URL here and link it from LinkedIn + GitHub", "done": False}],
+     "notes": "Optional: only worth it once there is a real demo to link."},
 ]
 
 
@@ -367,96 +357,9 @@ def _seed_profile_links(conn):
              json.dumps(row["checklist"]), row["due"], row.get("notes"), i])
 
 
-# Seeded once when `projects` is empty. Facts only — the six story columns stay NULL
-# on purpose: an empty progress bar is the whole point of the Projects section.
-# (slug, name, tier, path, category, stack, status, purpose)
-_PROJECT_SEED = [
-    ("ascent", "Ascent", "core", "Finance agent/career-planner", "agents",
-     "Flask + SQLite + Bun/Vite/TS", "active",
-     "Career OS — applications, learning tracks, timeline, Linda AI panel"),
-    ("forge", "Forge", "core", "forge", "agents",
-     "Tauri 2 + React 19 + Rust + Bun", "active",
-     "AI-assisted parametric CAD desktop shell (build123d / OpenSCAD)"),
-    ("phantom", "Phantom v2", "core", "phantom", "agents", "Python", "active",
-     "YouTube URL to 9:16 captioned clips — transcribe, LLM segment picks, render, review"),
-    ("phantom-studio", "Phantom Studio", "core", "Social_agent", "agents",
-     "Python + FastAPI + MoviePy", "active",
-     "Video and social publishing automation with a review UI"),
-    ("linda", "Linda", "core", "Finance agent/Linda", "agents",
-     "TypeScript (Bun)", "active",
-     "Market research agent feeding live data to the advisory stack"),
-    ("nexus", "NEXUS", "core", "Finance agent/nexus-app", "agents",
-     "Electron + TypeScript", "active",
-     "Trading dashboard for betting and prediction markets"),
-    ("mmm", "MMM", "core", "Finance agent/mmm-app", "agents",
-     "TypeScript", "active", "Personal money-management app"),
-    ("polymarked", "PolyMarked", "core", "PolyMarked", "agents", "Python", "active",
-     "Polymarket paper-trading bot with a live PnL feed, running 24/7 on PC + Pi"),
-    ("walrus", "walrus", "core", "walrus", "agents",
-     "Tauri 2 + React + Bun", "shipped", "Local Ollama agent desktop app"),
-    ("omniroute", "OmniRoute", "core", "omniroute", "infra", "Docker", "active",
-     "Loopback-only OpenAI/Anthropic-compatible AI gateway"),
-    ("portfolio-site", "Portfolio site", "core", "aaron-portfolio-site", "web",
-     "Next.js + React + TS + Tailwind", "active", "Public portfolio site"),
-    ("pi-homelab", "Pi homelab", "core", "Pis", "infra",
-     "Python + Ansible + Docker", "active",
-     "12-node Raspberry Pi fleet — NAS, DNS, MQTT, k3s, monitoring"),
-    ("edge-defect", "Edge defect detection", "core", "Pis/edge-defect-detection", "robotics",
-     "Python + YOLOv8 + Hailo-8L", "active",
-     "Production defect-detection vision pipeline on Pi 5 with a Hailo accelerator"),
-    ("robot-arm", "Robot ARM", "core", "Robot ARM", "robotics",
-     "Python + Pi 4 + PCA9685", "active", "6-DOF robotic arm controller and CAD"),
-    ("robot-car", "RobotCar", "core", "RobotCar", "robotics",
-     "Python + Pi 4 + OpenCV + MQTT", "active", "FPV autonomous car"),
-    ("plc", "PLC", "core", "PLC", "controls",
-     "Studio 5000 ladder + Python EtherNet/IP", "active",
-     "Studio 5000 demos and a Python-to-PLC bridge"),
-    ("ecad", "ECAD", "core", "ECAD", "hardware", "KiCad + SKiDL", "active",
-     "PCB designs and the V3 SKiDL generation harness"),
-    ("mcad", "MCAD", "core", "MCAD", "hardware", "SOLIDWORKS", "active",
-     "Mechanical CAD — arcade cabinet, picar chassis, server rack"),
-
-    ("plc-track-app", "plc-track-app", "other", "plc-track-app", "controls",
-     "Tauri + React", "shipped", "Controls learning-path tracker"),
-    ("ml-track-app", "ml-track-app", "other", "ml-track-app", "agents",
-     "Tauri + React", "shipped", "ML literacy-track tracker"),
-    ("tts", "Text-to-speech app", "other", "Text-to-speach", "agents",
-     "Python", "shipped", "TTS desktop app"),
-    ("career-runs", "Job-search automation", "other", "career", "agents",
-     "Markdown + Python", "active", "Daily scheduled job-search runs"),
-    ("daily-reports", "Daily reports", "other", "daily-reports", "agents",
-     "Markdown", "active", "Scheduled Ascent daily reports"),
-    ("openplc", "OpenPLC scaffolding", "other", "Openplc", "controls",
-     "Structured text", "paused", "Codesys/OpenPLC scaffolding supporting PLC/"),
-    ("kicad-tools", "KiCad tooling", "other", "kicad-tools", "hardware",
-     "Python + KiCad", "paused", "SKiDL projects, InteractiveHtmlBom, espressif-kicad"),
-    ("forge-ui", "Forge UI library", "other", "shared/forge", "web",
-     "CSS + JS", "shipped", "Shared UI library used by Ascent"),
-    ("yolov8-hailo", "yolov8-hailo-pi5", "other", "Pis/yolov8-hailo-pi5", "robotics",
-     "Python + Hailo", "shipped", "Hailo inference framework the defect pipeline is built on"),
-    ("homelab-monitoring", "Homelab monitoring stack", "other",
-     "Pis/homelab-monitoring-stack", "infra", "Prometheus + Grafana", "active",
-     "Fleet metrics and dashboards"),
-    ("ai-advisory", "ai-financial-advisory", "other",
-     "Finance agent/ai-financial-advisory", "agents", "Python", "paused",
-     "Advisory layer built on the autonomous-loop foundation"),
-    ("research", "Research agent", "other", "Finance agent/research", "agents",
-     "TypeScript + Python", "paused", "ATS keyword and market research feed"),
-    ("esp32-motion", "ESP32 motion controllers", "other", "sevo.py / step.py", "robotics",
-     "MicroPython + ESP32", "shipped",
-     "Servo (PCA9685) and stepper web controllers served off-board over WiFi"),
-]
-
-
-def _seed_projects(conn):
-    n = conn.execute("SELECT COUNT(*) FROM projects").fetchone()[0]
-    if n:
-        return
-    for i, (slug, name, tier, path, category, stack, status, purpose) in enumerate(_PROJECT_SEED):
-        conn.execute(
-            "INSERT INTO projects (id, slug, name, tier, path, category, stack, status, purpose, sort) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?)",
-            [_new_id("proj"), slug, name, tier, path, category, stack, status, purpose, i])
+def _utcnow():
+    """Naive UTC now (same format the rows already store); utcnow() is deprecated."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def get_conn():
@@ -535,7 +438,6 @@ def init_db():
         _migrate(conn)
         _seed_profile_links(conn)
         _seed_workouts(conn)
-        _seed_projects(conn)
 
 def get_all(status=None, company=None):
     with get_conn() as conn:
@@ -578,7 +480,7 @@ def create(data):
     # whitelist: client JSON keys become SQL column names
     data = {k: v for k, v in dict(data).items() if k in APP_COLUMNS}
     data.setdefault('id', f"app_{uuid.uuid4().hex[:8]}")
-    now = datetime.utcnow().isoformat()
+    now = _utcnow().isoformat()
     data.setdefault('created_at', now)
     data['updated_at'] = now
     if data.get('status') == 'applied' and not data.get('applied_date'):
@@ -595,7 +497,7 @@ def create(data):
 
 def update(app_id, data):
     data = {k: v for k, v in dict(data).items() if k in APP_COLUMNS - {"id", "created_at"}}
-    data['updated_at'] = datetime.utcnow().isoformat()
+    data['updated_at'] = _utcnow().isoformat()
     sets = ', '.join([f"{k} = ?" for k in data])
     vals = list(data.values()) + [app_id]
     with get_conn() as conn:
@@ -649,18 +551,31 @@ def get_funnel():
     return {'stages': STAGE_ORDER, 'reached': reached, 'steps': steps}
 
 
+# Bucket values written by older versions: "az" was the local market and "houston"
+# a retired relocation target. Rows keep their stored value; reads map them here.
+_BUCKET_ALIASES = {"az": "local", "houston": "other"}
+
+
+def norm_bucket(b):
+    b = (b or '').strip().lower() or 'other'
+    return _BUCKET_ALIASES.get(b, b)
+
+
 def get_cadence():
     """Weekly apps vs target, by bucket, plus the overdue-first follow-up queue."""
     from agent.config import load_settings
     s = load_settings()
     target = int(s.get('weekly_target') or 8)
-    bucket_targets = s.get('bucket_targets') or {'az': 5, 'remote': 3}
+    bucket_targets = {}
+    for k, v in (s.get('bucket_targets') or {'local': 5, 'remote': 3}).items():
+        nk = norm_bucket(k)
+        bucket_targets[nk] = bucket_targets.get(nk, 0) + (v or 0)
     apps = get_all()
     today = date.today().isoformat()
     week_ago = (date.today() - timedelta(days=7)).isoformat()
 
     def bkt(a):
-        return (a.get('bucket') or '').strip().lower() or 'other'
+        return norm_bucket(a.get('bucket'))
 
     by_bucket, week_by_bucket = {}, {}
     for a in apps:
@@ -697,6 +612,7 @@ def get_cadence():
     no_reply.sort(key=lambda x: -x['days'])
     return {
         'weekly_target': target, 'bucket_targets': bucket_targets,
+        'local_label': s.get('local_label') or 'Local',
         'week_total': week_total, 'week_by_bucket': week_by_bucket,
         'by_bucket': by_bucket, 'needs_followup': needs, 'no_reply': no_reply,
     }
@@ -724,7 +640,7 @@ def track_status_all(track):
 
 
 def track_set_week(track, week_id, status, notes=None):
-    now = datetime.utcnow().isoformat()
+    now = _utcnow().isoformat()
     today = date.today().isoformat()
     fields = {'status': status, 'updated_at': now}
     if status == 'in_progress':
@@ -792,7 +708,7 @@ def track_detail_set(track, week_id, objectives_done=None, can_explain_done=None
     obj = objectives_done if objectives_done is not None else cur['objectives_done']
     cxd = can_explain_done if can_explain_done is not None else cur['can_explain_done']
     hrs = hours if hours is not None else cur['hours']
-    now = datetime.utcnow().isoformat()
+    now = _utcnow().isoformat()
     with get_conn() as conn:
         conn.execute(
             "INSERT INTO track_progress_detail "
@@ -848,7 +764,7 @@ def roadmap_progress_all(roadmap_id):
 
 
 def roadmap_set_node(roadmap_id, node_id, state, notes=None):
-    now = datetime.utcnow().isoformat()
+    now = _utcnow().isoformat()
     with get_conn() as conn:
         conn.execute(
             "INSERT INTO roadmap_progress (roadmap_id, node_id, state, notes, updated_at) VALUES (?,?,?,?,?) "
@@ -883,7 +799,7 @@ def day_block_create(d):
     row.setdefault("actual_min", 0)
     row.setdefault("pos", 0)
     row["id"] = _new_id("blk")
-    row["updated_at"] = datetime.utcnow().isoformat()
+    row["updated_at"] = _utcnow().isoformat()
     return _insert("day_blocks", row)
 
 
@@ -891,7 +807,7 @@ def day_block_update(bid, d):
     patch = {k: v for k, v in d.items() if k in _BLOCK_COLS}
     if not patch:
         return get_row("day_blocks", bid)
-    patch["updated_at"] = datetime.utcnow().isoformat()
+    patch["updated_at"] = _utcnow().isoformat()
     return _update("day_blocks", bid, patch)
 
 
@@ -923,7 +839,7 @@ def link_update(lid, d):
     if not patch:
         r = get_row("profile_links", lid)
     else:
-        patch["updated_at"] = datetime.utcnow().isoformat()
+        patch["updated_at"] = _utcnow().isoformat()
         r = _update("profile_links", lid, patch)
     if r:
         r["checklist"] = _jload(r.get("checklist")) or []
@@ -952,7 +868,7 @@ def project_add(d):
     row = {k: v for k, v in d.items() if k in _PROJECT_COLS}
     row["id"] = _new_id("proj")
     row.setdefault("slug", row["id"])
-    row["updated_at"] = datetime.utcnow().isoformat()
+    row["updated_at"] = _utcnow().isoformat()
     _insert("projects", row)
     return get_row("projects", row["id"])
 
@@ -967,7 +883,7 @@ def project_update(pid, d):
     patch = {k: v for k, v in d.items() if k in _PROJECT_COLS}
     if not patch:
         return get_row("projects", pid)
-    patch["updated_at"] = datetime.utcnow().isoformat()
+    patch["updated_at"] = _utcnow().isoformat()
     return _update("projects", pid, patch)
 
 
@@ -1051,7 +967,7 @@ def health_day_upsert(day, d):
         patch["routine"] = json.dumps(d["routine"] or {})
     if "note" in d:
         patch["note"] = d["note"] or None
-    patch["updated_at"] = datetime.utcnow().isoformat()
+    patch["updated_at"] = _utcnow().isoformat()
     cur = _rows("health_day", "date = ?", (day,))
     if cur:
         _update("health_day", cur[0]["id"], patch)
@@ -1078,7 +994,7 @@ def workout_update(wid, d):
         patch["split"] = (patch["split"] or "push").strip().lower()
     if "sort" in patch:
         patch["sort"] = int(patch["sort"] or 0)
-    patch["updated_at"] = datetime.utcnow().isoformat()
+    patch["updated_at"] = _utcnow().isoformat()
     return _update("workouts", wid, patch)
 
 
@@ -1206,7 +1122,7 @@ def cert_seed_fields(cid, d):
         patch["how_to"] = json.dumps(d["how_to"]) if d["how_to"] is not None else None
     if "steps" in d:
         patch["steps"] = json.dumps(_norm_steps(d["steps"]))
-    patch["updated_at"] = datetime.utcnow().isoformat()
+    patch["updated_at"] = _utcnow().isoformat()
     return _cert_out(_update("certifications", cid, patch))
 
 
@@ -1230,7 +1146,7 @@ def cert_create(d):
         "related_profiles": profiles if isinstance(profiles, str) else json.dumps(profiles or []),
         "notes": d.get("notes"), "sort": d.get("sort", 0),
         "steps": json.dumps(_norm_steps(d.get("steps") or [])),
-        "created_at": datetime.utcnow().isoformat()}))
+        "created_at": _utcnow().isoformat()}))
 
 def cert_update(cid, d):
     d = dict(d)
@@ -1243,7 +1159,7 @@ def cert_update(cid, d):
          ("provider", "title", "url", "track", "status", "hours", "cost", "notes",
           "category", "time_est", "why", "sort", "related_skills", "related_profiles",
           "exam_date", "cost_usd", "steps")}
-    d["updated_at"] = datetime.utcnow().isoformat()
+    d["updated_at"] = _utcnow().isoformat()
     return _cert_out(_update("certifications", cid, d))
 
 def cert_delete(cid):
@@ -1264,12 +1180,12 @@ def timeline_create(d):
         "id": _new_id("tl"), "date": d["date"], "kind": d.get("kind", "milestone"),
         "label": d["label"], "phase": d.get("phase"), "track": d.get("track"),
         "done": int(bool(d.get("done"))), "notes": d.get("notes"),
-        "updated_at": datetime.utcnow().isoformat()})
+        "updated_at": _utcnow().isoformat()})
 
 def timeline_update(eid, d):
     fields = {k: v for k, v in d.items() if k in
               ("date", "kind", "label", "phase", "track", "done", "notes")}
-    fields["updated_at"] = datetime.utcnow().isoformat()  # audit: trace silent date changes
+    fields["updated_at"] = _utcnow().isoformat()  # audit: trace silent date changes
     return _update("timeline_events", eid, fields)
 
 def timeline_delete(eid):
@@ -1282,14 +1198,14 @@ def notes_all(limit=None):
     return rows[:limit] if limit else rows
 
 def note_create(text):
-    ts = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    ts = _utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     return _insert("notes", {"id": _new_id("note"), "ts": ts, "text": text, "edited": None, "pinned": 0})
 
 def note_update(nid, text=None, pinned=None):
     fields = {}
     if text is not None:
         fields["text"] = text
-        fields["edited"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        fields["edited"] = _utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     if pinned is not None:
         fields["pinned"] = int(bool(pinned))
     if not fields:
@@ -1333,5 +1249,3 @@ def reminder_mark(rid, *, read=None, dismissed=None):
         d["dismissed"] = int(dismissed)
     return _update("reminders", rid, d)
 
-
-init_db()

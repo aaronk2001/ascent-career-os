@@ -28,6 +28,7 @@ _DEFAULTS = {
     "star_situation": "",          # default STAR "Situation" line
     "star_result": "",             # default STAR "Result" line
     "talking_points": [],          # company-intel talking points; "{company}" is substituted
+    "after_tax_rate": 0.74,        # rough take-home share of gross pay for offer comparisons
 }
 
 

@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -10,37 +11,39 @@ import db  # noqa: E402
 import projects  # noqa: E402
 
 
+# (slug, name, tier, path) - a small inventory; a fresh install seeds none.
+FIXTURE = [
+    ("edge-defect", "Edge defect detection", "core", "robots/edge-defect"),
+    ("arm", "Robot arm", "core", "robots/arm"),
+    ("sorter", "Sorter cell", "core", "plc/sorter"),
+    ("tts", "TTS app", "other", "apps/tts"),
+    ("old-bot", "Old bot", "other", "robots/old-bot"),
+]
+N_CORE, N_OTHER = 3, 2
+
+
 @pytest.fixture(autouse=True)
 def tmp_db(tmp_path, monkeypatch):
     monkeypatch.setattr(db, "DB_PATH", tmp_path / "t.db")
     db.init_db()
+    for i, (slug, name, tier, path) in enumerate(FIXTURE):
+        db.project_add({"slug": slug, "name": name, "tier": tier, "path": path, "sort": i})
     yield
 
 
-def test_seed_populates_both_tiers():
-    rows = db.projects_all()
-    assert len(rows) == 31
-    assert sum(1 for r in rows if r["tier"] == "core") == 18
-    assert sum(1 for r in rows if r["tier"] == "other") == 13
-
-
-def test_seed_leaves_every_story_field_blank():
-    for r in db.projects_all():
-        for f in ("problem", "built", "decision", "result", "differently", "pitch"):
-            assert not r[f], f"{r['slug']}.{f} was seeded with text"
-
-
-def test_seed_is_idempotent():
-    before = len(db.projects_all())
+def test_fresh_install_seeds_no_projects(tmp_path, monkeypatch):
+    monkeypatch.setattr(db, "DB_PATH", tmp_path / "fresh.db")
     db.init_db()
-    assert len(db.projects_all()) == before
+    assert db.projects_all() == []
+    assert projects.all_grouped()["overall"] == {"percent": 0, "complete_count": 0, "shipped_count": 0, "total": 0}
 
 
-def test_seed_does_not_overwrite_edits():
-    row = db.projects_all()[0]
-    db.project_update(row["id"], {"problem": "mine"})
+def test_init_db_never_touches_existing_projects():
+    before = db.projects_all()
+    db.project_update(before[0]["id"], {"problem": "mine"})
     db.init_db()
-    assert db.project_get(row["id"])["problem"] == "mine"
+    after = db.projects_all()
+    assert len(after) == len(before) and after[0]["problem"] == "mine"
 
 
 def test_add_update_delete_round_trip():
@@ -117,10 +120,10 @@ def test_overall_counts_core_completion():
 
 def test_all_grouped_splits_tiers_and_decorates():
     out = projects.all_grouped()
-    assert len(out["core"]) == 18 and len(out["other"]) == 13
+    assert len(out["core"]) == N_CORE and len(out["other"]) == N_OTHER
     assert all("completeness" in r for r in out["core"] + out["other"])
     assert out["overall"]["percent"] == 0
-    assert out["overall"]["total"] == 18
+    assert out["overall"]["total"] == N_CORE
 
 
 def test_set_tier_promotes_and_survives_a_reload():
@@ -142,7 +145,7 @@ def test_render_lists_every_project_in_the_index():
 
 def test_render_marks_unfilled_blanks():
     md = projects.render_markdown()
-    assert md.count("_(blank)_") == 18 * len(projects.STORY_FIELDS)
+    assert md.count("_(blank)_") == N_CORE * len(projects.STORY_FIELDS)
 
 
 def test_render_only_sections_core_projects():
@@ -161,7 +164,7 @@ def test_render_includes_written_answers():
     db.project_update(row["id"], {"pitch": "A fleet of 180 robots, one control plane."})
     md = projects.render_markdown()
     assert "A fleet of 180 robots, one control plane." in md
-    assert md.count("_(blank)_") == 18 * len(projects.STORY_FIELDS)
+    assert md.count("_(blank)_") == N_CORE * len(projects.STORY_FIELDS)
 
 
 def test_export_writes_the_file(tmp_path, monkeypatch):
@@ -182,7 +185,7 @@ def client(tmp_db):
 def test_get_returns_grouped_payload(client):
     body = client.get("/api/projects").get_json()
     assert set(body) == {"core", "other", "overall"}
-    assert len(body["core"]) == 18
+    assert len(body["core"]) == N_CORE
 
 
 def test_post_requires_a_name(client):
@@ -234,12 +237,12 @@ def test_draft_422_when_no_source_file(tmp_path, monkeypatch):
     monkeypatch.setattr(projects, "PROJECTS_ROOT", tmp_path)
     with pytest.raises(projects.DraftError) as e:
         projects.draft(_core()["id"])
-    assert e.value.status == 422 and "Pis/edge-defect-detection" in e.value.message
+    assert e.value.status == 422 and "robots/edge-defect" in e.value.message
 
 
 def test_draft_503_when_ollama_down(tmp_path, monkeypatch):
     monkeypatch.setattr(projects, "PROJECTS_ROOT", tmp_path)
-    d = tmp_path / "Pis" / "edge-defect-detection"
+    d = tmp_path / "robots" / "edge-defect"
     d.mkdir(parents=True)
     (d / "README.md").write_text("# Edge\nYOLO on a Pi", encoding="utf-8")
 
@@ -253,7 +256,7 @@ def test_draft_503_when_ollama_down(tmp_path, monkeypatch):
 
 def test_draft_returns_four_strings_and_caps_input(tmp_path, monkeypatch):
     monkeypatch.setattr(projects, "PROJECTS_ROOT", tmp_path)
-    d = tmp_path / "Pis" / "edge-defect-detection"
+    d = tmp_path / "robots" / "edge-defect"
     d.mkdir(parents=True)
     (d / "README.md").write_text("x" * 20000, encoding="utf-8")
     seen = {}
@@ -288,3 +291,23 @@ def test_draft_422_when_path_blank_even_if_root_has_readme(tmp_path, monkeypatch
     with pytest.raises(projects.DraftError) as e:
         projects.draft(row["id"])
     assert e.value.status == 422 and "(no path set)" in e.value.message
+
+
+@pytest.mark.parametrize("path", ["../outside", "robots/../../outside", "/etc", "C:/Windows"])
+def test_draft_refuses_paths_outside_the_projects_root(tmp_path, monkeypatch, path):
+    root = tmp_path / "root"
+    root.mkdir()
+    (tmp_path / "outside").mkdir()
+    (tmp_path / "outside" / "README.md").write_text("# secret", encoding="utf-8")
+    monkeypatch.setattr(projects, "PROJECTS_ROOT", root)
+    row = db.project_add({"name": "Escape", "slug": "escape", "path": path})
+    with pytest.raises(projects.DraftError) as e:
+        projects.draft(row["id"])
+    assert e.value.status in (403, 422)
+    assert "secret" not in e.value.message
+
+
+def test_projects_md_defaults_next_to_the_database_not_outside_the_repo():
+    assert projects.PROJECTS_ROOT.resolve() == Path(os.environ["ASCENT_PROJECTS_ROOT"]).resolve()
+    assert projects.PROJECTS_MD.name == "PROJECTS.md"
+    assert projects.PROJECTS_MD.parent.resolve() == projects.PROJECTS_ROOT.resolve()

@@ -36,10 +36,9 @@ import sys
 from pathlib import Path
 
 from docx import Document
-from docx.shared import Pt, Inches, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT, WD_TAB_LEADER
-from docx.enum.table import WD_ALIGN_VERTICAL
-from docx.oxml.ns import qn, nsmap
+from docx.shared import Pt, Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
 

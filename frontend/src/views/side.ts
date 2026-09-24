@@ -11,6 +11,7 @@ type SideSummary = {
   latest_followers: Record<string, { followers: number; date: string }>;
   posts_mtd: number; revenue_mtd: number; posts_total: number; revenue_total: number;
   streak_days: number; entries: number;
+  clips_tool?: string | null; clips_url?: string | null;
 };
 
 export default function side(): View {
@@ -51,7 +52,7 @@ export default function side(): View {
             <h1 class="text-2xl font-semibold tracking-tight">Side Hustle</h1>
             <p class="text-sm text-fg-muted mt-1">Clips (engineering/robotics/PLC niche) · freelance · bridge income</p>
           </div>
-          <a href="http://127.0.0.1:8000" target="_blank" class="shrink-0 text-xs accent-text hover:underline">Open Phantom Clips ↗</a>
+          ${s.clips_url ? `<a href="${esc(s.clips_url)}" target="_blank" class="shrink-0 text-xs accent-text hover:underline">Open ${esc(s.clips_tool || "clip tool")} ↗</a>` : ""}
         </div>
 
         ${statTiles(s)}

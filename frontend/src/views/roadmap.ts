@@ -30,7 +30,7 @@ const LEVEL_TONE: Record<string, string> = {
   advanced: "text-violet-400 border-violet-400/40",
 };
 const BUCKET_TONE: Record<string, string> = {
-  houston: "text-fg-faint border-line", remote: "text-cyan-400 border-cyan-400/40", az: "text-violet-400 border-violet-400/40",
+  other: "text-fg-faint border-line", remote: "text-cyan-400 border-cyan-400/40", local: "text-violet-400 border-violet-400/40",
 };
 
 const parseEvidence = (s?: string): Evidence[] => {
@@ -113,7 +113,7 @@ export default function roadmap(): View {
         <div class="flex flex-col items-center gap-2 shrink-0">
           ${ring(g.match_pct, { size: 96, stroke: 9, color: tone, label: `${g.match_pct}%` })}
           <div class="text-xs text-fg-faint">${g.met}/${g.total} skills met</div>
-          ${g.profile.bucket ? `<span class="rounded-full border px-2 py-0.5 text-[10px] ${BUCKET_TONE[g.profile.bucket] ?? "text-fg-faint border-line"}">${esc(g.profile.bucket === "az" ? "AZ" : g.profile.bucket)}</span>` : ""}
+          ${g.profile.bucket ? `<span class="rounded-full border px-2 py-0.5 text-[10px] ${BUCKET_TONE[g.profile.bucket] ?? "text-fg-faint border-line"}">${esc(g.profile.bucket === "local" ? "Local" : g.profile.bucket)}</span>` : ""}
         </div>
         <div class="flex-1 min-w-0">
           ${g.profile.summary ? `<p class="text-sm text-fg-muted mb-2">${esc(g.profile.summary)}</p>` : ""}

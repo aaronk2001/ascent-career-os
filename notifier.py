@@ -13,7 +13,16 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import reminders
+# Same .env overrides as the app (ASCENT_DB etc.), loaded before db is imported.
+# Optional here: a scheduled task may run under a Python without python-dotenv.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent / ".env")
+except ImportError:
+    pass
+
+import db  # noqa: E402
+import reminders  # noqa: E402
 
 _SENT = Path(__file__).parent / "data" / ".toast_sent"
 
@@ -71,6 +80,7 @@ def run_blocks():
 
 
 if __name__ == "__main__":
+    db.init_db()  # the task may run before the app has ever created the database
     if "--blocks" in sys.argv:
         run_blocks()
     elif "--due" in sys.argv:

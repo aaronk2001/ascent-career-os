@@ -182,9 +182,8 @@ def test_profile_link_seed_preserves_notes():
     """Regression: the seed INSERT omitted the `notes` column, so the transcripts
     guidance was silently dropped on every freshly created database."""
     links = {l["key"]: l for l in db.links_all()}
-    assert links["transcripts"]["notes"] == (
-        "Field is optional (co-op/internship only) on the forms that ask.")
-    assert len(links) == 5
+    assert links["other"]["notes"] == "Optional: only worth it once there is a real demo to link."
+    assert len(links) == 4
 
 
 # ── calorie target + estimated burn ────────────────────────────────────────────

@@ -3,7 +3,6 @@ Exa-powered job search agent for robotics/automation roles.
 Searches job boards and scores listings against the skill profile.
 """
 import os
-import json
 from datetime import date
 
 from .profile import load_profile

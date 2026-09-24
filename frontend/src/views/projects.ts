@@ -192,8 +192,13 @@ export default function projectsView(): View {
         <div class="card p-5 space-y-2">
           ${progressBar(o.percent)}
           <div class="text-sm font-medium">${o.shipped_count} of ${o.total} core projects fully shipped · ${o.percent}% of stories written</div>
-          <div class="text-xs text-fg-faint">Closest to shipped first — finish those before starting new ones.</div>
+          <div class="text-xs text-fg-faint">${o.total ? "Closest to shipped first — finish those before starting new ones." : "No projects yet. Add the things you've built or are building; each gets a ship checklist and an interview story."}</div>
           <div id="p-export-msg" class="text-xs text-fg-muted"></div>
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            <input id="p-new-name" placeholder="Project name" class="bg-ink-800 rounded-lg px-3 py-1.5 text-sm w-56" />
+            <input id="p-new-path" placeholder="Folder (optional, under ASCENT_PROJECTS_ROOT)" class="bg-ink-800 rounded-lg px-3 py-1.5 text-sm flex-1 min-w-48 max-w-96" />
+            <button id="p-add" class="rounded-lg btn-accent px-3 py-1.5 text-sm">+ Add project</button>
+          </div>
         </div>
 
         ${reviewing ? reviewPanel() : ""}
@@ -353,6 +358,19 @@ export default function projectsView(): View {
       const msg = $(root, "#p-export-msg");
       const res = await tryApi<{ path: string }>("/projects/export", { method: "POST" });
       if (msg) msg.textContent = res.ok ? `Written to ${res.data.path}` : `Export failed: ${res.error}`;
+    }));
+
+    $$(root, "#p-add").forEach((b) => b.addEventListener("click", async () => {
+      const name = ($(root, "#p-new-name") as HTMLInputElement).value.trim();
+      const path = ($(root, "#p-new-path") as HTMLInputElement).value.trim();
+      const msg = $(root, "#p-export-msg");
+      if (!name) { if (msg) msg.textContent = "Give the project a name first."; return; }
+      const res = await tryApi<Project>("/projects", {
+        method: "POST", body: JSON.stringify({ name, tier: "core", ...(path ? { path } : {}) }),
+      });
+      if (!res.ok) { if (msg) msg.textContent = `Add failed: ${res.error}`; return; }
+      openId = res.data.id;
+      await refresh(root);
     }));
   }
 }
