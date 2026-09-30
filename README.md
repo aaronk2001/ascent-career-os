@@ -14,49 +14,6 @@
 
 A job search has a lot of moving parts: applications and follow-ups, a lab curriculum, certifications with exam dates, portfolio projects that each need a README and a resume bullet. Separate spreadsheets and to-do apps drift apart, so Ascent keeps everything in one SQLite file and derives the rest from it, and the dashboard, timeline and daily plan always agree. Your data stays on your machine. Out of the box the app makes no network calls of its own; the news feed and the AI and search services are opt-in (see [Network calls](#network-calls)).
 
-## Highlights for reviewers
-
-The six places I would look first, with numbers taken from the code and the test suite:
-
-1. **Localhost hardening.** The API has no login; it trusts that only this machine can reach it. Binding to `127.0.0.1` is not enough on its own, because a page in any local browser can still reach it through DNS rebinding or a cross-site form POST. A `before_request` guard ([`tracker.py#L59-L102`](tracker.py#L59-L102)) rejects any non-loopback `Host` and any foreign `Origin` or cross-site `Sec-Fetch-Site`. [`tests/test_routes.py`](tests/test_routes.py) covers 6 rebinding hosts, 4 hostile origins and the allowed dev origins. Draft with Linda only reads files that resolve inside `ASCENT_PROJECTS_ROOT`, symlinks and `..` included ([`projects.py#L179-L186`](projects.py#L179-L186)).
-2. **Derived state, never stored.** Headline dates come from one module ([`anchors.py`](anchors.py)), and [`plan.py`](plan.py#L48-L111) projects every track's end date by walking its remaining weeks against the hours per day you set. Nothing is cached in the DB, so a slipped week moves every countdown, the Timeline and Today together.
-3. **Schema evolution without a migrations table.** `init_db()` runs on every start: `CREATE TABLE IF NOT EXISTS`, then `PRAGMA table_info` plus `ALTER TABLE ADD COLUMN` for anything missing, then seeds only into empty tables ([`db.py#L374-L440`](db.py#L374-L440)). Old databases upgrade in place. Before shipping this version I ran it against a copy of a real, months-old database: all 19 tables kept identical row counts and content hashes.
-4. **Data-driven day planner with feature flags.** A day is a YAML template ([`schedule.example.yaml`](schedule.example.yaml)) whose blocks are filled from live data: the next unticked deliverable of the active week, overdue follow-ups, the soonest cert exam with an open study step. Learning tracks become categories automatically (a template block whose `cat` is a track id), and categories owned by a disabled module are filtered in one place ([`dayplan.py#L49-L84`](dayplan.py#L49-L84)). The frontend loads the module list before it mounts the nav, so nothing flashes.
-5. **Backend-agnostic tool loop.** Linda's 14 tools ([`agent/tools.py`](agent/tools.py#L484)) run unchanged on a local Ollama model or on Claude. Both backends share one loop ([`agent/_loop_common.py`](agent/_loop_common.py)) with a per-tool call cap (3, failed calls included) and an iteration cap (10), both tested in [`tests/test_core_logic.py`](tests/test_core_logic.py), and a model that Ollama refuses for lack of RAM is retried on a 1.5B fallback ([`agent/config.py`](agent/config.py#L171)).
-6. **Launch engineering.** `app.py` imports pywebview and the Flask app on separate threads so the two slow imports overlap, pre-warms the YAML caches while WebView2 starts, and reuses a running backend only if `/api/instance` reports the same database file ([`app.py#L62-L71`](app.py#L62-L71)). A demo launch can't attach to real data. YAML goes through libyaml's `CSafeLoader` ([`yamlio.py`](yamlio.py)): the 41 KB ML track parses in 3 ms instead of 40 ms with the pure-Python loader (best of 5 on a laptop i5).
-
-**By the numbers:** 201 tests · 108 Flask routes, and a smoke test that requests every API GET route on a fresh and on a demo database · strict TypeScript, no UI framework · about 8.3k lines of Python and 7k of TypeScript · CI on Ubuntu and Windows × Python 3.11 and 3.12, plus ruff.
-
-## Quick start
-
-Prerequisites: Python 3.11 or 3.12 (tested in CI), [Bun](https://bun.sh), and optionally [Ollama](https://ollama.com) for Linda.
-
-**Windows**
-
-```powershell
-git clone https://github.com/aaronk2001/ascent-career-os.git
-cd ascent-career-os
-powershell -ExecutionPolicy Bypass -File .\setup.ps1
-.venv\Scripts\python app.py --demo     # fictional demo data (demo\, port 5002)
-.venv\Scripts\python app.py            # your own data; or .\ascent.bat
-```
-
-**macOS / Linux**
-
-```bash
-git clone https://github.com/aaronk2001/ascent-career-os.git
-cd ascent-career-os
-./setup.sh                                   # or: bash setup.sh
-.venv/bin/python app.py --demo --browser     # fictional demo data in your browser
-.venv/bin/python app.py --browser            # your own data
-```
-
-`--browser` serves the app and opens your default browser instead of a native window; add `--no-open` to only serve it. On Linux, the native window (`app.py` without `--browser`) also needs pywebview's GTK or Qt bindings, e.g. `.venv/bin/pip install "pywebview[qt]"`. macOS works without extras.
-
-**The demo.** `--demo` seeds a fictional job seeker (Jordan Rivera, Denver) into `demo/` on first run: 12 applications at made-up companies, 6 projects (3 with written interview stories), 6 certs, milestones, skills and this week's plan. It runs on port 5002 and never attaches to an instance serving other data. Dates are relative to the day you seed, so re-run `.venv/bin/python scripts/seed_demo.py` (Windows: `.venv\Scripts\python scripts\seed_demo.py`) to refresh them. All screenshots here come from it.
-
-**Your own data.** On first launch without `--demo`, `career.db` is created with the schema, a generic profile-link checklist and a workout library, and nothing else. Set your offer target and runway dates in Settings to start the countdowns. For Linda, run `ollama pull qwen2.5:1.5b-instruct`.
-
 ## Feature tour
 
 ### Today
@@ -103,6 +60,36 @@ Also included:
 
 **API-only features.** A few backend features have no UI yet and are reachable only through HTTP (or through Linda): resume and cover-letter tailoring to `.docx` (`POST /api/agent/tailor`, `/api/agent/cover-letter`), interview prep, company intel, the offer analyzer, the job scan (`POST /api/jobs/scan` through Exa; it answers 503 "not configured" without `EXA_API_KEY`), and a one-way Google Calendar push of a day's goals ([docs/gcal-setup.md](docs/gcal-setup.md)).
 
+## Quick start
+
+Prerequisites: Python 3.11 or 3.12 (tested in CI), [Bun](https://bun.sh), and optionally [Ollama](https://ollama.com) for Linda.
+
+**Windows**
+
+```powershell
+git clone https://github.com/aaronk2001/ascent-career-os.git
+cd ascent-career-os
+powershell -ExecutionPolicy Bypass -File .\setup.ps1
+.venv\Scripts\python app.py --demo     # fictional demo data (demo\, port 5002)
+.venv\Scripts\python app.py            # your own data; or .\ascent.bat
+```
+
+**macOS / Linux**
+
+```bash
+git clone https://github.com/aaronk2001/ascent-career-os.git
+cd ascent-career-os
+./setup.sh                                   # or: bash setup.sh
+.venv/bin/python app.py --demo --browser     # fictional demo data in your browser
+.venv/bin/python app.py --browser            # your own data
+```
+
+`--browser` serves the app and opens your default browser instead of a native window; add `--no-open` to only serve it. On Linux, the native window (`app.py` without `--browser`) also needs pywebview's GTK or Qt bindings, e.g. `.venv/bin/pip install "pywebview[qt]"`. macOS works without extras.
+
+**The demo.** `--demo` seeds a fictional job seeker (Jordan Rivera, Denver) into `demo/` on first run: 12 applications at made-up companies, 6 projects (3 with written interview stories), 6 certs, milestones, skills and this week's plan. It runs on port 5002 and never attaches to an instance serving other data. Dates are relative to the day you seed, so re-run `.venv/bin/python scripts/seed_demo.py` (Windows: `.venv\Scripts\python scripts\seed_demo.py`) to refresh them. All screenshots here come from it.
+
+**Your own data.** On first launch without `--demo`, `career.db` is created with the schema, a generic profile-link checklist and a workout library, and nothing else. Set your offer target and runway dates in Settings to start the countdowns. For Linda, run `ollama pull qwen2.5:1.5b-instruct`.
+
 ## Architecture
 
 ```mermaid
@@ -137,6 +124,18 @@ flowchart LR
 
 The backend owns all derived state: `anchors.py` is the single source for headline dates, and `plan.py` projects track end dates without storing them. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the process model, modules, schema, optional modules and the day planner.
 
+## Tech stack
+
+| Layer | Choice |
+|---|---|
+| Desktop shell | pywebview (WebView2 on Windows), launched windowless via `ascent.vbs`; `--browser` for any OS |
+| API | Flask 3, flask-compress, threaded dev server bound to 127.0.0.1 |
+| Storage | SQLite (WAL, `synchronous=NORMAL`), YAML for curricula, templates and settings |
+| Frontend | TypeScript (strict), Vite 6, Tailwind CSS v4, no UI framework; Three.js globe, Chart.js, GSAP |
+| Tooling | Bun (install, typecheck, build), pytest, ruff, GitHub Actions (Ubuntu + Windows) |
+| AI | Ollama (local, default), Anthropic Claude (optional fallback), Tavily and Exa search (optional keys) |
+| Integrations | Windows toast notifications, `.ics` export, `.docx` rendering and Google Calendar push (API only) |
+
 ## Network calls
 
 Your data stays in `career.db` and the YAML files next to it. The app only talks to these services, and only once you turn them on:
@@ -153,18 +152,6 @@ Your data stays in `career.db` and the YAML files next to it. The app only talks
 
 Each API key is read from its own environment variable and sent only to its own service ([`tests/test_core_logic.py`](tests/test_core_logic.py) checks this for Exa and Tavily). To turn the news feed off again, untick it in Settings or set `modules: {news: false}` in `settings.yaml`. Setup (`pip`, `bun install`) downloads packages as usual.
 
-## Tech stack
-
-| Layer | Choice |
-|---|---|
-| Desktop shell | pywebview (WebView2 on Windows), launched windowless via `ascent.vbs`; `--browser` for any OS |
-| API | Flask 3, flask-compress, threaded dev server bound to 127.0.0.1 |
-| Storage | SQLite (WAL, `synchronous=NORMAL`), YAML for curricula, templates and settings |
-| Frontend | TypeScript (strict), Vite 6, Tailwind CSS v4, no UI framework; Three.js globe, Chart.js, GSAP |
-| Tooling | Bun (install, typecheck, build), pytest, ruff, GitHub Actions (Ubuntu + Windows) |
-| AI | Ollama (local, default), Anthropic Claude (optional fallback), Tavily and Exa search (optional keys) |
-| Integrations | Windows toast notifications, `.ics` export, `.docx` rendering and Google Calendar push (API only) |
-
 ## Configuration
 
 | File / variable | Purpose |
@@ -179,16 +166,6 @@ Each API key is read from its own environment variable and sent only to its own 
 | `tracks/*.yaml` | Learning curricula |
 
 Personal files (`career.db`, `settings.yaml`, `profile.yaml`, `schedule.yaml`, `.env`, `demo/`, `output/`) are gitignored.
-
-## Testing
-
-```bash
-.venv/bin/python -m pytest tests -q        # Windows: .venv\Scripts\python -m pytest tests -q
-.venv/bin/ruff check .
-cd frontend && bun run typecheck && bun run build
-```
-
-The suite has 201 tests and needs no network or model. `tests/conftest.py` points every data path at a temp folder before any app module is imported, so a test run can't touch your data. CI runs the backend on Ubuntu and Windows with Python 3.11 and 3.12, and the frontend typecheck and build on Ubuntu ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ## Project structure
 
