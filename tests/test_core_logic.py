@@ -17,6 +17,7 @@ import dayplan  # noqa: E402
 import news  # noqa: E402
 import plan  # noqa: E402
 import registry  # noqa: E402
+import roadmaps  # noqa: E402
 import timeline_board  # noqa: E402
 import tracker  # noqa: E402
 from agent import _loop_common, company_intel, job_search, tools  # noqa: E402
@@ -60,6 +61,15 @@ def test_write_tools_are_refused_after_web_results():
         assert not blocked["allowed"] and "confirm" in blocked["warning"]
     assert sp.can_call("get_career_state", {})["allowed"]
     assert _loop_common.WRITE_TOOLS | _loop_common.UNTRUSTED_TOOLS <= {t["name"] for t in tools.get_all_tools()}
+
+
+def test_url_ids_cannot_leave_their_data_folder():
+    assert registry.exists("ml")
+    for bad in (r"..\tracks\ml", "../tracks/ml", "ml\n", ""):
+        assert not registry.exists(bad) and registry._raw(bad) is None
+    assert roadmaps.load_roadmap("robotics-controls") is not None
+    assert roadmaps.load_roadmap(r"..\roadmaps\robotics-controls") is None
+    assert roadmaps.load_profile(r"..\job_profiles\controls-engineer") is None
 
 
 def test_a_tool_that_raises_still_counts_toward_the_cap(monkeypatch):

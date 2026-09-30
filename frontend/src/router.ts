@@ -1,5 +1,6 @@
 import { enter, initMagnetics } from "./motion";
 import { modules, type Modules } from "./modules";
+import { esc } from "./ui";
 
 export type View = {
   render: (root: HTMLElement) => void | Promise<void>;
@@ -74,9 +75,9 @@ export function startRouter(root: HTMLElement, onChange?: (id: string) => void) 
     onChange?.(id);
     active?.cleanup?.();
     root.replaceChildren();
-    const loader = routes[id];
+    const loader = Object.hasOwn(routes, id) ? routes[id] : undefined;
     if (!loader) {
-      root.innerHTML = `<div class="p-8 text-fg-muted">Coming in a later phase: <span class="text-fg">${id}</span></div>`;
+      root.innerHTML = `<div class="p-8 text-fg-muted">Coming in a later phase: <span class="text-fg">${esc(id)}</span></div>`;
       return;
     }
     active = (await loader()).default();

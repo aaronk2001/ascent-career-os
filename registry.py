@@ -5,6 +5,7 @@ track, `short` / `caption` label it, and a schedule.yaml block whose `cat` is th
 track id becomes a Today goal for it (labelled `day_label`, coloured `day_color`).
 """
 import copy
+import re
 from pathlib import Path
 
 import yaml
@@ -13,6 +14,13 @@ import db
 import yamlio
 
 TRACKS_DIR = Path(__file__).parent / "tracks"
+# Ids come from URLs; on Windows a backslash in one would otherwise escape tracks/.
+_ID_RE = re.compile(r"[A-Za-z0-9_-]+")
+
+
+def _path(tid):
+    return TRACKS_DIR / f"{tid}.yaml" if _ID_RE.fullmatch(str(tid)) else None
+
 
 # Parsed-YAML cache keyed by mtime — track YAML rarely changes but was being
 # re-parsed on every /api/tracks/<id> hit (ml ~2s, controls ~0.8s each call).
@@ -25,8 +33,8 @@ def _files():
 
 def _raw(tid):
     """Cached parse of tracks/<tid>.yaml. Shared: never mutate the result."""
-    p = TRACKS_DIR / f"{tid}.yaml"
-    if not p.exists():
+    p = _path(tid)
+    if p is None or not p.exists():
         return None
     mtime = p.stat().st_mtime
     cached = _PARSE_CACHE.get(tid)
@@ -44,7 +52,8 @@ def _load_file(tid):
 
 
 def exists(tid):
-    return (TRACKS_DIR / f"{tid}.yaml").exists()
+    p = _path(tid)
+    return p is not None and p.exists()
 
 
 def track_ids():

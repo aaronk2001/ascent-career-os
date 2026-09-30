@@ -14,6 +14,7 @@ structure only — see the overhaul plan's licensing note).
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import db
@@ -22,6 +23,8 @@ ROADMAPS_DIR = Path(__file__).parent / "data" / "roadmaps"
 PROFILES_DIR = Path(__file__).parent / "data" / "job_profiles"
 
 VALID_STATES = {"locked", "available", "in_progress", "mastered"}
+# Ids come from URLs; on Windows a backslash in one would otherwise escape the data folder.
+_ID_RE = re.compile(r"[A-Za-z0-9_-]+")
 
 
 def _load_json(path: Path):
@@ -48,6 +51,8 @@ def _nodes(data):
 # ── roadmaps ────────────────────────────────────────────────────────────────────
 def load_roadmap(rid):
     """Static tree merged with live per-node state, or None if absent."""
+    if not _ID_RE.fullmatch(str(rid)):
+        return None
     data = _load_json(ROADMAPS_DIR / f"{rid}.json")
     if data is None:
         return None
@@ -103,6 +108,8 @@ def all_profiles():
 
 
 def load_profile(pid):
+    if not _ID_RE.fullmatch(str(pid)):
+        return None
     data = _load_json(PROFILES_DIR / f"{pid}.json")
     if data is None:
         return None
