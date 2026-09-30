@@ -51,6 +51,17 @@ def test_scratchpad_blocks_fourth_call_and_identical_inputs():
     assert sp.can_call("get_career_state", {"a": 2})["allowed"]
 
 
+def test_write_tools_are_refused_after_web_results():
+    sp = _loop_common.Scratchpad()
+    assert sp.can_call("add_application", {"company": "A"})["allowed"]
+    sp.record("tavily_search", {"query": "q"}, {"success": True})
+    for name in _loop_common.WRITE_TOOLS:
+        blocked = sp.can_call(name, {"x": 1})
+        assert not blocked["allowed"] and "confirm" in blocked["warning"]
+    assert sp.can_call("get_career_state", {})["allowed"]
+    assert _loop_common.WRITE_TOOLS | _loop_common.UNTRUSTED_TOOLS <= {t["name"] for t in tools.get_all_tools()}
+
+
 def test_a_tool_that_raises_still_counts_toward_the_cap(monkeypatch):
     def boom(inp):
         raise RuntimeError("down")

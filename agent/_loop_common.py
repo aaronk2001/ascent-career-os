@@ -17,6 +17,15 @@ log = logging.getLogger(__name__)
 MAX_ITERATIONS = 10
 MAX_CALLS_PER_TOOL = 3
 
+# Web results can carry instructions aimed at the model (prompt injection). Once one
+# is in context, tools that change the user's data are refused for the rest of the
+# query; the user can repeat the request in a new message.
+UNTRUSTED_TOOLS = frozenset({"tavily_search", "research_job_market", "search_jobs"})
+WRITE_TOOLS = frozenset({
+    "add_application", "update_application", "add_certification", "update_certification",
+    "add_timeline_event", "add_weekly_task", "complete_weekly_task", "linda_remember",
+})
+
 
 class Scratchpad:
     """Tracks tool calls within a single query to detect loops.
@@ -32,6 +41,15 @@ class Scratchpad:
         self.max_per_tool = max_per_tool
 
     def can_call(self, tool_name: str, inp: dict) -> dict:
+        if tool_name in WRITE_TOOLS and UNTRUSTED_TOOLS & self.counts.keys():
+            return {
+                "allowed": False,
+                "warning": (
+                    f"'{tool_name}' changes the user's data and web results are in this "
+                    f"conversation turn. Tell the user what you would change and ask them "
+                    f"to confirm in a new message."
+                ),
+            }
         count = self.counts.get(tool_name, 0)
         if count >= self.max_per_tool:
             return {

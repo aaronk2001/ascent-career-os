@@ -189,6 +189,7 @@ About `scripts/`: this repository is generated. I develop Ascent in a private fo
 
 - **WAL + NORMAL sync.** The dashboard fires about 11 concurrent requests, and reminder upserts are frequent. WAL mode with `synchronous=NORMAL` and a 5 s busy timeout keeps those writes from blocking reads.
 - **Caching by mtime.** Parsed tracks, settings and the schedule are cached against the file's modification time, so edits are picked up without a restart, and hashed Vite assets are served `immutable`. `scripts/bench_launch.py` times the cold path.
+- **Web results can't write.** Search results are untrusted text that may carry instructions aimed at the model. Once a Tavily or Exa result is in Linda's context, tools that change your data are refused for the rest of that message ([`agent/_loop_common.py`](agent/_loop_common.py)), so Linda proposes the change and you confirm it in a new message.
 - **Grounded AI output.** The resume tailor (API only) may only reorder and reword facts from `resume_master.json`, and its report lists every number in the output that isn't a whole number token in the master: "97%" against a master that says "96%" is flagged, and so is a "5" that only appears inside "2025". The offer analyzer returns `None` instead of guessing when no baseline is configured.
 
 ## Roadmap
