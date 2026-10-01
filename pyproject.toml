@@ -3,6 +3,7 @@ name = "ascent"
 version = "0.1.0"
 description = "Local-first career OS: Flask + SQLite API, TypeScript SPA, local-LLM assistant"
 requires-python = ">=3.11"
+license = { file = "LICENSE" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
